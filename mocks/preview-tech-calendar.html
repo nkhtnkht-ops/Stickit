@@ -1,0 +1,1590 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stickit — Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700&family=IBM+Plex+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --bg-2: #F4F4F4;
+    --surface: #FFFFFF;
+    --surface-2: #F8F8F8;
+    --border: #E8E8E8;
+    --border-2: #EFEFEF;
+    --ink: #0A0A0A;
+    --ink-2: #404040;
+    --ink-3: #737373;
+    --ink-4: #A3A3A3;
+    --ink-5: #D4D4D4;
+    --accent: #00C853;
+    --accent-soft: #DCFCE7;
+    --accent-deep: #047857;
+    --warn: #F97316;
+    --warn-soft: #FFEDD5;
+    --crit: #EF4444;
+    --crit-soft: #FEE2E2;
+    --info: #3B82F6;
+    --info-soft: #DBEAFE;
+    --purple: #8B5CF6;
+    --purple-soft: #EDE9FE;
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+    --r-sm: 6px;
+    --r: 10px;
+    --r-lg: 14px;
+    --sans: "Geist", "IBM Plex Sans JP", -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: "Geist Mono", "IBM Plex Sans JP", "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 13.5px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.005em;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input { font-family: inherit; color: inherit; }
+
+  /* App frame */
+  .app {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 14px 10px;
+    display: flex; flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 10px 4px;
+  }
+  .brand-mark {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    background: var(--ink);
+    color: var(--accent);
+    display: grid; place-items: center;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 13px;
+    position: relative;
+  }
+  .brand-mark::after {
+    content: ""; position: absolute; bottom: -2px; right: -2px;
+    width: 8px; height: 8px; background: var(--accent);
+    border-radius: 50%; border: 2px solid var(--surface);
+  }
+  .brand-name { font-weight: 600; font-size: 15px; letter-spacing: -0.02em; }
+  .brand-ver {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-4);
+    background: var(--bg-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .nav-section { display: flex; flex-direction: column; gap: 1px; padding: 0 4px; }
+  .nav-label {
+    text-transform: uppercase;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-4);
+    font-weight: 500;
+    padding: 8px 8px 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 8px;
+    border-radius: var(--r-sm);
+    color: var(--ink-2);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 80ms ease;
+    width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--bg-2); color: var(--ink); }
+  .nav-item.active { background: var(--ink); color: #fff; }
+  .nav-item .ic { width: 14px; height: 14px; }
+  .nav-item .count {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-4);
+  }
+  .nav-item.active .count { color: rgba(255,255,255,.55); }
+  .nav-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  /* Mini calendar */
+  .mini-cal { padding: 6px 4px 4px; }
+  .mini-cal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 4px 8px;
+  }
+  .mini-cal-month {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ink-2);
+  }
+  .mini-cal-nav { display: flex; gap: 2px; }
+  .mini-cal-nav button {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    color: var(--ink-3);
+    display: grid; place-items: center;
+    font-size: 11px;
+  }
+  .mini-cal-nav button:hover { background: var(--bg-2); color: var(--ink); }
+  .mini-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+  }
+  .mini-dow {
+    text-align: center;
+    color: var(--ink-4);
+    font-weight: 600;
+    padding: 4px 0;
+  }
+  .mini-day {
+    text-align: center;
+    padding: 4px 0;
+    color: var(--ink-2);
+    font-weight: 500;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+  }
+  .mini-day:hover { background: var(--bg-2); }
+  .mini-day.muted { color: var(--ink-4); }
+  .mini-day.today {
+    background: var(--ink);
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .mini-day.in-week { background: var(--accent-soft); color: var(--accent-deep); font-weight: 600; }
+  .mini-day.has-events::after {
+    content: "";
+    position: absolute;
+    bottom: 1px; left: 50%; transform: translateX(-50%);
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .mini-day.today.has-events::after { background: var(--accent); }
+
+  .sidebar-foot {
+    margin-top: auto;
+    padding: 12px 8px 4px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00C853 0%, #00A152 100%);
+    color: #fff;
+    display: grid; place-items: center;
+    font-weight: 600;
+    font-size: 11px;
+    font-family: var(--mono);
+  }
+  .avatar-meta { display: flex; flex-direction: column; line-height: 1.2; }
+  .avatar-name { font-weight: 600; font-size: 12.5px; }
+  .avatar-role { font-size: 10.5px; color: var(--ink-4); font-family: var(--mono); }
+
+  /* ---------- Main ---------- */
+  .main { overflow: hidden; display: flex; flex-direction: column; background: var(--bg); }
+
+  /* Top toolbar */
+  .toolbar {
+    display: flex; align-items: center;
+    padding: 16px 24px;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-wrap: wrap;
+  }
+  .toolbar-left { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .toolbar-title {
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+  }
+  .toolbar-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); position: relative;
+  }
+  .pulse::after {
+    content: ""; position: absolute; inset: -3px;
+    border-radius: 50%;
+    background: var(--accent); opacity: .3;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: .3; }
+    50% { transform: scale(1.6); opacity: 0; }
+  }
+
+  .nav-btns { display: flex; gap: 4px; }
+  .nav-btns button {
+    width: 30px; height: 30px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-2);
+    display: grid; place-items: center;
+    font-size: 14px;
+    transition: all 80ms ease;
+  }
+  .nav-btns button:hover { background: var(--bg-2); }
+
+  .toolbar-period {
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+    min-width: 180px;
+  }
+  .toolbar-period em {
+    font-style: normal;
+    color: var(--ink-4);
+    font-weight: 400;
+    font-family: var(--mono);
+    font-size: 12px;
+    margin-left: 6px;
+  }
+
+  .seg {
+    display: inline-flex;
+    background: var(--bg-2);
+    border-radius: var(--r-sm);
+    padding: 3px;
+    border: 1px solid var(--border-2);
+    margin-left: auto;
+  }
+  .seg button {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-3);
+    border-radius: 5px;
+    font-family: var(--mono);
+    transition: all 80ms ease;
+  }
+  .seg button.active {
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px;
+    border-radius: var(--r-sm);
+    font-weight: 500;
+    font-size: 12.5px;
+    transition: all 80ms ease;
+  }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:hover { background: #000; }
+  .btn-primary .kbd {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(255,255,255,.5);
+    background: rgba(255,255,255,.1);
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+  .btn-soft {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--ink-2);
+  }
+  .btn-soft:hover { border-color: var(--ink-5); }
+
+  /* Project filter chips */
+  .filters {
+    display: flex; gap: 6px; padding: 10px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow-x: auto;
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--bg-2);
+    border: 1px solid var(--border-2);
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--ink-2);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .chip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .chip-dot { width: 6px; height: 6px; border-radius: 2px; }
+  .chip .count {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-4);
+    margin-left: 4px;
+  }
+  .chip.active .count { color: rgba(255,255,255,.55); }
+
+  .ic { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  /* ============================================
+     WEEK VIEW (default)
+     ============================================ */
+  .week {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    grid-template-rows: auto auto 1fr;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .week-corner { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .week-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+  .week-day-h {
+    padding: 10px 12px;
+    border-right: 1px solid var(--border);
+    text-align: left;
+    background: var(--surface);
+  }
+  .week-day-h:last-child { border-right: none; }
+  .week-day-h.today { background: var(--accent-soft); }
+  .week-dow {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-4);
+    font-weight: 600;
+  }
+  .week-day-h.today .week-dow { color: var(--accent-deep); }
+  .week-day-h.weekend .week-dow { color: var(--info); }
+  .week-day-h.holiday .week-dow { color: var(--crit); }
+  .week-date {
+    font-size: 17px;
+    font-weight: 600;
+    margin-top: 2px;
+    letter-spacing: -0.01em;
+  }
+  .week-day-h.today .week-date { color: var(--accent-deep); }
+
+  /* All-day row */
+  .week-allday-label {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 8px;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--ink-4);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    text-align: right;
+    background: var(--surface-2);
+  }
+  .week-allday {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    min-height: 38px;
+  }
+  .week-allday-cell {
+    border-right: 1px solid var(--border);
+    padding: 5px;
+    display: flex; flex-direction: column; gap: 3px;
+    position: relative;
+  }
+  .week-allday-cell:last-child { border-right: none; }
+  .week-allday-cell.today { background: rgba(220, 252, 231, 0.3); }
+  .allday-event {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink);
+    box-shadow: var(--shadow-xs);
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .allday-event.span2 { grid-column: span 2; }
+  .allday-event.crit { border-color: var(--crit); background: var(--crit-soft); color: #991B1B; }
+  .allday-event.warn { border-color: var(--warn); background: var(--warn-soft); color: #9A3412; }
+
+  /* Time grid */
+  .week-times {
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    background: var(--surface-2);
+  }
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    overflow-y: auto;
+    position: relative;
+    background: var(--surface);
+  }
+  .time-slot {
+    height: 56px;
+    border-bottom: 1px solid var(--border-2);
+    padding: 4px 8px 0;
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-4);
+    font-weight: 500;
+  }
+  .day-col {
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .day-col:last-child { border-right: none; }
+  .day-col.today { background: rgba(220, 252, 231, 0.18); }
+  .day-col.weekend { background: rgba(248, 248, 248, 0.5); }
+  .hour-line {
+    height: 56px;
+    border-bottom: 1px solid var(--border-2);
+  }
+  .hour-line.half {
+    height: 28px;
+    border-bottom: 1px dashed var(--border-2);
+  }
+
+  /* Now-line */
+  .now-line {
+    position: absolute;
+    left: -2px; right: 0;
+    height: 0;
+    border-top: 1.5px solid var(--accent);
+    z-index: 5;
+    pointer-events: none;
+  }
+  .now-line::before {
+    content: "";
+    position: absolute;
+    left: -6px; top: -5px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.18);
+  }
+
+  /* Events */
+  .ev {
+    position: absolute;
+    left: 4px; right: 4px;
+    border-radius: 6px;
+    padding: 5px 7px;
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    font-size: 11px;
+    line-height: 1.3;
+    cursor: pointer;
+    box-shadow: var(--shadow-xs);
+    overflow: hidden;
+    transition: all 100ms ease;
+    z-index: 2;
+  }
+  .ev:hover { box-shadow: var(--shadow-md); z-index: 4; transform: translateY(-1px); }
+  .ev .ev-time {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--ink-4);
+    font-weight: 500;
+  }
+  .ev .ev-title {
+    font-weight: 500;
+    color: var(--ink);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+  }
+  .ev.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .ev.warn .ev-title { color: #7C2D12; }
+  .ev.crit { background: var(--crit-soft); border-color: var(--crit); }
+  .ev.crit .ev-title { color: #7F1D1D; }
+  .ev.info { background: var(--info-soft); border-color: var(--info); }
+  .ev.info .ev-title { color: #1E3A8A; }
+  .ev.purple { background: var(--purple-soft); border-color: var(--purple); }
+  .ev.purple .ev-title { color: #4C1D95; }
+  .ev.muted { background: var(--bg-2); border-color: var(--ink-4); }
+  .ev.muted .ev-title { color: var(--ink-3); }
+
+  /* ============================================
+     MONTH VIEW (TickTick-style: minimal, lots of whitespace)
+     ============================================ */
+  .month {
+    flex: 1;
+    display: flex; flex-direction: column;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .month-dows {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .month-dow {
+    padding: 10px 14px;
+    font-size: 11.5px;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .month-dow.holiday { color: var(--crit); }
+  .month-dow.weekend { color: var(--info); }
+
+  .month-scroll {
+    flex: 1;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    position: relative;
+  }
+
+  .month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    /* 6週間が常に表示領域にピッタリ収まる: (viewport - toolbar 57 - dow 37 - filter chips 47) / 6 */
+    grid-auto-rows: calc((100vh - 142px) / 6);
+    background: transparent;
+  }
+  .month-cell {
+    background: var(--surface);
+    padding: 8px 10px;
+    display: flex; flex-direction: column;
+    gap: 3px;
+    cursor: pointer;
+    position: relative;
+    border-right: 1px solid var(--border-2);
+    border-bottom: 1px solid var(--border-2);
+  }
+  .month-cell:nth-child(7n) { border-right: none; }
+  .month-cell:hover { background: var(--surface-2); }
+  .month-cell.today { background: rgba(220, 252, 231, 0.3); }
+
+  .month-day {
+    display: flex; align-items: baseline; gap: 0;
+    font-size: 12.5px;
+    color: var(--ink-2);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    min-height: 18px;
+  }
+  .month-cell.today .month-day .num {
+    background: var(--accent-deep);
+    color: #fff;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: inline-grid; place-items: center;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  /* Sunday = red day numbers */
+  .month-cell:nth-child(7n+1) .month-day .num { color: var(--crit); }
+  /* Saturday = blue */
+  .month-cell:nth-child(7n) .month-day .num { color: var(--info); }
+  .month-cell.today:nth-child(7n+1) .month-day .num,
+  .month-cell.today:nth-child(7n) .month-day .num { color: #fff; }
+
+  /* Month-boundary day label: 「5月1日」を1つの統一ラベルとして表示 */
+  .month-day .num.is-boundary {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  /* Days that belong to a month other than the currently-viewed month */
+  .month-cell.is-other-month .month-day .num {
+    color: var(--ink-4) !important;
+    opacity: .55;
+  }
+  .month-cell.is-other-month .month-event {
+    opacity: .5;
+  }
+  .month-day .holiday-name {
+    margin-left: auto;
+    color: var(--crit);
+    font-size: 10.5px;
+    font-weight: 500;
+  }
+  .month-day .wk {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--ink-4);
+    font-weight: 500;
+  }
+
+  /* Events: TickTick style — tinted by project/list, minimal */
+  .month-event {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11.5px;
+    padding: 2px 8px 3px;
+    border-radius: 4px;
+    background: var(--bg-2);
+    color: var(--ink-2);
+    font-weight: 400;
+    overflow: hidden;
+    margin-top: 1px;
+  }
+  .month-event .ev-check {
+    width: 10px; height: 10px;
+    border: 1.3px solid currentColor;
+    opacity: .55;
+    border-radius: 2.5px;
+    flex-shrink: 0;
+  }
+  .month-event .ev-time {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: inherit;
+    opacity: .7;
+    flex-shrink: 0;
+    padding-left: 4px;
+  }
+  .month-event .ev-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+  /* Project tints */
+  .month-event.p-mgmt { background: #DCEAF7; color: #1E40AF; }      /* 支配人業務 / 出勤 → 薄青 */
+  .month-event.p-cc   { background: #FCE0E0; color: #991B1B; }      /* キャプテンカップ → 薄赤 */
+  .month-event.p-ota  { background: #FCEACB; color: #92400E; }      /* OTA戦略 → 薄黄 */
+  .month-event.p-event{ background: #EDE3FB; color: #5B21B6; }      /* イベント系 → 薄紫 */
+  .month-event.p-rm   { background: #FCEACB; color: #92400E; }      /* RM/月締め → 薄黄 */
+  .month-event.p-personal { background: #E5E5E5; color: #404040; }  /* 個人 → グレー */
+
+  .month-event.done {
+    color: var(--ink-4) !important;
+    background: transparent !important;
+    text-decoration: line-through;
+  }
+  .month-event.done .ev-check {
+    background: var(--ink-4);
+    opacity: .5;
+  }
+  .me-more {
+    font-size: 10.5px;
+    color: var(--ink-3);
+    padding: 1px 8px;
+    margin-top: 1px;
+  }
+  .month-cell {
+    background: var(--surface);
+    padding: 6px 8px;
+    display: flex; flex-direction: column; gap: 3px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .month-cell:hover { background: var(--surface-2); }
+  .month-cell.muted { background: var(--bg); }
+  .month-cell.muted .month-day { color: var(--ink-4); }
+  .month-cell.today { background: rgba(220, 252, 231, 0.4); }
+  .month-cell.weekend { background: rgba(247, 250, 253, 0.6); }
+  .month-day {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ink-2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .month-cell.today .month-day {
+    color: #fff;
+    background: var(--accent-deep);
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 10.5px;
+  }
+  .month-day .holiday-name {
+    font-family: var(--sans);
+    font-size: 10px;
+    color: var(--crit);
+    font-weight: 500;
+  }
+  .month-event {
+    font-size: 10.5px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border-left: 2px solid;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .me-acc { border-color: var(--accent); }
+  .me-warn { border-color: var(--warn); background: var(--warn-soft); color: #9A3412; }
+  .me-info { border-color: var(--info); background: var(--info-soft); color: #1E40AF; }
+  .me-crit { border-color: var(--crit); background: var(--crit-soft); color: #991B1B; }
+  .me-purple { border-color: var(--purple); background: var(--purple-soft); color: #5B21B6; }
+  .me-more {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--ink-3);
+    padding: 1px 6px;
+    margin-top: 1px;
+  }
+
+  /* ============================================
+     DAY VIEW
+     ============================================ */
+  .day {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .day-side {
+    border-right: 1px solid var(--border);
+    padding: 20px 18px;
+    background: var(--surface-2);
+    overflow-y: auto;
+  }
+  .day-h {
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .day-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-bottom: 18px;
+  }
+  .day-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 10px 12px;
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .day-stat-num {
+    font-family: var(--mono);
+    font-size: 17px;
+    font-weight: 600;
+    min-width: 28px;
+  }
+  .day-stat-num.crit { color: var(--crit); }
+  .day-stat-num.warn { color: var(--warn); }
+  .day-stat-num.acc { color: var(--accent-deep); }
+  .day-stat-label { font-size: 12px; color: var(--ink-3); flex: 1; }
+
+  .day-list-h {
+    margin-top: 22px;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-4);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .day-task {
+    display: flex; align-items: flex-start; gap: 9px;
+    padding: 9px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--r-sm);
+    margin-bottom: 5px;
+    font-size: 12.5px;
+  }
+  .day-check {
+    width: 15px; height: 15px;
+    border: 1.4px solid var(--ink-5);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .day-task .body { flex: 1; }
+  .day-task .body .title { font-weight: 500; }
+  .day-task .body .meta {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-4);
+    margin-top: 2px;
+  }
+
+  .day-grid-wrap {
+    overflow-y: auto;
+    position: relative;
+  }
+  .day-grid {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    position: relative;
+  }
+
+  .day-now-line {
+    position: absolute;
+    left: 56px; right: 0;
+    height: 0;
+    border-top: 1.5px solid var(--accent);
+    z-index: 5;
+  }
+  .day-now-line::before {
+    content: "";
+    position: absolute;
+    left: -6px; top: -5px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.18);
+  }
+  .day-now-line .label {
+    position: absolute;
+    left: -52px; top: -8px;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    font-weight: 600;
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+
+  .day-ev {
+    position: absolute;
+    left: 64px; right: 16px;
+    border-radius: 8px;
+    padding: 8px 12px;
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    z-index: 2;
+  }
+  .day-ev:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .day-ev .time {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .day-ev .title {
+    font-weight: 500;
+    font-size: 13px;
+    margin-top: 2px;
+    color: var(--ink);
+  }
+  .day-ev .desc {
+    font-size: 11.5px;
+    color: var(--ink-3);
+    margin-top: 3px;
+  }
+  .day-ev.warn { background: var(--warn-soft); border-color: var(--warn); }
+  .day-ev.warn .title { color: #7C2D12; }
+  .day-ev.crit { background: var(--crit-soft); border-color: var(--crit); }
+  .day-ev.crit .title { color: #7F1D1D; }
+  .day-ev.info { background: var(--info-soft); border-color: var(--info); }
+  .day-ev.info .title { color: #1E3A8A; }
+
+  /* ---------- Hidden ---------- */
+  .hidden { display: none !important; }
+
+  /* ---------- Scrollbars ---------- */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--ink-5); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink-4); }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div class="brand-name">Stickit</div>
+      <div class="brand-ver">v0.1</div>
+    </div>
+
+    <div class="nav-section">
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        今日 <span class="count">7</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        明日 <span class="count">3</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+        今後7日間 <span class="count">19</span>
+      </button>
+      <button class="nav-item active">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+        カレンダー
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/></svg>
+        すべて <span class="count">42</span>
+      </button>
+    </div>
+
+    <!-- Mini calendar -->
+    <div class="mini-cal">
+      <div class="mini-cal-head">
+        <div class="mini-cal-month">2026年 5月</div>
+        <div class="mini-cal-nav"><button>‹</button><button>›</button></div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini-dow">日</div><div class="mini-dow">月</div><div class="mini-dow">火</div><div class="mini-dow">水</div><div class="mini-dow">木</div><div class="mini-dow">金</div><div class="mini-dow">土</div>
+        <div class="mini-day muted">26</div><div class="mini-day muted">27</div><div class="mini-day muted">28</div><div class="mini-day muted">29</div><div class="mini-day muted">30</div><div class="mini-day has-events">1</div><div class="mini-day">2</div>
+        <div class="mini-day">3</div><div class="mini-day has-events">4</div><div class="mini-day has-events">5</div><div class="mini-day">6</div><div class="mini-day has-events">7</div><div class="mini-day">8</div><div class="mini-day has-events">9</div>
+        <div class="mini-day in-week">10</div><div class="mini-day in-week has-events">11</div><div class="mini-day in-week has-events">12</div><div class="mini-day today has-events">13</div><div class="mini-day in-week has-events">14</div><div class="mini-day in-week has-events">15</div><div class="mini-day in-week has-events">16</div>
+        <div class="mini-day">17</div><div class="mini-day has-events">18</div><div class="mini-day">19</div><div class="mini-day has-events">20</div><div class="mini-day has-events">21</div><div class="mini-day">22</div><div class="mini-day">23</div>
+        <div class="mini-day">24</div><div class="mini-day has-events">25</div><div class="mini-day">26</div><div class="mini-day">27</div><div class="mini-day has-events">28</div><div class="mini-day">29</div><div class="mini-day has-events">30</div>
+        <div class="mini-day">31</div><div class="mini-day muted">1</div><div class="mini-day muted">2</div><div class="mini-day muted">3</div><div class="mini-day muted">4</div><div class="mini-day muted">5</div><div class="mini-day muted">6</div>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">// 表示するプロジェクト</div>
+      <button class="nav-item"><span class="nav-dot" style="background:#00C853"></span>支配人業務 <span class="count">12</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#EF4444"></span>キャプテンカップ <span class="count">8</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#F97316"></span>OTA戦略 <span class="count">5</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#3B82F6"></span>個人 <span class="count">9</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#8B5CF6"></span>シフト <span class="count">28</span></button>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="avatar">NK</div>
+      <div class="avatar-meta">
+        <span class="avatar-name">中畑 慶治</span>
+        <span class="avatar-role">支配人</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="nav-btns">
+          <button id="nav-prev" title="前へ">‹</button>
+          <button class="btn btn-soft" style="width:auto;height:auto;font-size:11.5px;padding:5px 12px" id="nav-today">今日</button>
+          <button id="nav-next" title="次へ">›</button>
+        </div>
+        <div class="toolbar-period" id="period-label">2026年 5月 10日 — 16日 <em>// W20</em></div>
+        <div class="toolbar-meta"><span class="pulse"></span> 同期済 · 14:03 JST</div>
+      </div>
+
+      <div class="seg">
+        <button onclick="setView('day')" id="seg-day">日</button>
+        <button class="active" onclick="setView('week')" id="seg-week">週</button>
+        <button onclick="setView('month')" id="seg-month">月</button>
+      </div>
+      <button class="btn btn-soft">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+        絞り込み
+      </button>
+      <button class="btn btn-primary">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        新規 <span class="kbd">N</span>
+      </button>
+    </div>
+
+    <!-- Project filter chips -->
+    <div class="filters">
+      <button class="chip active">すべて<span class="count">42</span></button>
+      <button class="chip"><span class="chip-dot" style="background:#00C853"></span>支配人業務<span class="count">12</span></button>
+      <button class="chip"><span class="chip-dot" style="background:#EF4444"></span>キャプテンカップ<span class="count">8</span></button>
+      <button class="chip"><span class="chip-dot" style="background:#F97316"></span>OTA戦略<span class="count">5</span></button>
+      <button class="chip"><span class="chip-dot" style="background:#3B82F6"></span>個人<span class="count">9</span></button>
+      <button class="chip"><span class="chip-dot" style="background:#8B5CF6"></span>シフト<span class="count">28</span></button>
+    </div>
+
+    <!-- ================= WEEK VIEW ================= -->
+    <div class="week" id="view-week">
+
+      <div class="week-corner"></div>
+
+      <!-- Date headers -->
+      <div class="week-header">
+        <div class="week-day-h holiday"><div class="week-dow">SUN</div><div class="week-date">10</div></div>
+        <div class="week-day-h"><div class="week-dow">MON</div><div class="week-date">11</div></div>
+        <div class="week-day-h"><div class="week-dow">TUE</div><div class="week-date">12</div></div>
+        <div class="week-day-h today"><div class="week-dow">WED</div><div class="week-date">13</div></div>
+        <div class="week-day-h"><div class="week-dow">THU</div><div class="week-date">14</div></div>
+        <div class="week-day-h"><div class="week-dow">FRI</div><div class="week-date">15</div></div>
+        <div class="week-day-h weekend"><div class="week-dow">SAT</div><div class="week-date">16</div></div>
+      </div>
+
+      <!-- All-day row -->
+      <div class="week-allday-label">終日</div>
+      <div class="week-allday">
+        <div class="week-allday-cell"></div>
+        <div class="week-allday-cell"><div class="allday-event">朝礼</div></div>
+        <div class="week-allday-cell"></div>
+        <div class="week-allday-cell today"><div class="allday-event crit">CC 予選最終確認 締切</div></div>
+        <div class="week-allday-cell"><div class="allday-event">月次RM 提出</div></div>
+        <div class="week-allday-cell"><div class="allday-event crit" style="grid-column: span 2;">キャプテンカップ 本戦</div></div>
+        <div class="week-allday-cell" style="background: var(--crit-soft);"><div class="allday-event crit">キャプテンカップ 本戦</div></div>
+      </div>
+
+      <!-- Time labels -->
+      <div class="week-times">
+        <div class="time-slot">07:00</div>
+        <div class="time-slot">08:00</div>
+        <div class="time-slot">09:00</div>
+        <div class="time-slot">10:00</div>
+        <div class="time-slot">11:00</div>
+        <div class="time-slot">12:00</div>
+        <div class="time-slot">13:00</div>
+        <div class="time-slot">14:00</div>
+        <div class="time-slot">15:00</div>
+        <div class="time-slot">16:00</div>
+        <div class="time-slot">17:00</div>
+        <div class="time-slot">18:00</div>
+        <div class="time-slot">19:00</div>
+        <div class="time-slot">20:00</div>
+        <div class="time-slot">21:00</div>
+        <div class="time-slot">22:00</div>
+      </div>
+
+      <!-- Day columns -->
+      <div class="week-grid">
+        <!-- SUN 10 -->
+        <div class="day-col weekend">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+        </div>
+
+        <!-- MON 11 -->
+        <div class="day-col">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="ev" style="top: 84px; height: 32px;">
+            <div class="ev-time">08:30 — 09:00</div>
+            <div class="ev-title">朝礼</div>
+          </div>
+          <div class="ev info" style="top: 168px; height: 56px;">
+            <div class="ev-time">10:00 — 11:00</div>
+            <div class="ev-title">支配人会議</div>
+          </div>
+          <div class="ev warn" style="top: 392px; height: 84px;">
+            <div class="ev-time">14:00 — 15:30</div>
+            <div class="ev-title">OTA担当MTG</div>
+          </div>
+        </div>
+
+        <!-- TUE 12 -->
+        <div class="day-col">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="ev" style="top: 84px; height: 32px;">
+            <div class="ev-time">08:30</div>
+            <div class="ev-title">朝礼</div>
+          </div>
+          <div class="ev crit" style="top: 280px; height: 70px;">
+            <div class="ev-time">12:00 — 13:00</div>
+            <div class="ev-title">v6 検証</div>
+          </div>
+          <div class="ev" style="top: 532px; height: 56px;">
+            <div class="ev-time">16:30 — 17:30</div>
+            <div class="ev-title">芝管理ミーティング</div>
+          </div>
+        </div>
+
+        <!-- WED 13 (today) -->
+        <div class="day-col today">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+
+          <div class="ev" style="top: 84px; height: 32px;">
+            <div class="ev-time">08:30</div>
+            <div class="ev-title">朝礼で本日の予約状況を共有</div>
+          </div>
+          <div class="ev" style="top: 116px; height: 56px;">
+            <div class="ev-time">09:00 — 10:00</div>
+            <div class="ev-title">芝コンディション確認 (#3, #7)</div>
+          </div>
+          <div class="ev crit" style="top: 196px; height: 84px;">
+            <div class="ev-time">10:30 — 12:00</div>
+            <div class="ev-title">キャプテンカップ予選成績シート最終確認</div>
+          </div>
+          <div class="ev warn" style="top: 336px; height: 112px;">
+            <div class="ev-time">13:00 — 15:00</div>
+            <div class="ev-title">OTA戦略レビュー — 自社WEB誘導の数値確認</div>
+          </div>
+          <div class="ev info" style="top: 504px; height: 56px;">
+            <div class="ev-time">16:00 — 17:00</div>
+            <div class="ev-title">スタッフ面談 (山田さん)</div>
+          </div>
+          <div class="ev muted" style="top: 728px; height: 56px;">
+            <div class="ev-time">20:00 — 21:00</div>
+            <div class="ev-title">月次RM 売上CSV DL</div>
+          </div>
+
+          <!-- Now line at 14:03 -->
+          <div class="now-line" style="top: 396px;"></div>
+        </div>
+
+        <!-- THU 14 -->
+        <div class="day-col">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="ev" style="top: 84px; height: 32px;">
+            <div class="ev-time">08:30</div>
+            <div class="ev-title">朝礼</div>
+          </div>
+          <div class="ev warn" style="top: 224px; height: 84px;">
+            <div class="ev-time">11:00 — 12:30</div>
+            <div class="ev-title">月次RM 分析提出</div>
+          </div>
+          <div class="ev info" style="top: 448px; height: 56px;">
+            <div class="ev-time">15:00 — 16:00</div>
+            <div class="ev-title">来月シフト表 配布</div>
+          </div>
+        </div>
+
+        <!-- FRI 15 -->
+        <div class="day-col">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="ev crit" style="top: 28px; height: 252px;">
+            <div class="ev-time">07:30 — 12:00</div>
+            <div class="ev-title">CC 本戦 / 受付・運営</div>
+            <div style="font-size:10.5px;color:#7F1D1D;margin-top:3px">7:30 集合 / 8:00 受付開始</div>
+          </div>
+          <div class="ev crit" style="top: 336px; height: 168px;">
+            <div class="ev-time">13:00 — 16:00</div>
+            <div class="ev-title">CC 本戦 / 後半 + 表彰式</div>
+          </div>
+        </div>
+
+        <!-- SAT 16 -->
+        <div class="day-col weekend">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="ev crit" style="top: 56px; height: 252px;">
+            <div class="ev-time">08:00 — 12:30</div>
+            <div class="ev-title">CC 本戦 2日目</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MONTH VIEW (TickTick-style minimal) ================= -->
+    <div class="month hidden" id="view-month">
+      <div class="month-dows">
+        <div class="month-dow holiday">日</div>
+        <div class="month-dow">月</div>
+        <div class="month-dow">火</div>
+        <div class="month-dow">水</div>
+        <div class="month-dow">木</div>
+        <div class="month-dow">金</div>
+        <div class="month-dow weekend">土</div>
+      </div>
+      <div class="month-scroll">
+        <div class="month-grid">
+
+          <!-- Week 18: Apr 26 (Sun) - May 2 (Sat) -->
+          <div class="month-cell"><div class="month-day"><span class="num">26</span><span class="wk">W18</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">27</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">28</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">29</span><span class="holiday-name">昭和の日</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">30</span></div></div>
+          <div class="month-cell" data-month="5"><div class="month-day"><span class="num is-boundary">5月1日</span><span class="holiday-name">メーデー</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span><span class="ev-time">08:30</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">2</span></div></div>
+
+          <!-- Week 19: May 3-9 -->
+          <div class="month-cell"><div class="month-day"><span class="num">3</span><span class="holiday-name">憲法記念日</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">4</span><span class="holiday-name">みどりの日</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">OTA担当MTG</span><span class="ev-time">14:00</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">5</span><span class="holiday-name">こどもの日</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">CC準備</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">6</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">7</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span><span class="ev-time">08:30</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">面談</span><span class="ev-time">15:00</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">8</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">9</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">RM 分析</span></div></div>
+
+          <!-- Week 20: May 10-16 -->
+          <div class="month-cell"><div class="month-day"><span class="num">10</span><span class="wk">W20</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">11</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span><span class="ev-time">08:30</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">支配人会議</span><span class="ev-time">10:00</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">12</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">予選成績</span><span class="ev-time">12:00</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">OTA レビュー</span></div></div>
+          <div class="month-cell today">
+            <div class="month-day"><span class="num">13</span></div>
+            <div class="month-event"><span class="ev-check"></span><span class="ev-title">CC 予選最終</span><span class="ev-time">10:30</span></div>
+            <div class="month-event"><span class="ev-check"></span><span class="ev-title">OTA 戦略</span><span class="ev-time">13:00</span></div>
+            <div class="month-event"><span class="ev-check"></span><span class="ev-title">面談</span><span class="ev-time">16:00</span></div>
+            <div class="me-more">+ 4件</div>
+          </div>
+          <div class="month-cell"><div class="month-day"><span class="num">14</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span><span class="ev-time">08:30</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">RM 提出</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">15</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">CC 本戦 1日目</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">16</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">CC 本戦 2日目</span></div></div>
+
+          <!-- Week 21: May 17-23 -->
+          <div class="month-cell"><div class="month-day"><span class="num">17</span><span class="wk">W21</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">18</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span><span class="ev-time">08:30</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">19</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">CC 振り返り</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">20</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">支配人会議</span><span class="ev-time">10:00</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">21</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span><span class="ev-time">08:30</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">22</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">23</span></div></div>
+
+          <!-- Week 22: May 24-30 -->
+          <div class="month-cell"><div class="month-day"><span class="num">24</span><span class="wk">W22</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">25</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span><span class="ev-time">08:30</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">26</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">27</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">28</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">面談</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">29</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">30</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">月末締め</span></div></div>
+
+          <!-- Week 23: May 31 - Jun 6 -->
+          <div class="month-cell"><div class="month-day"><span class="num">31</span><span class="wk">W23</span></div></div>
+          <div class="month-cell" data-month="6"><div class="month-day"><span class="num is-boundary">6月1日</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">2</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">3</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">月初会議</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">4</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">5</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">6</span></div></div>
+
+          <!-- Week 24: Jun 7-13 -->
+          <div class="month-cell"><div class="month-day"><span class="num">7</span><span class="wk">W24</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">8</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">9</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">OTA レビュー</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">10</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">11</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">12</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">RM 中間</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">13</span></div></div>
+
+          <!-- Week 25: Jun 14-20 -->
+          <div class="month-cell"><div class="month-day"><span class="num">14</span><span class="wk">W25</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">15</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">父の日企画</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">16</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">17</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">支配人会議</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">18</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">19</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">20</span></div></div>
+
+          <!-- Week 26: Jun 21-27 -->
+          <div class="month-cell"><div class="month-day"><span class="num">21</span><span class="wk">W26</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">夏季シフト案 確定</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">22</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">23</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">24</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">25</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">26</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">27</span></div></div>
+
+          <!-- Week 27: Jun 28 - Jul 4 -->
+          <div class="month-cell"><div class="month-day"><span class="num">28</span><span class="wk">W27</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">29</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">30</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">月末締め</span></div></div>
+          <div class="month-cell" data-month="7"><div class="month-day"><span class="num is-boundary">7月1日</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">2</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">3</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">月初会議</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">4</span></div></div>
+
+          <!-- Week 28: Jul 5-11 -->
+          <div class="month-cell"><div class="month-day"><span class="num">5</span><span class="wk">W28</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">6</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">7</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">七夕イベント</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">8</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">9</span></div><div class="month-event"><span class="ev-check"></span><span class="ev-title">朝礼</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">10</span></div></div>
+          <div class="month-cell"><div class="month-day"><span class="num">11</span></div></div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= DAY VIEW ================= -->
+    <div class="day hidden" id="view-day">
+      <!-- Side panel -->
+      <div class="day-side">
+        <div class="day-h">5月13日 (水)</div>
+        <div class="day-meta">2026 · W20 · 14:03 JST</div>
+
+        <div class="day-stat"><span class="day-stat-num crit">1</span><span class="day-stat-label">優先度 高 (P0)</span></div>
+        <div class="day-stat"><span class="day-stat-num warn">3</span><span class="day-stat-label">未完了</span></div>
+        <div class="day-stat"><span class="day-stat-num acc">2</span><span class="day-stat-label">本日完了</span></div>
+        <div class="day-stat"><span class="day-stat-num">9</span><span class="day-stat-label">合計</span></div>
+
+        <div class="day-list-h">/ 終日タスク</div>
+        <div class="day-task">
+          <div class="day-check"></div>
+          <div class="body">
+            <div class="title">月次RM分析の前準備</div>
+            <div class="meta">#待ち · 期限なし</div>
+          </div>
+        </div>
+
+        <div class="day-list-h">/ 完了済</div>
+        <div class="day-task" style="opacity:.55">
+          <div class="day-check" style="background:var(--accent);border-color:var(--accent)"></div>
+          <div class="body">
+            <div class="title" style="text-decoration:line-through">朝礼で本日の予約状況を共有</div>
+            <div class="meta">08:30 · 支配人業務</div>
+          </div>
+        </div>
+        <div class="day-task" style="opacity:.55">
+          <div class="day-check" style="background:var(--accent);border-color:var(--accent)"></div>
+          <div class="body">
+            <div class="title" style="text-decoration:line-through">芝コンディション確認 (#3, #7)</div>
+            <div class="meta">09:00 · 支配人業務</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Time grid -->
+      <div class="day-grid-wrap">
+        <div class="day-grid">
+          <div class="week-times" style="border-right:none">
+            <div class="time-slot">07:00</div>
+            <div class="time-slot">08:00</div>
+            <div class="time-slot">09:00</div>
+            <div class="time-slot">10:00</div>
+            <div class="time-slot">11:00</div>
+            <div class="time-slot">12:00</div>
+            <div class="time-slot">13:00</div>
+            <div class="time-slot">14:00</div>
+            <div class="time-slot">15:00</div>
+            <div class="time-slot">16:00</div>
+            <div class="time-slot">17:00</div>
+            <div class="time-slot">18:00</div>
+            <div class="time-slot">19:00</div>
+            <div class="time-slot">20:00</div>
+            <div class="time-slot">21:00</div>
+            <div class="time-slot">22:00</div>
+          </div>
+          <div style="position:relative">
+            <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+            <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+            <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+            <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          </div>
+        </div>
+
+        <!-- Day events overlaid -->
+        <div class="day-ev" style="top: 130px; height: 38px;">
+          <div class="time">08:30 — 09:00</div>
+          <div class="title">朝礼で本日の予約状況を共有</div>
+        </div>
+        <div class="day-ev" style="top: 178px; height: 56px;">
+          <div class="time">09:00 — 10:00</div>
+          <div class="title">芝コンディション確認 (#3, #7)</div>
+          <div class="desc">グリーン芝の状態と散水ローテを記録</div>
+        </div>
+        <div class="day-ev crit" style="top: 250px; height: 84px;">
+          <div class="time">10:30 — 12:00 · P0</div>
+          <div class="title">キャプテンカップ予選成績シート最終確認</div>
+          <div class="desc">v6 / コンパウンドキー方式 タイ表示の検証</div>
+        </div>
+        <div class="day-ev warn" style="top: 390px; height: 112px;">
+          <div class="time">13:00 — 15:00 · P1</div>
+          <div class="title">OTA戦略レビュー — 自社WEB誘導の数値確認</div>
+          <div class="desc">2025年2月施策以降の効果測定</div>
+        </div>
+        <div class="day-ev info" style="top: 558px; height: 56px;">
+          <div class="time">16:00 — 17:00</div>
+          <div class="title">スタッフ面談 (山田さん)</div>
+        </div>
+        <div class="day-ev" style="top: 782px; height: 56px; opacity:.6">
+          <div class="time">20:00 — 21:00</div>
+          <div class="title">月次RM 売上CSV ダウンロード</div>
+        </div>
+
+        <!-- Now line at 14:03 -->
+        <div class="day-now-line" style="top: 450px;"><span class="label">14:03</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function setView(name) {
+    ['day','week','month'].forEach(v => {
+      document.getElementById('view-'+v).classList.toggle('hidden', v !== name);
+      document.getElementById('seg-'+v).classList.toggle('active', v === name);
+    });
+    const labels = {
+      day: '2026年 5月 13日 (水)',
+      week: '2026年 5月 10日 — 16日 <em>// W20</em>',
+      month: '2026年 5月 <em>// Q2</em>'
+    };
+    document.getElementById('period-label').innerHTML = labels[name];
+  }
+
+  // ============ TickTick-like scroll behavior ============
+  (function() {
+    const scroller = document.querySelector('.month-scroll');
+    const cells = Array.from(document.querySelectorAll('.month-cell'));
+    if (!scroller || !cells.length) return;
+
+    // Build month map: cells with data-month attribute mark month boundaries
+    let curMonth = '4月';
+    const monthOfCell = new Map();
+    cells.forEach(c => {
+      if (c.dataset.month) {
+        curMonth = c.dataset.month + '月';
+      }
+      monthOfCell.set(c, curMonth);
+    });
+
+    // Find today's cell and the scroll-target cells at the start of each month
+    const todayCell = document.querySelector('.month-cell.today');
+    const monthStartCells = cells.filter(c => c.dataset.month);
+
+    // ---- Period label + mute other-month cells ----
+    let currentMonth = '5月';
+    function updateActiveMonth() {
+      const view = document.getElementById('view-month');
+      if (!view || view.classList.contains('hidden')) return;
+      const rect = scroller.getBoundingClientRect();
+      const probe = rect.top + rect.height * 0.35;
+      let best = currentMonth;
+      for (const c of cells) {
+        const r = c.getBoundingClientRect();
+        if (r.top <= probe && r.bottom > probe) {
+          best = monthOfCell.get(c) || best;
+          break;
+        }
+      }
+      if (best !== currentMonth) {
+        currentMonth = best;
+        // Apply mute class to cells outside current month
+        cells.forEach(c => {
+          c.classList.toggle('is-other-month', monthOfCell.get(c) !== currentMonth);
+        });
+        document.getElementById('period-label').innerHTML = '2026年 ' + currentMonth;
+      }
+    }
+    // Initial application
+    function applyInitial() {
+      cells.forEach(c => {
+        c.classList.toggle('is-other-month', monthOfCell.get(c) !== currentMonth);
+      });
+      document.getElementById('period-label').innerHTML = '2026年 ' + currentMonth;
+    }
+    const updatePeriodLabel = updateActiveMonth;
+
+    // ---- Smooth scroll helpers ----
+    function scrollToCell(cell, offset = 0) {
+      if (!cell) return;
+      const cellRect = cell.getBoundingClientRect();
+      const scrollerRect = scroller.getBoundingClientRect();
+      const delta = (cellRect.top - scrollerRect.top) - offset;
+      scroller.scrollBy({ top: delta, behavior: 'smooth' });
+    }
+
+    // Today button: scroll today's row to ~30% from top (like TickTick)
+    document.getElementById('nav-today')?.addEventListener('click', () => {
+      if (todayCell) scrollToCell(todayCell, scroller.getBoundingClientRect().height * 0.30);
+    });
+
+    // Prev button: jump up to start of previous month
+    document.getElementById('nav-prev')?.addEventListener('click', () => {
+      const probeTop = scroller.scrollTop;
+      let target = monthStartCells[0];
+      for (const c of monthStartCells) {
+        if (c.offsetTop < probeTop - 20) target = c;
+        else break;
+      }
+      scrollToCell(target, 8);
+    });
+
+    // Next button: jump down to start of next month
+    document.getElementById('nav-next')?.addEventListener('click', () => {
+      const probeTop = scroller.scrollTop;
+      for (const c of monthStartCells) {
+        if (c.offsetTop > probeTop + 20) {
+          scrollToCell(c, 8);
+          return;
+        }
+      }
+    });
+
+    // Wheel: free scroll (no snap, no boundary lock) — already default behavior, just confirm
+    scroller.style.overscrollBehavior = 'contain';
+
+    scroller.addEventListener('scroll', updatePeriodLabel, { passive: true });
+
+    // Initial: scroll to today on first month-view visit
+    setTimeout(() => {
+      if (todayCell) scrollToCell(todayCell, scroller.getBoundingClientRect().height * 0.25);
+      applyInitial();
+    }, 50);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1220 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stickit — Design Mock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FBFAF7;
+    --bg-warm: #F5F1E9;
+    --surface: #FFFFFF;
+    --surface-soft: #F8F6F1;
+    --border: #EAE4D6;
+    --border-soft: #F1ECE0;
+    --ink: #1F1B16;
+    --ink-2: #4A453D;
+    --ink-3: #8A8275;
+    --ink-4: #B8B0A0;
+    --sage: #6B8A6B;
+    --sage-soft: #E4ECE0;
+    --sage-deep: #4A6B4A;
+    --terra: #C76D5E;
+    --amber: #D4A574;
+    --sky: #8FA8C2;
+    --sticky-cream: #FFF6D6;
+    --sticky-mint: #DCEFE0;
+    --sticky-peach: #FBDCC9;
+    --sticky-lavender: #E5DEF6;
+    --sticky-sky: #D8E8F4;
+    --sticky-rose: #F9D7DD;
+    --shadow-sm: 0 1px 2px rgba(31,27,22,.04), 0 1px 3px rgba(31,27,22,.03);
+    --shadow-md: 0 4px 12px rgba(31,27,22,.06), 0 2px 4px rgba(31,27,22,.04);
+    --shadow-lg: 0 12px 28px rgba(31,27,22,.10), 0 4px 8px rgba(31,27,22,.05);
+    --shadow-sticky: 0 6px 14px rgba(31,27,22,.12), 0 2px 4px rgba(31,27,22,.06);
+    --radius-sm: 8px;
+    --radius: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --serif: "Fraunces", ui-serif, Georgia, serif;
+    --sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, textarea { font-family: inherit; color: inherit; }
+
+  /* ---------- App Frame ---------- */
+  .app {
+    display: grid;
+    grid-template-columns: 248px 1fr;
+    height: 100vh;
+    background: var(--bg);
+  }
+  .app[data-detail="open"] {
+    grid-template-columns: 248px 1fr 380px;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    background: var(--bg-warm);
+    border-right: 1px solid var(--border);
+    padding: 22px 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    overflow-y: auto;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 10px 0;
+  }
+  .brand-mark {
+    width: 30px; height: 30px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--sage) 0%, var(--sage-deep) 100%);
+    display: grid; place-items: center;
+    color: #fff;
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 17px;
+    box-shadow: var(--shadow-sm);
+    transform: rotate(-4deg);
+  }
+  .brand-name {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    font-variation-settings: "opsz" 144;
+  }
+  .brand-name em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--sage-deep);
+  }
+
+  .nav-section { display: flex; flex-direction: column; gap: 1px; }
+  .nav-label {
+    text-transform: uppercase;
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    font-weight: 600;
+    padding: 6px 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--ink-2);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: rgba(31,27,22,.04); }
+  .nav-item.active {
+    background: var(--sage-soft);
+    color: var(--sage-deep);
+    font-weight: 600;
+  }
+  .nav-item .icon { width: 16px; height: 16px; flex-shrink: 0; opacity: .85; }
+  .nav-item .count {
+    margin-left: auto;
+    font-size: 11.5px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+  .nav-item.active .count { color: var(--sage-deep); }
+  .nav-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .sidebar-foot {
+    margin-top: auto;
+    padding: 10px 8px 4px;
+    display: flex; align-items: center; gap: 10px;
+    border-top: 1px solid var(--border-soft);
+    padding-top: 14px;
+  }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #C7D6BD, #8FA889);
+    color: #fff;
+    display: grid; place-items: center;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .avatar-meta { display: flex; flex-direction: column; line-height: 1.2; }
+  .avatar-name { font-weight: 600; font-size: 13px; }
+  .avatar-role { font-size: 11px; color: var(--ink-3); }
+
+  /* ---------- Main Area ---------- */
+  .main { overflow-y: auto; padding: 36px 56px 60px; }
+  .topbar {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .page-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 38px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    font-variation-settings: "opsz" 144;
+  }
+  .page-title em { font-style: italic; color: var(--sage-deep); font-weight: 400; }
+  .page-sub {
+    color: var(--ink-3);
+    font-size: 13.5px;
+    margin-top: 6px;
+  }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    transition: background 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-primary:hover { background: #000; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-ghost { color: var(--ink-2); }
+  .btn-ghost:hover { background: rgba(31,27,22,.05); }
+  .btn-soft {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--ink-2);
+  }
+  .btn-soft:hover { background: var(--surface-soft); }
+
+  /* ---------- Today View ---------- */
+  .today-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    max-width: 760px;
+  }
+  .group { display: flex; flex-direction: column; gap: 4px; }
+  .group-head {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 0 4px 8px;
+  }
+  .group-name {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: -0.005em;
+  }
+  .group-meta { font-size: 12px; color: var(--ink-3); }
+
+  .task {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    align-items: start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid transparent;
+    transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+    cursor: pointer;
+  }
+  .task:hover { border-color: var(--border); background: #fff; }
+  .task + .task { margin-top: 2px; }
+
+  .check {
+    width: 19px; height: 19px;
+    border: 1.6px solid var(--ink-4);
+    border-radius: 6px;
+    background: var(--surface);
+    display: grid; place-items: center;
+    transition: all 160ms ease;
+    margin-top: 2px;
+  }
+  .check:hover { border-color: var(--sage); }
+  .task.done .check {
+    background: var(--sage);
+    border-color: var(--sage);
+  }
+  .task.done .check::after {
+    content: "";
+    width: 9px; height: 5px;
+    border-left: 1.8px solid #fff;
+    border-bottom: 1.8px solid #fff;
+    transform: rotate(-45deg) translate(1px, -1px);
+  }
+
+  .task-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .task-title {
+    font-weight: 500;
+    font-size: 14.5px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .task.done .task-title {
+    color: var(--ink-3);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+  .task-meta {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .task-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-4); }
+  .task-meta .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--bg-warm);
+    color: var(--ink-2);
+    font-weight: 500;
+    font-size: 11.5px;
+  }
+  .task-meta .tag { color: var(--sage-deep); font-weight: 500; }
+  .task-priority { width: 4px; align-self: stretch; border-radius: 2px; margin-top: 2px; margin-bottom: 2px; }
+  .task-side { display: flex; align-items: center; gap: 8px; padding-top: 2px; }
+  .pri-high { color: var(--terra); }
+  .pri-med { color: var(--amber); }
+  .pri-low { color: var(--sky); }
+  .icon-flag {
+    width: 14px; height: 14px;
+  }
+
+  .quick-add {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    color: var(--ink-3);
+    font-size: 13.5px;
+    cursor: text;
+    margin-top: 4px;
+    transition: border-color 120ms ease, color 120ms ease;
+  }
+  .quick-add:hover { border-color: var(--sage); color: var(--sage-deep); }
+
+  /* ---------- View switcher ---------- */
+  .view-switch { display: flex; gap: 4px; padding: 3px; background: var(--bg-warm); border-radius: 10px; border: 1px solid var(--border-soft); }
+  .view-switch button {
+    padding: 6px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-3);
+    border-radius: 8px;
+  }
+  .view-switch button.active {
+    background: #fff;
+    color: var(--ink);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ---------- Calendar View ---------- */
+  .cal-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .cal-month {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+  }
+  .cal-month em { font-style: italic; color: var(--sage-deep); }
+  .cal-nav { display: flex; gap: 6px; }
+  .cal-nav button {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-2);
+    display: grid; place-items: center;
+    font-size: 14px;
+  }
+  .cal-nav button:hover { background: var(--surface-soft); }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--border-soft);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .cal-dow {
+    background: var(--bg-warm);
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+  }
+  .cal-cell {
+    background: var(--surface);
+    min-height: 110px;
+    padding: 8px 10px;
+    display: flex; flex-direction: column; gap: 4px;
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+  .cal-cell:hover { background: var(--surface-soft); }
+  .cal-cell.muted { background: var(--bg-warm); color: var(--ink-4); }
+  .cal-cell.today { background: linear-gradient(180deg, #FFFCEF 0%, var(--surface) 70%); }
+  .cal-day {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .cal-cell.today .cal-day {
+    color: #fff;
+    background: var(--ink);
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 11.5px;
+  }
+  .cal-cell.muted .cal-day { color: var(--ink-4); }
+  .cal-event {
+    font-size: 11.5px;
+    padding: 3px 7px;
+    border-radius: 5px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .ev-sage { background: var(--sage-soft); color: var(--sage-deep); }
+  .ev-amber { background: #FBEBD0; color: #7A5512; }
+  .ev-sky { background: var(--sticky-sky); color: #2F5573; }
+  .ev-rose { background: var(--sticky-rose); color: #8A3A48; }
+  .ev-cream { background: var(--sticky-cream); color: #6B5611; }
+
+  /* ---------- Sticky View ---------- */
+  .sticky-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 22px;
+    padding: 8px 4px 40px;
+  }
+  .sticky {
+    background: var(--sticky-cream);
+    border-radius: 4px 14px 4px 14px;
+    padding: 18px 18px 22px;
+    box-shadow: var(--shadow-sticky);
+    display: flex; flex-direction: column; gap: 10px;
+    position: relative;
+    transform: rotate(-1.2deg);
+    transition: transform 220ms cubic-bezier(.4,1.4,.5,1), box-shadow 220ms ease;
+    cursor: pointer;
+    min-height: 160px;
+  }
+  .sticky:hover { transform: rotate(0deg) translateY(-3px); box-shadow: 0 14px 28px rgba(31,27,22,.16), 0 4px 8px rgba(31,27,22,.08); }
+  .sticky:nth-child(2n) { transform: rotate(1.4deg); background: var(--sticky-mint); }
+  .sticky:nth-child(2n):hover { transform: rotate(0deg) translateY(-3px); }
+  .sticky:nth-child(3n) { transform: rotate(-0.6deg); background: var(--sticky-peach); }
+  .sticky:nth-child(3n):hover { transform: rotate(0deg) translateY(-3px); }
+  .sticky:nth-child(4n) { transform: rotate(1.8deg); background: var(--sticky-lavender); }
+  .sticky:nth-child(4n):hover { transform: rotate(0deg) translateY(-3px); }
+  .sticky:nth-child(5n) { transform: rotate(-1.6deg); background: var(--sticky-sky); }
+  .sticky:nth-child(5n):hover { transform: rotate(0deg) translateY(-3px); }
+  .sticky:nth-child(7n) { transform: rotate(0.8deg); background: var(--sticky-rose); }
+  .sticky:nth-child(7n):hover { transform: rotate(0deg) translateY(-3px); }
+  .sticky-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .sticky-check {
+    width: 17px; height: 17px;
+    border: 1.5px solid rgba(31,27,22,.45);
+    border-radius: 5px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,.4);
+  }
+  .sticky-due {
+    font-size: 11px;
+    color: rgba(31,27,22,.6);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .sticky-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 1.35;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    flex: 1;
+  }
+  .sticky-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; }
+  .sticky-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    background: rgba(31,27,22,.07);
+    border-radius: 999px;
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+  .sticky-popout-hint {
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 12.5px;
+    margin-bottom: 22px;
+  }
+
+  /* ---------- Detail Panel ---------- */
+  .detail {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 32px 28px;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .detail-close {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    color: var(--ink-3);
+    display: grid; place-items: center;
+    font-size: 16px;
+  }
+  .detail-close:hover { background: var(--surface-soft); color: var(--ink); }
+
+  .detail-title-input {
+    border: none; background: none; outline: none;
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    width: 100%;
+    padding: 0;
+  }
+  .detail-row {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 13px;
+  }
+  .detail-row .label {
+    color: var(--ink-3);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 10.5px;
+  }
+  .detail-row .value { color: var(--ink); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--surface-soft);
+    border: 1px solid var(--border-soft);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+  .chip.sage { background: var(--sage-soft); color: var(--sage-deep); border-color: transparent; }
+  .chip.terra { background: #F8E1DC; color: #8A3A2D; border-color: transparent; }
+  .chip.amber { background: #FBEBD0; color: #7A5512; border-color: transparent; }
+
+  .memo {
+    background: var(--surface-soft);
+    border-radius: var(--radius);
+    padding: 14px;
+    font-size: 13.5px;
+    color: var(--ink-2);
+    line-height: 1.6;
+    border: 1px solid var(--border-soft);
+  }
+
+  .subtask {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+  .subtask .check { width: 16px; height: 16px; }
+
+  .attach {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    color: var(--ink-2);
+  }
+  .attach-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: var(--bg-warm);
+    display: grid; place-items: center;
+    color: var(--ink-2);
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ---------- Login Screen ---------- */
+  .login-screen {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, #F1ECE0 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, #E8EFE4 0%, transparent 55%),
+      var(--bg);
+    display: grid; place-items: center;
+    z-index: 100;
+  }
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 44px 40px 36px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-soft);
+    position: relative;
+  }
+  .login-card::before {
+    content: "";
+    position: absolute;
+    top: -16px; right: 36px;
+    width: 60px; height: 60px;
+    background: var(--sticky-cream);
+    border-radius: 4px 14px 4px 14px;
+    transform: rotate(8deg);
+    box-shadow: var(--shadow-md);
+    z-index: -1;
+  }
+  .login-card::after {
+    content: "✓";
+    position: absolute;
+    top: -8px; right: 50px;
+    color: var(--sage-deep);
+    font-size: 22px;
+    font-weight: 600;
+    transform: rotate(8deg);
+  }
+  .login-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; }
+  .login-h {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 30px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0 0 8px;
+  }
+  .login-h em { font-style: italic; color: var(--sage-deep); }
+  .login-sub {
+    color: var(--ink-3);
+    font-size: 13.5px;
+    margin: 0 0 24px;
+    line-height: 1.6;
+  }
+  .field-label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    margin-bottom: 7px;
+  }
+  .field-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    background: var(--surface);
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+  }
+  .field-input:focus {
+    outline: none;
+    border-color: var(--sage);
+    box-shadow: 0 0 0 4px var(--sage-soft);
+  }
+  .login-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--ink);
+    color: #fff;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 18px;
+    transition: background 120ms ease, transform 120ms ease;
+  }
+  .login-btn:hover { background: #000; transform: translateY(-1px); }
+  .login-foot {
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 12px;
+    margin-top: 20px;
+  }
+
+  /* ---------- Mock Switcher (top-right floating) ---------- */
+  .mock-switcher {
+    position: fixed;
+    bottom: 16px; right: 16px;
+    background: rgba(31,27,22,.92);
+    backdrop-filter: blur(8px);
+    border-radius: 999px;
+    padding: 5px;
+    display: flex; gap: 2px;
+    z-index: 200;
+    box-shadow: var(--shadow-lg);
+  }
+  .mock-switcher button {
+    color: rgba(255,255,255,.7);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 120ms ease;
+  }
+  .mock-switcher button.active {
+    background: #fff;
+    color: var(--ink);
+  }
+  .mock-switcher button:hover:not(.active) { color: #fff; }
+
+  .hidden { display: none !important; }
+
+  /* ---------- Icons (inline SVG fed via mask trick removed in favor of inline) ---------- */
+  .ic { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div class="login-screen" id="screen-login">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark">S</div>
+      <div class="brand-name">Stick<em>it</em></div>
+    </div>
+    <h1 class="login-h">おかえり<em>なさい</em>。</h1>
+    <p class="login-sub">メールアドレスを入力してください。マジックリンクをお送りします — パスワードは要りません。</p>
+    <label class="field-label">メールアドレス</label>
+    <input class="field-input" type="email" placeholder="you@example.com" value="nkhtnkht@gmail.com" />
+    <button class="login-btn">マジックリンクを送る →</button>
+    <div class="login-foot">仕事PC でも 自宅PC でも、続きから。</div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app hidden" id="screen-app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div class="brand-name">Stick<em>it</em></div>
+    </div>
+
+    <div class="nav-section">
+      <button class="nav-item active">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        今日 <span class="count">7</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        明日 <span class="count">3</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+        7日間 <span class="count">19</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/></svg>
+        すべて <span class="count">42</span>
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">プロジェクト</div>
+      <button class="nav-item"><span class="nav-dot" style="background:#6B8A6B"></span>支配人業務 <span class="count">12</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#C76D5E"></span>キャプテンカップ <span class="count">8</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#D4A574"></span>OTA戦略 <span class="count">5</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#8FA8C2"></span>個人 <span class="count">9</span></button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">タグ</div>
+      <button class="nav-item"><span class="nav-dot" style="background:#B8B0A0"></span>#至急</button>
+      <button class="nav-item"><span class="nav-dot" style="background:#B8B0A0"></span>#会議</button>
+      <button class="nav-item"><span class="nav-dot" style="background:#B8B0A0"></span>#待ち</button>
+    </div>
+
+    <div class="nav-section">
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 001 1h4M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/></svg>
+        シフト取込
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        TickTick移行
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51"/></svg>
+        設定
+      </button>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="avatar">NK</div>
+      <div class="avatar-meta">
+        <span class="avatar-name">中畑 慶治</span>
+        <span class="avatar-role">支配人</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main: TODAY view -->
+  <main class="main" id="view-today">
+    <div class="topbar">
+      <div>
+        <h1 class="page-title">今日<em>、5月13日</em></h1>
+        <div class="page-sub">水曜日 · 7件のタスク · 完了 2/9</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="view-switch">
+          <button class="active" onclick="switchView('today')">リスト</button>
+          <button onclick="switchView('calendar')">カレンダー</button>
+          <button onclick="switchView('sticky')">付箋</button>
+        </div>
+        <button class="btn btn-primary">
+          <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
+          新規タスク
+        </button>
+      </div>
+    </div>
+
+    <div class="today-grid">
+      <div class="group">
+        <div class="group-head">
+          <div class="group-name">朝のルーティン</div>
+          <div class="group-meta">3件</div>
+        </div>
+
+        <div class="task done" onclick="toggleDetail()">
+          <div class="check"></div>
+          <div class="task-body">
+            <div class="task-title">朝礼で本日の予約状況を共有</div>
+            <div class="task-meta">
+              <span>8:30</span>
+              <span class="dot"></span>
+              <span class="tag">#会議</span>
+            </div>
+          </div>
+          <div class="task-side">
+            <svg class="ic icon-flag pri-low" viewBox="0 0 24 24"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></svg>
+          </div>
+        </div>
+
+        <div class="task done">
+          <div class="check"></div>
+          <div class="task-body">
+            <div class="task-title">芝コンディション確認 (グリーン #3, #7)</div>
+            <div class="task-meta"><span>9:00</span></div>
+          </div>
+          <div class="task-side"></div>
+        </div>
+
+        <div class="task" onclick="toggleDetail()">
+          <div class="check"></div>
+          <div class="task-body">
+            <div class="task-title">キャプテンカップ予選成績シートを最終確認</div>
+            <div class="task-meta">
+              <span>10:30</span>
+              <span class="dot"></span>
+              <span class="pill" style="background:#F8E1DC;color:#8A3A2D">キャプテンカップ</span>
+              <span class="dot"></span>
+              <span class="tag">#至急</span>
+            </div>
+          </div>
+          <div class="task-side">
+            <svg class="ic icon-flag pri-high" viewBox="0 0 24 24"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-head">
+          <div class="group-name">午後</div>
+          <div class="group-meta">3件</div>
+        </div>
+
+        <div class="task">
+          <div class="check"></div>
+          <div class="task-body">
+            <div class="task-title">OTA戦略レビュー — 自社WEB誘導の数値確認</div>
+            <div class="task-meta">
+              <span>13:00</span>
+              <span class="dot"></span>
+              <span class="pill" style="background:#FBEBD0;color:#7A5512">OTA戦略</span>
+            </div>
+          </div>
+          <div class="task-side">
+            <svg class="ic icon-flag pri-med" viewBox="0 0 24 24"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></svg>
+          </div>
+        </div>
+
+        <div class="task">
+          <div class="check"></div>
+          <div class="task-body">
+            <div class="task-title">来月のシフト表をTickTickに登録</div>
+            <div class="task-meta">
+              <span>15:00</span>
+              <span class="dot"></span>
+              <span class="pill" style="background:var(--sage-soft);color:var(--sage-deep)">支配人業務</span>
+            </div>
+          </div>
+          <div class="task-side"></div>
+        </div>
+
+        <div class="task">
+          <div class="check"></div>
+          <div class="task-body">
+            <div class="task-title">スタッフ面談 (山田さん)</div>
+            <div class="task-meta">
+              <span>16:00</span>
+              <span class="dot"></span>
+              <span class="tag">#会議</span>
+            </div>
+          </div>
+          <div class="task-side"></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-head">
+          <div class="group-name">夜まで</div>
+          <div class="group-meta">1件</div>
+        </div>
+
+        <div class="task">
+          <div class="check"></div>
+          <div class="task-body">
+            <div class="task-title">月次RM分析の前準備 — 売上CSVをダウンロード</div>
+            <div class="task-meta">
+              <span>期限なし</span>
+              <span class="dot"></span>
+              <span class="tag">#待ち</span>
+            </div>
+          </div>
+          <div class="task-side"></div>
+        </div>
+      </div>
+
+      <div class="quick-add">+  クリックして新しいタスクを追加</div>
+    </div>
+  </main>
+
+  <!-- Main: CALENDAR view -->
+  <main class="main hidden" id="view-calendar">
+    <div class="topbar">
+      <div>
+        <h1 class="page-title">カレン<em>ダー</em></h1>
+        <div class="page-sub">月表示 · ドラッグで日付を変更</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="view-switch">
+          <button onclick="switchView('today')">リスト</button>
+          <button class="active" onclick="switchView('calendar')">カレンダー</button>
+          <button onclick="switchView('sticky')">付箋</button>
+        </div>
+        <button class="btn btn-primary">
+          <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
+          新規タスク
+        </button>
+      </div>
+    </div>
+
+    <div class="cal-head">
+      <div class="cal-month">2026年 5月<em> Sat</em></div>
+      <div class="cal-nav">
+        <button>‹</button>
+        <button class="btn btn-soft" style="border-radius:8px">今日</button>
+        <button>›</button>
+      </div>
+    </div>
+
+    <div class="cal-grid">
+      <div class="cal-dow">日</div><div class="cal-dow">月</div><div class="cal-dow">火</div><div class="cal-dow">水</div><div class="cal-dow">木</div><div class="cal-dow">金</div><div class="cal-dow">土</div>
+
+      <div class="cal-cell muted"><div class="cal-day">26</div></div>
+      <div class="cal-cell muted"><div class="cal-day">27</div></div>
+      <div class="cal-cell muted"><div class="cal-day">28</div></div>
+      <div class="cal-cell muted"><div class="cal-day">29</div></div>
+      <div class="cal-cell muted"><div class="cal-day">30</div></div>
+      <div class="cal-cell"><div class="cal-day">1</div><div class="cal-event ev-sage">朝礼</div></div>
+      <div class="cal-cell"><div class="cal-day">2</div></div>
+
+      <div class="cal-cell"><div class="cal-day">3</div></div>
+      <div class="cal-cell"><div class="cal-day">4</div><div class="cal-event ev-amber">OTAミーティング</div></div>
+      <div class="cal-cell"><div class="cal-day">5</div><div class="cal-event ev-rose">キャプテンカップ準備</div></div>
+      <div class="cal-cell"><div class="cal-day">6</div></div>
+      <div class="cal-cell"><div class="cal-day">7</div><div class="cal-event ev-sage">朝礼</div><div class="cal-event ev-sky">面談</div></div>
+      <div class="cal-cell"><div class="cal-day">8</div></div>
+      <div class="cal-cell"><div class="cal-day">9</div><div class="cal-event ev-cream">月次RM分析</div></div>
+
+      <div class="cal-cell"><div class="cal-day">10</div></div>
+      <div class="cal-cell"><div class="cal-day">11</div><div class="cal-event ev-sage">朝礼</div></div>
+      <div class="cal-cell"><div class="cal-day">12</div><div class="cal-event ev-rose">予選成績シート最終確認</div><div class="cal-event ev-amber">OTA戦略レビュー</div></div>
+      <div class="cal-cell today">
+        <div class="cal-day">13</div>
+        <div class="cal-event ev-rose">予選成績</div>
+        <div class="cal-event ev-amber">OTA戦略</div>
+        <div class="cal-event ev-sky">スタッフ面談</div>
+      </div>
+      <div class="cal-cell"><div class="cal-day">14</div><div class="cal-event ev-sage">朝礼</div><div class="cal-event ev-cream">月次RM分析提出</div></div>
+      <div class="cal-cell"><div class="cal-day">15</div><div class="cal-event ev-rose">キャプテンカップ本戦</div></div>
+      <div class="cal-cell"><div class="cal-day">16</div><div class="cal-event ev-rose">キャプテンカップ本戦</div></div>
+
+      <div class="cal-cell"><div class="cal-day">17</div></div>
+      <div class="cal-cell"><div class="cal-day">18</div><div class="cal-event ev-sage">朝礼</div></div>
+      <div class="cal-cell"><div class="cal-day">19</div></div>
+      <div class="cal-cell"><div class="cal-day">20</div><div class="cal-event ev-amber">支配人会議</div></div>
+      <div class="cal-cell"><div class="cal-day">21</div><div class="cal-event ev-sage">朝礼</div></div>
+      <div class="cal-cell"><div class="cal-day">22</div></div>
+      <div class="cal-cell"><div class="cal-day">23</div></div>
+
+      <div class="cal-cell"><div class="cal-day">24</div></div>
+      <div class="cal-cell"><div class="cal-day">25</div><div class="cal-event ev-sage">朝礼</div></div>
+      <div class="cal-cell"><div class="cal-day">26</div></div>
+      <div class="cal-cell"><div class="cal-day">27</div></div>
+      <div class="cal-cell"><div class="cal-day">28</div><div class="cal-event ev-sage">朝礼</div></div>
+      <div class="cal-cell"><div class="cal-day">29</div></div>
+      <div class="cal-cell"><div class="cal-day">30</div><div class="cal-event ev-cream">月次RM締め</div></div>
+
+      <div class="cal-cell"><div class="cal-day">31</div></div>
+      <div class="cal-cell muted"><div class="cal-day">1</div></div>
+      <div class="cal-cell muted"><div class="cal-day">2</div></div>
+      <div class="cal-cell muted"><div class="cal-day">3</div></div>
+      <div class="cal-cell muted"><div class="cal-day">4</div></div>
+      <div class="cal-cell muted"><div class="cal-day">5</div></div>
+      <div class="cal-cell muted"><div class="cal-day">6</div></div>
+    </div>
+  </main>
+
+  <!-- Main: STICKY view -->
+  <main class="main hidden" id="view-sticky">
+    <div class="topbar">
+      <div>
+        <h1 class="page-title">付<em>箋ボード</em></h1>
+        <div class="page-sub">プロジェクト「キャプテンカップ」 · 8件</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="view-switch">
+          <button onclick="switchView('today')">リスト</button>
+          <button onclick="switchView('calendar')">カレンダー</button>
+          <button class="active" onclick="switchView('sticky')">付箋</button>
+        </div>
+        <button class="btn btn-soft">
+          <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M9 21H3v-6M21 9V3h-6M21 3l-7 7M3 21l7-7"/></svg>
+          ポップアウト
+        </button>
+        <button class="btn btn-primary">
+          <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
+          新規
+        </button>
+      </div>
+    </div>
+
+    <div class="sticky-popout-hint">↑「ポップアウト」で小窓化 → OS で「常に手前」設定すれば常時表示</div>
+
+    <div class="sticky-board">
+      <div class="sticky">
+        <div class="sticky-head">
+          <div class="sticky-due">5/12 12:00</div>
+          <div class="sticky-check"></div>
+        </div>
+        <div class="sticky-title">予選成績シートを最終確認 — タイ表示の検証</div>
+        <div class="sticky-tags"><span class="sticky-tag">#至急</span><span class="sticky-tag">v6</span></div>
+      </div>
+      <div class="sticky">
+        <div class="sticky-head">
+          <div class="sticky-due">5/14</div>
+          <div class="sticky-check"></div>
+        </div>
+        <div class="sticky-title">参加者リスト印刷 (A4 × 80部)</div>
+        <div class="sticky-tags"><span class="sticky-tag">準備</span></div>
+      </div>
+      <div class="sticky">
+        <div class="sticky-head">
+          <div class="sticky-due">5/15</div>
+          <div class="sticky-check"></div>
+        </div>
+        <div class="sticky-title">受付テーブル設営 — 8:00 AM 集合</div>
+        <div class="sticky-tags"><span class="sticky-tag">当日</span><span class="sticky-tag">#会議</span></div>
+      </div>
+      <div class="sticky">
+        <div class="sticky-head">
+          <div class="sticky-due">5/15</div>
+          <div class="sticky-check"></div>
+        </div>
+        <div class="sticky-title">優勝カップ・賞品の最終確認</div>
+        <div class="sticky-tags"><span class="sticky-tag">準備</span></div>
+      </div>
+      <div class="sticky">
+        <div class="sticky-head">
+          <div class="sticky-due">5/16</div>
+          <div class="sticky-check"></div>
+        </div>
+        <div class="sticky-title">表彰式進行台本 — リハーサル</div>
+        <div class="sticky-tags"><span class="sticky-tag">本番</span></div>
+      </div>
+      <div class="sticky">
+        <div class="sticky-head">
+          <div class="sticky-due">5/17</div>
+          <div class="sticky-check"></div>
+        </div>
+        <div class="sticky-title">スコア集計プログラム動作チェック</div>
+        <div class="sticky-tags"><span class="sticky-tag">技術</span></div>
+      </div>
+      <div class="sticky">
+        <div class="sticky-head">
+          <div class="sticky-due">5/18</div>
+          <div class="sticky-check"></div>
+        </div>
+        <div class="sticky-title">写真撮影スポット5箇所をマーキング</div>
+        <div class="sticky-tags"><span class="sticky-tag">準備</span></div>
+      </div>
+      <div class="sticky">
+        <div class="sticky-head">
+          <div class="sticky-due">5/19</div>
+          <div class="sticky-check"></div>
+        </div>
+        <div class="sticky-title">参加者へのお礼メール下書き</div>
+        <div class="sticky-tags"><span class="sticky-tag">事後</span></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Detail Panel -->
+  <aside class="detail" id="detail-panel" hidden>
+    <div class="detail-head">
+      <input class="detail-title-input" value="キャプテンカップ予選成績シートを最終確認" />
+      <button class="detail-close" onclick="toggleDetail()">×</button>
+    </div>
+
+    <div class="detail-row">
+      <span class="label">プロジェクト</span>
+      <span class="value"><span class="chip terra">●  キャプテンカップ</span></span>
+    </div>
+    <div class="detail-row">
+      <span class="label">期限</span>
+      <span class="value">2026年5月13日 (水) 10:30</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">優先度</span>
+      <span class="value"><span class="chip terra">▲ 高</span></span>
+    </div>
+    <div class="detail-row">
+      <span class="label">タグ</span>
+      <span class="value"><span class="chip">#至急</span><span class="chip">#会議</span></span>
+    </div>
+    <div class="detail-row">
+      <span class="label">繰り返し</span>
+      <span class="value">なし</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">リマインダー</span>
+      <span class="value"><span class="chip sage">✦ 30分前</span></span>
+    </div>
+
+    <div>
+      <span class="label" style="display:block;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;color:var(--ink-3)">メモ</span>
+      <div class="memo">
+        v6スクリプトで生成した予選成績シートを <strong>build_sorted_sheet_v6.py</strong> 出力と照合。<br>
+        コンパウンドキー方式でタイ表示が解消されているか、特に同スコア複数組の表示順を重点確認。
+      </div>
+    </div>
+
+    <div>
+      <span class="label" style="display:block;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;color:var(--ink-3)">サブタスク</span>
+      <div class="subtask"><div class="check" style="background:var(--sage);border-color:var(--sage)"></div><span style="text-decoration:line-through;color:var(--ink-3)">v6を実行して新シート生成</span></div>
+      <div class="subtask"><div class="check"></div><span>同スコア組のソート順を目視確認</span></div>
+      <div class="subtask"><div class="check"></div><span>印刷プレビューで A4 横向き レイアウト確認</span></div>
+      <div class="subtask"><div class="check"></div><span>+ サブタスクを追加</span></div>
+    </div>
+
+    <div>
+      <span class="label" style="display:block;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;color:var(--ink-3)">添付</span>
+      <div class="attach"><div class="attach-icon">XLSX</div><div>captain_cup_sorted_v6.xlsx<br><span style="color:var(--ink-3);font-size:11px">142 KB · 5/12 22:14</span></div></div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ============ Mock Switcher ============ -->
+<div class="mock-switcher">
+  <button onclick="showScreen('login')">ログイン</button>
+  <button class="active" onclick="showScreen('app')">アプリ画面</button>
+</div>
+
+<script>
+  function showScreen(name) {
+    document.getElementById('screen-login').classList.toggle('hidden', name !== 'login');
+    document.getElementById('screen-app').classList.toggle('hidden', name !== 'app');
+    document.querySelectorAll('.mock-switcher button').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+  function switchView(name) {
+    ['today','calendar','sticky'].forEach(v => {
+      document.getElementById('view-'+v).classList.toggle('hidden', v !== name);
+    });
+    document.getElementById('detail-panel').setAttribute('hidden','');
+    document.querySelector('.app').removeAttribute('data-detail');
+  }
+  function toggleDetail() {
+    const panel = document.getElementById('detail-panel');
+    const app = document.querySelector('.app');
+    if (panel.hasAttribute('hidden')) {
+      panel.removeAttribute('hidden');
+      app.setAttribute('data-detail','open');
+    } else {
+      panel.setAttribute('hidden','');
+      app.removeAttribute('data-detail');
+    }
+  }
+</script>
+
+</body>
+</html>

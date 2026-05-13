@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stickit — Sticky Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700&family=IBM+Plex+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --bg-2: #F4F4F4;
+    --surface: #FFFFFF;
+    --surface-2: #F8F8F8;
+    --border: #E8E8E8;
+    --border-2: #EFEFEF;
+    --ink: #0A0A0A;
+    --ink-2: #404040;
+    --ink-3: #737373;
+    --ink-4: #A3A3A3;
+    --ink-5: #D4D4D4;
+    --accent: #00C853;
+    --accent-soft: #DCFCE7;
+    --accent-deep: #047857;
+    --warn: #F97316;
+    --warn-soft: #FFEDD5;
+    --crit: #EF4444;
+    --crit-soft: #FEE2E2;
+    --info: #3B82F6;
+    --info-soft: #DBEAFE;
+    --purple: #8B5CF6;
+    --purple-soft: #EDE9FE;
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+    --shadow-lg: 0 12px 28px rgba(0,0,0,.16), 0 4px 10px rgba(0,0,0,.08);
+    --r-sm: 6px;
+    --r: 10px;
+    --r-lg: 14px;
+    --sans: "Geist", "IBM Plex Sans JP", -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: "Geist Mono", "IBM Plex Sans JP", "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 13.5px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.005em;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input { font-family: inherit; color: inherit; }
+
+  .app {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    height: 100vh;
+  }
+
+  /* Sidebar (compressed) */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 14px 10px;
+    display: flex; flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 10px 4px;
+  }
+  .brand-mark {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    background: var(--ink);
+    color: var(--accent);
+    display: grid; place-items: center;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 13px;
+    position: relative;
+  }
+  .brand-mark::after {
+    content: ""; position: absolute; bottom: -2px; right: -2px;
+    width: 8px; height: 8px; background: var(--accent);
+    border-radius: 50%; border: 2px solid var(--surface);
+  }
+  .brand-name { font-weight: 600; font-size: 15px; letter-spacing: -0.02em; }
+  .brand-ver {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-4);
+    background: var(--bg-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .nav-section { display: flex; flex-direction: column; gap: 1px; padding: 0 4px; }
+  .nav-label {
+    text-transform: uppercase;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-4);
+    font-weight: 500;
+    padding: 8px 8px 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 8px;
+    border-radius: var(--r-sm);
+    color: var(--ink-2);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 80ms ease;
+    width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--bg-2); color: var(--ink); }
+  .nav-item.active { background: var(--ink); color: #fff; }
+  .nav-item .count {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-4);
+  }
+  .nav-item.active .count { color: rgba(255,255,255,.55); }
+  .nav-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .ic { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  .sidebar-foot {
+    margin-top: auto;
+    padding: 12px 8px 4px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00C853 0%, #00A152 100%);
+    color: #fff;
+    display: grid; place-items: center;
+    font-weight: 600;
+    font-size: 11px;
+    font-family: var(--mono);
+  }
+  .avatar-meta { display: flex; flex-direction: column; line-height: 1.2; }
+  .avatar-name { font-weight: 600; font-size: 12.5px; }
+  .avatar-role { font-size: 10.5px; color: var(--ink-4); font-family: var(--mono); }
+
+  /* Main */
+  .main {
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    background: var(--bg);
+  }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex; align-items: center;
+    padding: 16px 24px;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); position: relative;
+  }
+  .pulse::after {
+    content: ""; position: absolute; inset: -3px;
+    border-radius: 50%;
+    background: var(--accent); opacity: .3;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: .3; }
+    50% { transform: scale(1.6); opacity: 0; }
+  }
+  .toolbar-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .toolbar-title {
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px;
+    border-radius: var(--r-sm);
+    font-weight: 500;
+    font-size: 12.5px;
+    transition: all 80ms ease;
+  }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:hover { background: #000; }
+  .btn-primary .kbd {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(255,255,255,.5);
+    background: rgba(255,255,255,.1);
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+  .btn-soft {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--ink-2);
+  }
+  .btn-soft:hover { border-color: var(--ink-5); }
+  .btn-accent {
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+    border: 1px solid #86EFAC;
+  }
+  .btn-accent:hover { background: #BBF7D0; }
+
+  /* Board tabs */
+  .board-tabs {
+    display: flex; gap: 4px;
+    padding: 10px 24px 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow-x: auto;
+  }
+  .board-tab {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 14px 11px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--ink-3);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 80ms ease;
+  }
+  .board-tab:hover { color: var(--ink-2); }
+  .board-tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+  .board-tab .dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+  }
+  .board-tab .count {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-4);
+    margin-left: 2px;
+    background: var(--bg-2);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .board-tab.active .count { background: var(--ink); color: #fff; }
+  .board-tab.new {
+    border-bottom: none;
+    color: var(--ink-4);
+    padding-right: 10px;
+  }
+
+  /* Board body */
+  .board-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+  }
+  .board-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 18px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .board-head-title {
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.025em;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .board-head-title .dot { width: 12px; height: 12px; border-radius: 3px; }
+  .board-head-meta {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+  .board-actions { display: flex; gap: 8px; }
+
+  .popout-hint {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 12px;
+    background: var(--purple-soft);
+    border: 1px dashed var(--purple);
+    border-radius: var(--r-sm);
+    color: #5B21B6;
+    font-size: 11.5px;
+    font-family: var(--mono);
+    margin-bottom: 18px;
+  }
+
+  /* Sticky tile grid */
+  .sticky-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .sticky-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 16px 16px 14px;
+    display: flex; flex-direction: column; gap: 12px;
+    cursor: pointer;
+    transition: all 120ms ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 180px;
+  }
+  .sticky-tile:hover {
+    border-color: var(--ink-5);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .sticky-tile::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+  }
+  .sticky-tile[data-pri="high"]::before { background: var(--crit); }
+  .sticky-tile[data-pri="med"]::before { background: var(--warn); }
+  .sticky-tile[data-pri="low"]::before { background: var(--info); }
+  .sticky-tile[data-pri="done"] { opacity: .55; }
+  .sticky-tile[data-pri="done"]::before { background: var(--ink-4); }
+
+  .sticky-head {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .sticky-id { color: var(--ink-4); }
+  .sticky-due { color: var(--ink-3); }
+  .sticky-due.crit { color: var(--crit); font-weight: 600; }
+  .sticky-due.warn { color: var(--warn); font-weight: 600; }
+
+  .sticky-title {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .sticky-tile[data-pri="done"] .sticky-title { text-decoration: line-through; color: var(--ink-3); }
+
+  .sticky-subs {
+    display: flex; flex-direction: column; gap: 4px;
+    margin-top: -4px;
+  }
+  .sticky-sub {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 11.5px;
+    color: var(--ink-3);
+  }
+  .sticky-sub .mini-check {
+    width: 11px; height: 11px;
+    border: 1.2px solid var(--ink-5);
+    border-radius: 2.5px;
+    flex-shrink: 0;
+  }
+  .sticky-sub .mini-check.done { background: var(--accent); border-color: var(--accent); position: relative; }
+  .sticky-sub .mini-check.done::after {
+    content: ""; position: absolute; left: 2px; top: 3px;
+    width: 6px; height: 3px;
+    border-left: 1.2px solid #fff;
+    border-bottom: 1.2px solid #fff;
+    transform: rotate(-45deg);
+  }
+  .sticky-sub.done span { text-decoration: line-through; color: var(--ink-4); }
+
+  .sticky-foot {
+    display: flex; align-items: center; gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-2);
+    margin-top: auto;
+  }
+  .sticky-tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+  }
+  .sticky-tag.tag-crit { color: var(--crit); font-weight: 600; }
+  .sticky-meta-r {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-4);
+  }
+  .sticky-meta-r .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 1px 6px;
+    background: var(--bg-2);
+    border-radius: 4px;
+  }
+  .sticky-progress {
+    height: 3px;
+    background: var(--bg-2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 2px;
+  }
+  .sticky-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* Add card */
+  .add-card {
+    border: 1.5px dashed var(--border);
+    background: transparent;
+    color: var(--ink-3);
+    display: grid; place-items: center;
+    min-height: 180px;
+    border-radius: var(--r);
+    cursor: pointer;
+    transition: all 100ms ease;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .add-card:hover { border-color: var(--accent); color: var(--accent-deep); background: var(--accent-soft); }
+  .add-card .plus { font-size: 22px; font-weight: 300; }
+  .add-card .label { font-family: var(--mono); font-size: 11px; }
+
+  /* ===== Popout window mockup (floating bottom-right) ===== */
+  .popout {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    width: 320px;
+    background: var(--ink);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    z-index: 100;
+    border: 1px solid #222;
+  }
+  .popout-title {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,.06);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .popout-traffic {
+    display: flex; gap: 5px;
+  }
+  .popout-traffic span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.2);
+  }
+  .popout-traffic span.crit { background: #FF5F57; }
+  .popout-traffic span.warn { background: #FEBC2E; }
+  .popout-traffic span.acc { background: #28C840; }
+  .popout-name {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: rgba(255,255,255,.6);
+    margin-left: 6px;
+  }
+  .popout-pin {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: rgba(255,255,255,.85);
+    background: rgba(0,200,83,.18);
+    border: 1px solid rgba(0,200,83,.35);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .popout-body {
+    padding: 12px;
+    display: flex; flex-direction: column; gap: 7px;
+    max-height: 360px;
+    overflow-y: auto;
+  }
+  .pop-card {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-left: 2px solid var(--accent);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: #E5E5E5;
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+  .pop-card[data-pri="high"] { border-left-color: var(--crit); }
+  .pop-card[data-pri="med"] { border-left-color: var(--warn); }
+  .pop-card[data-pri="done"] { opacity: .5; }
+  .pop-card .pop-meta {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: rgba(255,255,255,.5);
+    margin-bottom: 3px;
+    display: flex; justify-content: space-between;
+  }
+  .pop-card .pop-title {
+    font-weight: 500;
+    color: #fff;
+  }
+  .pop-card[data-pri="done"] .pop-title { text-decoration: line-through; color: rgba(255,255,255,.55); }
+  .popout-foot {
+    padding: 7px 12px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.03);
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: rgba(255,255,255,.5);
+    display: flex; justify-content: space-between;
+  }
+  .popout-foot .live {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: var(--accent);
+  }
+  .popout-foot .live::before {
+    content: "";
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Popout label callout */
+  .popout-callout {
+    position: fixed;
+    bottom: 200px; right: 360px;
+    background: var(--ink);
+    color: #fff;
+    padding: 7px 12px;
+    border-radius: var(--r-sm);
+    font-family: var(--mono);
+    font-size: 11px;
+    box-shadow: var(--shadow-md);
+    z-index: 99;
+    pointer-events: none;
+  }
+  .popout-callout::after {
+    content: "";
+    position: absolute;
+    right: -6px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0;
+    border: 6px solid transparent;
+    border-left-color: var(--ink);
+    border-right: 0;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div class="brand-name">Stickit</div>
+      <div class="brand-ver">v0.1</div>
+    </div>
+
+    <div class="nav-section">
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        今日 <span class="count">7</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        明日 <span class="count">3</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+        今後7日間 <span class="count">19</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+        カレンダー
+      </button>
+      <button class="nav-item active">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>
+        付箋ボード
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">// マイボード</div>
+      <button class="nav-item"><span class="nav-dot" style="background:#EF4444"></span>キャプテンカップ <span class="count">8</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#00C853"></span>支配人業務 <span class="count">12</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#F97316"></span>OTA戦略 <span class="count">5</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#3B82F6"></span>個人 <span class="count">9</span></button>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="avatar">NK</div>
+      <div class="avatar-meta">
+        <span class="avatar-name">中畑 慶治</span>
+        <span class="avatar-role">支配人</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+
+    <div class="toolbar">
+      <div class="toolbar-title">付箋ボード</div>
+      <div class="toolbar-meta"><span class="pulse"></span> 同期済 · 14:03 JST</div>
+      <div style="flex:1"></div>
+      <button class="btn btn-soft">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+        並び替え: 期限順
+      </button>
+      <button class="btn btn-accent" id="btn-pop">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M9 21H3v-6M21 9V3h-6M21 3l-7 7M3 21l7-7"/></svg>
+        ポップアウト
+      </button>
+      <button class="btn btn-primary">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        新規 <span class="kbd">N</span>
+      </button>
+    </div>
+
+    <!-- Board tabs -->
+    <div class="board-tabs">
+      <div class="board-tab active"><span class="dot" style="background:#EF4444"></span>キャプテンカップ<span class="count">8</span></div>
+      <div class="board-tab"><span class="dot" style="background:#00C853"></span>支配人業務<span class="count">12</span></div>
+      <div class="board-tab"><span class="dot" style="background:#F97316"></span>OTA戦略<span class="count">5</span></div>
+      <div class="board-tab"><span class="dot" style="background:#3B82F6"></span>個人<span class="count">9</span></div>
+      <div class="board-tab new">+ ボード追加</div>
+    </div>
+
+    <!-- Board body -->
+    <div class="board-body">
+
+      <div class="board-head">
+        <div>
+          <div class="board-head-title">
+            <span class="dot" style="background:#EF4444"></span>
+            キャプテンカップ
+          </div>
+          <div class="board-head-meta">8件 · 完了 1/8 · 残り期限 6日 // 本戦 5/15-16</div>
+        </div>
+      </div>
+
+      <div class="popout-hint">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M9 21H3v-6M21 9V3h-6M21 3l-7 7M3 21l7-7"/></svg>
+        ポップアウト → 小窓化 → OS で「常に手前」設定で、コックピット状態のHUD表示に
+      </div>
+
+      <div class="sticky-board">
+
+        <div class="sticky-tile" data-pri="high">
+          <div class="sticky-head"><span class="sticky-id">CC-001</span><span class="sticky-due crit">⚠ 残り 4h</span></div>
+          <div class="sticky-title">予選成績シートを最終確認 — タイ表示の検証</div>
+          <div class="sticky-subs">
+            <div class="sticky-sub done"><span class="mini-check done"></span><span>v6 実行</span></div>
+            <div class="sticky-sub"><span class="mini-check"></span><span>同スコア組のソート順を確認</span></div>
+            <div class="sticky-sub"><span class="mini-check"></span><span>印刷プレビュー</span></div>
+          </div>
+          <div class="sticky-progress"><div class="sticky-progress-fill" style="width:33%"></div></div>
+          <div class="sticky-foot">
+            <span class="sticky-tag tag-crit">#至急</span>
+            <span class="sticky-tag">v6</span>
+            <div class="sticky-meta-r">
+              <span class="pill">📎 1</span>
+              <span class="pill">P0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sticky-tile" data-pri="med">
+          <div class="sticky-head"><span class="sticky-id">CC-002</span><span class="sticky-due warn">明日</span></div>
+          <div class="sticky-title">参加者リスト印刷 (A4 × 80部)</div>
+          <div class="sticky-foot">
+            <span class="sticky-tag">#準備</span>
+            <div class="sticky-meta-r">
+              <span class="pill">P1</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sticky-tile" data-pri="high">
+          <div class="sticky-head"><span class="sticky-id">CC-003</span><span class="sticky-due">2日後 08:00</span></div>
+          <div class="sticky-title">受付テーブル設営 — 朝 8:00 集合 · 駐車場入口横</div>
+          <div class="sticky-subs">
+            <div class="sticky-sub"><span class="mini-check"></span><span>長机 4 × 看板 1</span></div>
+            <div class="sticky-sub"><span class="mini-check"></span><span>名簿バインダー</span></div>
+          </div>
+          <div class="sticky-foot">
+            <span class="sticky-tag">#当日</span>
+            <span class="sticky-tag">#会議</span>
+            <div class="sticky-meta-r">
+              <span class="pill">P0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sticky-tile">
+          <div class="sticky-head"><span class="sticky-id">CC-004</span><span class="sticky-due">2日後</span></div>
+          <div class="sticky-title">優勝カップ・賞品の最終確認</div>
+          <div class="sticky-foot">
+            <span class="sticky-tag">#準備</span>
+            <div class="sticky-meta-r">
+              <span class="pill">📎 2</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sticky-tile" data-pri="med">
+          <div class="sticky-head"><span class="sticky-id">CC-005</span><span class="sticky-due">3日後</span></div>
+          <div class="sticky-title">表彰式進行台本 — リハーサル</div>
+          <div class="sticky-subs">
+            <div class="sticky-sub"><span class="mini-check"></span><span>司会原稿</span></div>
+            <div class="sticky-sub"><span class="mini-check"></span><span>音響チェック</span></div>
+            <div class="sticky-sub"><span class="mini-check"></span><span>立ち位置確認</span></div>
+          </div>
+          <div class="sticky-foot">
+            <span class="sticky-tag">#本番</span>
+            <div class="sticky-meta-r">
+              <span class="pill">P1</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sticky-tile">
+          <div class="sticky-head"><span class="sticky-id">CC-006</span><span class="sticky-due">4日後</span></div>
+          <div class="sticky-title">スコア集計プログラム動作チェック</div>
+          <div class="sticky-foot">
+            <span class="sticky-tag">#技術</span>
+            <div class="sticky-meta-r">
+              <span class="pill">📎 1</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sticky-tile" data-pri="done">
+          <div class="sticky-head"><span class="sticky-id">CC-000</span><span class="sticky-due">完了 · 5/10</span></div>
+          <div class="sticky-title">参加申込フォーム公開</div>
+          <div class="sticky-foot">
+            <span class="sticky-tag">#完了</span>
+            <div class="sticky-meta-r">
+              <span class="pill">✓</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sticky-tile" data-pri="low">
+          <div class="sticky-head"><span class="sticky-id">CC-008</span><span class="sticky-due">6日後</span></div>
+          <div class="sticky-title">参加者へのお礼メール下書き</div>
+          <div class="sticky-foot">
+            <span class="sticky-tag">#事後</span>
+            <div class="sticky-meta-r">
+              <span class="pill">P2</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="add-card">
+          <div class="plus">+</div>
+          <div class="label">新しい付箋</div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== Popout window mockup (floating) ===== -->
+<div class="popout-callout">← OS で「常に手前」</div>
+<div class="popout">
+  <div class="popout-title">
+    <div class="popout-traffic"><span class="crit"></span><span class="warn"></span><span class="acc"></span></div>
+    <div class="popout-name">stickit · captain_cup</div>
+    <div class="popout-pin">📌 PINNED</div>
+  </div>
+  <div class="popout-body">
+    <div class="pop-card" data-pri="high">
+      <div class="pop-meta"><span>CC-001 · P0</span><span>残り 4h</span></div>
+      <div class="pop-title">予選成績シートを最終確認</div>
+    </div>
+    <div class="pop-card" data-pri="med">
+      <div class="pop-meta"><span>CC-002 · P1</span><span>明日</span></div>
+      <div class="pop-title">参加者リスト印刷</div>
+    </div>
+    <div class="pop-card" data-pri="high">
+      <div class="pop-meta"><span>CC-003 · P0</span><span>2日後</span></div>
+      <div class="pop-title">受付テーブル設営</div>
+    </div>
+    <div class="pop-card">
+      <div class="pop-meta"><span>CC-004</span><span>2日後</span></div>
+      <div class="pop-title">優勝カップ確認</div>
+    </div>
+    <div class="pop-card" data-pri="med">
+      <div class="pop-meta"><span>CC-005 · P1</span><span>3日後</span></div>
+      <div class="pop-title">表彰式進行台本リハ</div>
+    </div>
+    <div class="pop-card" data-pri="done">
+      <div class="pop-meta"><span>CC-000 ✓</span><span>—</span></div>
+      <div class="pop-title">参加申込フォーム公開</div>
+    </div>
+  </div>
+  <div class="popout-foot">
+    <span>320 × 480px · captain_cup</span>
+    <span class="live">live</span>
+  </div>
+</div>
+
+</body>
+</html>

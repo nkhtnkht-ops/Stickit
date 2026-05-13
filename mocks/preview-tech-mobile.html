@@ -1,0 +1,1220 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stickit — Mobile / PWA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700&family=IBM+Plex+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --bg-2: #F4F4F4;
+    --surface: #FFFFFF;
+    --surface-2: #F8F8F8;
+    --border: #E8E8E8;
+    --border-2: #EFEFEF;
+    --ink: #0A0A0A;
+    --ink-2: #404040;
+    --ink-3: #737373;
+    --ink-4: #A3A3A3;
+    --ink-5: #D4D4D4;
+    --accent: #00C853;
+    --accent-soft: #DCFCE7;
+    --accent-deep: #047857;
+    --crit: #EF4444;
+    --crit-soft: #FEE2E2;
+    --warn: #F97316;
+    --warn-soft: #FFEDD5;
+    --info: #3B82F6;
+    --info-soft: #DBEAFE;
+    --purple: #8B5CF6;
+    --purple-soft: #EDE9FE;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+    --shadow-lg: 0 12px 28px rgba(0,0,0,.16), 0 4px 10px rgba(0,0,0,.08);
+    --shadow-phone: 0 30px 60px -10px rgba(0,0,0,.30), 0 18px 32px -10px rgba(0,0,0,.18);
+    --r-sm: 6px;
+    --r: 10px;
+    --r-lg: 14px;
+    --sans: "Geist", "IBM Plex Sans JP", -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: "Geist Mono", "IBM Plex Sans JP", "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    background:
+      radial-gradient(ellipse at 50% 0%, #F0F4F8 0%, transparent 60%),
+      var(--bg);
+    color: var(--ink);
+    font-size: 13.5px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.005em;
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
+
+  .page-h {
+    max-width: 1700px;
+    margin: 0 auto 32px;
+    display: flex; align-items: baseline; gap: 14px;
+  }
+  .page-h h1 {
+    font-weight: 600;
+    font-size: 24px;
+    letter-spacing: -0.025em;
+    margin: 0;
+  }
+  .page-h .sub {
+    color: var(--ink-3);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .gallery {
+    max-width: 2100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 28px;
+  }
+
+  /* Phone frame */
+  .phone {
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+    background: #1A1A1A;
+    border-radius: 44px;
+    padding: 14px 12px;
+    box-shadow: var(--shadow-phone);
+    position: relative;
+  }
+  .phone::before {
+    content: "";
+    position: absolute;
+    top: 22px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 30px;
+    background: #0A0A0A;
+    border-radius: 18px;
+    z-index: 100;
+  }
+  .phone-screen {
+    background: var(--surface);
+    border-radius: 32px;
+    overflow: hidden;
+    height: 720px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+
+  .status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 28px 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--surface);
+    z-index: 10;
+  }
+  .status-bar .signals {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px;
+  }
+  .status-bar .signals svg { width: 13px; height: 13px; }
+
+  .phone-name {
+    text-align: center;
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .phone-name .num {
+    background: var(--ink);
+    color: var(--accent);
+    padding: 1px 7px;
+    border-radius: 999px;
+    margin-right: 6px;
+    font-weight: 700;
+  }
+
+  /* App bar */
+  .app-bar {
+    padding: 6px 18px 12px;
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-2);
+  }
+  .app-bar h1 {
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.025em;
+    margin: 0;
+    flex: 1;
+  }
+  .app-bar .meta {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .pulse-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+  }
+  .ic-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    color: var(--ink-2);
+    background: var(--bg-2);
+  }
+  .ic { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Content area */
+  .screen-body {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg);
+    padding-bottom: 92px;
+  }
+
+  /* Bottom tab bar */
+  .tab-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    padding: 8px 12px 24px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    z-index: 5;
+  }
+  .tab {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 6px 0;
+    color: var(--ink-4);
+    font-size: 10.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 80ms ease;
+  }
+  .tab .ic { width: 20px; height: 20px; stroke-width: 1.6; }
+  .tab.active { color: var(--ink); }
+  .tab.active .ic { color: var(--accent-deep); stroke-width: 2; }
+
+  /* Home indicator */
+  .home-indicator {
+    position: absolute;
+    bottom: 6px; left: 50%; transform: translateX(-50%);
+    width: 130px; height: 4px;
+    border-radius: 2px;
+    background: var(--ink);
+    opacity: .85;
+    z-index: 6;
+  }
+
+  /* FAB */
+  .fab {
+    position: absolute;
+    right: 18px;
+    bottom: 100px;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--accent);
+    display: grid; place-items: center;
+    box-shadow: 0 6px 16px rgba(0,0,0,.25), 0 0 0 4px rgba(0,200,83,.14);
+    z-index: 4;
+  }
+  .fab .ic { width: 22px; height: 22px; stroke-width: 2.2; color: #fff; }
+
+  /* ============ Today view ============ */
+  .group-h {
+    padding: 14px 18px 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .group-h .name {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-4);
+    font-weight: 600;
+  }
+  .group-h .count {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-4);
+    margin-left: auto;
+  }
+  .task-row {
+    display: grid;
+    grid-template-columns: 18px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-2);
+    position: relative;
+  }
+  .task-row::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 8px; bottom: 8px;
+    width: 2px;
+  }
+  .task-row[data-pri="high"]::before { background: var(--crit); }
+  .task-row[data-pri="med"]::before { background: var(--warn); }
+  .check {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--ink-5);
+    border-radius: 5px;
+  }
+  .check.done {
+    background: var(--accent);
+    border-color: var(--accent);
+    position: relative;
+  }
+  .check.done::after {
+    content: "";
+    position: absolute;
+    left: 4px; top: 5px;
+    width: 8px; height: 4px;
+    border-left: 1.6px solid #fff;
+    border-bottom: 1.6px solid #fff;
+    transform: rotate(-45deg);
+  }
+  .task-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .task-title { font-weight: 500; font-size: 14px; color: var(--ink); }
+  .task-row.done .task-title { color: var(--ink-4); text-decoration: line-through; }
+  .task-meta {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-4);
+    flex-wrap: wrap;
+  }
+  .proj-tint {
+    color: var(--ink-2);
+    background: var(--bg-2);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .proj-tint.p-mgmt { background: #DCEAF7; color: #1E40AF; }
+  .proj-tint.p-cc   { background: #FCE0E0; color: #991B1B; }
+  .proj-tint.p-ota  { background: #FCEACB; color: #92400E; }
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: var(--bg-2);
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .badge.crit { background: #FEE2E2; color: #991B1B; }
+
+  /* Today header card */
+  .today-hero {
+    background: var(--surface);
+    margin: 0 0 6px;
+    padding: 14px 18px 16px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .today-hero .date {
+    font-weight: 700;
+    font-size: 32px;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .today-hero .meta {
+    color: var(--ink-3);
+    font-size: 12px;
+  }
+  .today-hero .meta .sep { margin: 0 5px; color: var(--ink-5); }
+
+  /* ============ Calendar (mobile month) view ============ */
+  .m-cal-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 18px 10px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-2);
+  }
+  .m-cal-toolbar .label {
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+  .m-cal-toolbar .seg {
+    display: inline-flex;
+    background: var(--bg-2);
+    border-radius: var(--r-sm);
+    padding: 2px;
+  }
+  .m-cal-toolbar .seg button {
+    padding: 4px 10px;
+    border: none;
+    background: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-3);
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .m-cal-toolbar .seg button.active {
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-sm);
+  }
+  .m-cal-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 18px 6px;
+    background: var(--surface);
+  }
+  .m-cal-nav .arrow {
+    width: 26px; height: 26px;
+    display: grid; place-items: center;
+    color: var(--ink-2);
+    font-size: 14px;
+  }
+  .m-dows {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--surface);
+    padding: 4px 0 6px;
+  }
+  .m-dows div {
+    text-align: center;
+    font-size: 10.5px;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .m-dows div.sun { color: var(--crit); }
+  .m-dows div.sat { color: var(--info); }
+  .m-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--border-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .m-cell {
+    background: var(--surface);
+    min-height: 78px;
+    padding: 4px 3px;
+    display: flex; flex-direction: column;
+    gap: 2px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .m-cell.muted .m-num { color: var(--ink-4); opacity: .5; }
+  .m-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-2);
+    padding-left: 2px;
+    line-height: 1.2;
+  }
+  .m-cell:nth-child(7n+1) > .m-num { color: var(--crit); }
+  .m-cell:nth-child(7n) > .m-num { color: var(--info); }
+  .m-cell.today > .m-num {
+    background: var(--ink);
+    color: var(--accent);
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 0;
+    margin-bottom: 1px;
+  }
+  .m-cell.selected {
+    box-shadow: inset 0 0 0 1.5px var(--accent-deep);
+  }
+  /* Mini event pills (TickTick-mobile style) */
+  .m-ev {
+    font-size: 8.5px;
+    line-height: 1.25;
+    padding: 1px 4px;
+    border-radius: 2px;
+    background: var(--bg-2);
+    color: var(--ink-2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .m-ev.e-mgmt { background: #DCEAF7; color: #1E40AF; }
+  .m-ev.e-cc { background: #FCE0E0; color: #991B1B; }
+  .m-ev.e-ota { background: #FCEACB; color: #92400E; }
+  .m-ev.e-event { background: #EDE3FB; color: #5B21B6; }
+  .m-more {
+    font-size: 8.5px;
+    color: var(--ink-3);
+    padding: 0 4px;
+    font-family: var(--mono);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .m-more:hover { color: var(--ink); }
+
+  .m-day-banner {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 12px 18px 8px;
+    background: var(--bg);
+  }
+  .m-day-banner .d {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .m-day-banner .meta {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+  }
+  .m-day-banner .more {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--accent-deep);
+    font-weight: 600;
+  }
+
+  /* ============ Calendar (agenda) view ============ */
+  .agenda-day {
+    padding: 14px 18px 4px;
+    display: flex; align-items: baseline; gap: 10px;
+    background: var(--bg);
+  }
+  .agenda-day.today { background: linear-gradient(180deg, var(--accent-soft) 0%, transparent 100%); }
+  .agenda-day .num {
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .agenda-day.today .num { color: var(--accent-deep); }
+  .agenda-day.weekend .num { color: var(--info); }
+  .agenda-day.holiday .num { color: var(--crit); }
+  .agenda-day .dow {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .agenda-day .holiday-name {
+    margin-left: auto;
+    color: var(--crit);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .agenda-empty {
+    padding: 4px 18px 12px;
+    color: var(--ink-4);
+    font-size: 11.5px;
+    font-family: var(--mono);
+  }
+
+  /* ============ Sticky board mobile ============ */
+  .board-tabs-m {
+    display: flex; gap: 4px;
+    padding: 8px 14px 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-2);
+    overflow-x: auto;
+  }
+  .board-tab-m {
+    padding: 9px 12px 11px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-3);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    white-space: nowrap;
+  }
+  .board-tab-m.active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+  .sticky-list {
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .sticky-card-m {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 12px 13px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sticky-card-m::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+  }
+  .sticky-card-m[data-pri="high"]::before { background: var(--crit); }
+  .sticky-card-m[data-pri="med"]::before { background: var(--warn); }
+  .sticky-card-m[data-pri="done"] { opacity: .55; }
+  .sticky-card-m .head {
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
+  }
+  .sticky-card-m .title {
+    font-weight: 500;
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .sticky-card-m[data-pri="done"] .title { text-decoration: line-through; color: var(--ink-3); }
+  .sticky-card-m .foot {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-2);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-4);
+  }
+  .sticky-card-m .due { margin-left: auto; }
+
+  /* ============ Task detail (slide-up sheet) ============ */
+  .sheet-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.30);
+    z-index: 8;
+  }
+  .sheet {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-radius: 18px 18px 0 0;
+    padding: 8px 0 0;
+    z-index: 9;
+    max-height: 85%;
+    overflow-y: auto;
+    box-shadow: 0 -10px 30px rgba(0,0,0,.16);
+  }
+  .sheet-handle {
+    width: 36px; height: 4px;
+    background: var(--ink-5);
+    border-radius: 2px;
+    margin: 0 auto 10px;
+  }
+  .sheet-head {
+    padding: 0 18px 12px;
+    border-bottom: 1px solid var(--border-2);
+  }
+  .sheet-head .meta {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+  }
+  .chip.crit { background: var(--crit-soft); color: #991B1B; }
+  .chip.tag { background: var(--bg-2); color: var(--ink-2); }
+  .sheet-title {
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    line-height: 1.35;
+  }
+  .sheet-row {
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border-2);
+    font-size: 12.5px;
+  }
+  .sheet-row .lbl {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-4);
+  }
+  .sheet-row .val { color: var(--ink); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .sheet-section {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-2);
+  }
+  .sheet-section .lbl {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-4);
+    margin-bottom: 8px;
+  }
+  .sheet-memo {
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    border-radius: var(--r-sm);
+    padding: 10px 12px;
+    font-size: 12.5px;
+    color: var(--ink-2);
+    line-height: 1.6;
+  }
+  .sheet-memo code { font-family: var(--mono); background: var(--surface); padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+  .sub-row {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 0;
+    font-size: 12.5px;
+  }
+  .sub-row .check { width: 15px; height: 15px; border-radius: 4px; }
+  .sheet-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    padding: 14px 18px 24px;
+  }
+  .sheet-action {
+    background: var(--bg-2);
+    color: var(--ink-2);
+    padding: 11px 8px;
+    border-radius: var(--r-sm);
+    text-align: center;
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+  .sheet-action.primary { background: var(--ink); color: #fff; grid-column: span 2; }
+  .sheet-action .ic { width: 14px; height: 14px; margin-right: 5px; vertical-align: -2px; }
+
+</style>
+</head>
+<body>
+
+<div class="page-h">
+  <h1>Mobile / PWA</h1>
+  <span class="sub">// 380×780 · iOS インストール後の見え方</span>
+</div>
+
+<div class="gallery">
+
+  <!-- ===== 01: Today ===== -->
+  <div>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>14:03</span>
+          <span class="signals">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 17l4-4 4 4 4-4 4 4 4-4v8H2z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4a8 8 0 00-8 8 8 8 0 008 8 8 8 0 008-8 8 8 0 00-8-8z"/></svg>
+            <span style="font-family:var(--mono);font-size:11px">88%</span>
+          </span>
+        </div>
+
+        <div class="app-bar">
+          <h1>今日</h1>
+          <div class="meta"><span class="pulse-dot"></span> SYNCED</div>
+          <div class="ic-btn"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
+        </div>
+
+        <div class="screen-body">
+          <div class="today-hero">
+            <div class="date">13</div>
+            <div>
+              <div style="font-weight:600;font-size:14px">5月 水曜日</div>
+              <div class="meta">未完了 7件 <span class="sep">·</span> 2/9 完了 <span class="sep">·</span> 残り 3.5h</div>
+            </div>
+          </div>
+
+          <div class="group-h"><span class="name">/ 朝</span><span class="count">3件</span></div>
+          <div class="task-row done">
+            <div class="check done"></div>
+            <div class="task-body">
+              <div class="task-title">朝礼で本日の予約状況を共有</div>
+              <div class="task-meta"><span>08:30</span><span class="proj-tint p-mgmt">支配人業務</span></div>
+            </div>
+          </div>
+          <div class="task-row done">
+            <div class="check done"></div>
+            <div class="task-body">
+              <div class="task-title">芝コンディション確認</div>
+              <div class="task-meta"><span>09:00</span></div>
+            </div>
+          </div>
+          <div class="task-row" data-pri="high">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">CC 予選成績シート最終確認</div>
+              <div class="task-meta"><span>10:30</span><span class="proj-tint p-cc">CC</span><span>#至急</span></div>
+            </div>
+            <span class="badge crit">P0</span>
+          </div>
+
+          <div class="group-h"><span class="name">/ 午後</span><span class="count">3件</span></div>
+          <div class="task-row" data-pri="med">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">OTA戦略レビュー</div>
+              <div class="task-meta"><span>13:00</span><span class="proj-tint p-ota">OTA</span></div>
+            </div>
+            <span class="badge">P1</span>
+          </div>
+          <div class="task-row">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">来月のシフト表をTickTickに登録</div>
+              <div class="task-meta"><span>15:00</span></div>
+            </div>
+          </div>
+          <div class="task-row">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">スタッフ面談 (山田さん)</div>
+              <div class="task-meta"><span>16:00</span><span>#会議</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fab"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="tab-bar">
+          <div class="tab active"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>今日</div>
+          <div class="tab"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>カレンダー</div>
+          <div class="tab"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>付箋</div>
+          <div class="tab"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83"/></svg>設定</div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+    <div class="phone-name"><span class="num">01</span>今日</div>
+  </div>
+
+  <!-- ===== 02: Calendar (agenda) ===== -->
+  <div>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>14:03</span>
+          <span class="signals">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 17l4-4 4 4 4-4 4 4 4-4v8H2z"/></svg>
+            <span style="font-family:var(--mono);font-size:11px">88%</span>
+          </span>
+        </div>
+
+        <div class="app-bar">
+          <h1>カレンダー</h1>
+          <div class="meta">2026年 5月</div>
+          <div class="ic-btn"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18"/></svg></div>
+        </div>
+
+        <div class="screen-body">
+          <!-- May 13 today -->
+          <div class="agenda-day today">
+            <span class="num">13</span>
+            <div>
+              <div class="dow">水 · 今日</div>
+            </div>
+          </div>
+          <div class="task-row" data-pri="high">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">CC 予選成績シート最終確認</div>
+              <div class="task-meta"><span>10:30</span><span class="proj-tint p-cc">CC</span></div>
+            </div>
+          </div>
+          <div class="task-row" data-pri="med">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">OTA戦略レビュー</div>
+              <div class="task-meta"><span>13:00</span><span class="proj-tint p-ota">OTA</span></div>
+            </div>
+          </div>
+          <div class="task-row">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">スタッフ面談 (山田さん)</div>
+              <div class="task-meta"><span>16:00</span></div>
+            </div>
+          </div>
+
+          <!-- May 14 -->
+          <div class="agenda-day">
+            <span class="num">14</span>
+            <div><div class="dow">木</div></div>
+          </div>
+          <div class="task-row">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">朝礼</div>
+              <div class="task-meta"><span>08:30</span></div>
+            </div>
+          </div>
+          <div class="task-row">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">月次RM 分析提出</div>
+              <div class="task-meta"><span>11:00</span></div>
+            </div>
+          </div>
+
+          <!-- May 15 - 多日イベント開始 -->
+          <div class="agenda-day">
+            <span class="num">15</span>
+            <div><div class="dow">金</div></div>
+          </div>
+          <div class="task-row" data-pri="high">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">CC 本戦 1日目</div>
+              <div class="task-meta"><span>07:30 — 16:00</span><span class="proj-tint p-cc">CC</span></div>
+            </div>
+          </div>
+
+          <!-- May 16 weekend -->
+          <div class="agenda-day weekend">
+            <span class="num">16</span>
+            <div><div class="dow">土</div></div>
+          </div>
+          <div class="task-row" data-pri="high">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">CC 本戦 2日目</div>
+              <div class="task-meta"><span>08:00 — 12:30</span><span class="proj-tint p-cc">CC</span></div>
+            </div>
+          </div>
+
+          <!-- May 17 holiday -->
+          <div class="agenda-day holiday">
+            <span class="num">17</span>
+            <div><div class="dow">日</div></div>
+            <span class="holiday-name">休み</span>
+          </div>
+          <div class="agenda-empty">予定なし</div>
+
+          <!-- May 18 -->
+          <div class="agenda-day">
+            <span class="num">18</span>
+            <div><div class="dow">月</div></div>
+          </div>
+          <div class="task-row">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">朝礼</div>
+              <div class="task-meta"><span>08:30</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fab"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="tab-bar">
+          <div class="tab"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>今日</div>
+          <div class="tab active"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>カレンダー</div>
+          <div class="tab"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>付箋</div>
+          <div class="tab"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83"/></svg>設定</div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+    <div class="phone-name"><span class="num">02</span>カレンダー（アジェンダ）</div>
+  </div>
+
+  <!-- ===== 03: Sticky Board ===== -->
+  <div>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>14:03</span>
+          <span class="signals">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 17l4-4 4 4 4-4 4 4 4-4v8H2z"/></svg>
+            <span style="font-family:var(--mono);font-size:11px">88%</span>
+          </span>
+        </div>
+
+        <div class="app-bar">
+          <h1>付箋</h1>
+          <div class="ic-btn"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg></div>
+        </div>
+
+        <div class="board-tabs-m">
+          <div class="board-tab-m active">CC</div>
+          <div class="board-tab-m">支配人業務</div>
+          <div class="board-tab-m">OTA</div>
+          <div class="board-tab-m">個人</div>
+        </div>
+
+        <div class="screen-body">
+          <div class="sticky-list">
+
+            <div class="sticky-card-m" data-pri="high">
+              <div class="head"><span>CC-001</span><span style="color:var(--crit);font-weight:600">⚠ 残り 4h</span></div>
+              <div class="title">予選成績シート最終確認 — タイ表示の検証</div>
+              <div class="foot">
+                <span>#至急</span><span>v6</span>
+                <span class="due">5/13 12:00</span>
+              </div>
+            </div>
+
+            <div class="sticky-card-m" data-pri="med">
+              <div class="head"><span>CC-002</span><span style="color:var(--warn);font-weight:600">明日</span></div>
+              <div class="title">参加者リスト印刷 (A4 × 80部)</div>
+              <div class="foot">
+                <span>#準備</span>
+                <span class="due">5/14</span>
+              </div>
+            </div>
+
+            <div class="sticky-card-m" data-pri="high">
+              <div class="head"><span>CC-003</span><span>2日後 08:00</span></div>
+              <div class="title">受付テーブル設営 — 朝 8:00 集合</div>
+              <div class="foot">
+                <span>#当日</span>
+                <span class="due">5/15</span>
+              </div>
+            </div>
+
+            <div class="sticky-card-m">
+              <div class="head"><span>CC-004</span><span>2日後</span></div>
+              <div class="title">優勝カップ・賞品の最終確認</div>
+              <div class="foot">
+                <span>#準備</span>
+                <span class="due">5/15</span>
+              </div>
+            </div>
+
+            <div class="sticky-card-m" data-pri="done">
+              <div class="head"><span>CC-000</span><span>完了</span></div>
+              <div class="title">参加申込フォーム公開</div>
+              <div class="foot">
+                <span>#完了</span>
+                <span class="due">5/10</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="fab"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="tab-bar">
+          <div class="tab"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>今日</div>
+          <div class="tab"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>カレンダー</div>
+          <div class="tab active"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>付箋</div>
+          <div class="tab"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83"/></svg>設定</div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+    <div class="phone-name"><span class="num">03</span>付箋ボード</div>
+  </div>
+
+  <!-- ===== 05: Calendar (Month grid) ===== -->
+  <div>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>14:03</span>
+          <span class="signals">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 17l4-4 4 4 4-4 4 4 4-4v8H2z"/></svg>
+            <span style="font-family:var(--mono);font-size:11px">88%</span>
+          </span>
+        </div>
+
+        <div class="m-cal-toolbar">
+          <span class="label">2026年 5月</span>
+          <div class="seg">
+            <button class="active">月</button>
+            <button>予定</button>
+          </div>
+        </div>
+
+        <div class="m-cal-nav">
+          <span class="arrow">‹</span>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">// W17 — W22</span>
+          <span class="arrow">›</span>
+        </div>
+
+        <div class="m-dows">
+          <div class="sun">日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div class="sat">土</div>
+        </div>
+
+        <div class="m-grid">
+          <!-- Week 1 -->
+          <div class="m-cell muted"><span class="m-num">26</span></div>
+          <div class="m-cell muted"><span class="m-num">27</span></div>
+          <div class="m-cell muted"><span class="m-num">28</span></div>
+          <div class="m-cell muted"><span class="m-num">29</span></div>
+          <div class="m-cell muted"><span class="m-num">30</span></div>
+          <div class="m-cell"><span class="m-num">1</span><div class="m-ev e-mgmt">朝礼</div></div>
+          <div class="m-cell"><span class="m-num">2</span></div>
+
+          <!-- Week 2 -->
+          <div class="m-cell"><span class="m-num">3</span></div>
+          <div class="m-cell"><span class="m-num">4</span><div class="m-ev e-ota">OTA mtg</div></div>
+          <div class="m-cell"><span class="m-num">5</span><div class="m-ev e-cc">CC 準備</div></div>
+          <div class="m-cell"><span class="m-num">6</span></div>
+          <div class="m-cell"><span class="m-num">7</span><div class="m-ev e-mgmt">朝礼</div><div class="m-ev e-mgmt">面談</div></div>
+          <div class="m-cell"><span class="m-num">8</span></div>
+          <div class="m-cell"><span class="m-num">9</span><div class="m-ev e-ota">RM 分析</div></div>
+
+          <!-- Week 3 -->
+          <div class="m-cell"><span class="m-num">10</span></div>
+          <div class="m-cell"><span class="m-num">11</span><div class="m-ev e-mgmt">朝礼</div><div class="m-ev e-mgmt">支配人会議</div></div>
+          <div class="m-cell"><span class="m-num">12</span><div class="m-ev e-cc">予選成績</div><div class="m-ev e-ota">OTA</div></div>
+          <div class="m-cell today selected">
+            <span class="m-num">13</span>
+            <div class="m-ev e-cc">CC 予選</div>
+            <div class="m-ev e-ota">OTA 戦略</div>
+            <div class="m-more">+5件</div>
+          </div>
+          <div class="m-cell"><span class="m-num">14</span><div class="m-ev e-mgmt">朝礼</div><div class="m-ev e-ota">RM 提出</div></div>
+          <div class="m-cell"><span class="m-num">15</span><div class="m-ev e-cc">CC 本戦1</div></div>
+          <div class="m-cell"><span class="m-num">16</span><div class="m-ev e-cc">CC 本戦2</div></div>
+
+          <!-- Week 4 -->
+          <div class="m-cell"><span class="m-num">17</span></div>
+          <div class="m-cell"><span class="m-num">18</span><div class="m-ev e-mgmt">朝礼</div></div>
+          <div class="m-cell"><span class="m-num">19</span><div class="m-ev e-event">CC 振返</div></div>
+          <div class="m-cell"><span class="m-num">20</span><div class="m-ev e-ota">支配人会議</div></div>
+          <div class="m-cell"><span class="m-num">21</span><div class="m-ev e-mgmt">朝礼</div></div>
+          <div class="m-cell"><span class="m-num">22</span></div>
+          <div class="m-cell"><span class="m-num">23</span></div>
+
+          <!-- Week 5 -->
+          <div class="m-cell"><span class="m-num">24</span></div>
+          <div class="m-cell"><span class="m-num">25</span><div class="m-ev e-mgmt">朝礼</div></div>
+          <div class="m-cell"><span class="m-num">26</span></div>
+          <div class="m-cell"><span class="m-num">27</span></div>
+          <div class="m-cell"><span class="m-num">28</span><div class="m-ev e-mgmt">朝礼</div><div class="m-ev e-mgmt">面談</div></div>
+          <div class="m-cell"><span class="m-num">29</span></div>
+          <div class="m-cell"><span class="m-num">30</span><div class="m-ev e-ota">月末締め</div></div>
+        </div>
+
+        <div class="fab"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="tab-bar">
+          <div class="tab"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>今日</div>
+          <div class="tab active"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>カレンダー</div>
+          <div class="tab"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>付箋</div>
+          <div class="tab"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83"/></svg>設定</div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+    <div class="phone-name"><span class="num">05</span>カレンダー（月表示）</div>
+  </div>
+
+  <!-- ===== 04: Task Detail (slide-up sheet) ===== -->
+  <div>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="status-bar">
+          <span>14:03</span>
+          <span class="signals">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 17l4-4 4 4 4-4 4 4 4-4v8H2z"/></svg>
+            <span style="font-family:var(--mono);font-size:11px">88%</span>
+          </span>
+        </div>
+
+        <!-- Faded background view (today list) -->
+        <div class="app-bar" style="opacity:.45">
+          <h1>今日</h1>
+        </div>
+        <div class="screen-body" style="opacity:.45;pointer-events:none">
+          <div class="today-hero">
+            <div class="date">13</div>
+            <div>
+              <div style="font-weight:600;font-size:14px">5月 水曜日</div>
+              <div class="meta">未完了 7件</div>
+            </div>
+          </div>
+          <div class="task-row" data-pri="high">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">CC 予選成績シート最終確認</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backdrop + slide-up sheet -->
+        <div class="sheet-backdrop"></div>
+        <div class="sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-head">
+            <div class="meta">
+              <span class="chip"><svg class="ic" viewBox="0 0 24 24" style="width:12px;height:12px"><rect x="3" y="4" width="18" height="17" rx="2"/></svg>5/13, 今日 10:30</span>
+              <span class="chip crit">P0 · 高</span>
+            </div>
+            <div class="sheet-title">CC 予選成績シート最終確認 — タイ表示の検証</div>
+          </div>
+
+          <div class="sheet-row">
+            <span class="lbl">プロジェクト</span>
+            <span class="val"><span class="proj-tint p-cc">キャプテンカップ</span></span>
+          </div>
+          <div class="sheet-row">
+            <span class="lbl">タグ</span>
+            <span class="val"><span class="chip tag">#至急</span><span class="chip tag">#会議</span></span>
+          </div>
+          <div class="sheet-row">
+            <span class="lbl">リマインダー</span>
+            <span class="val"><span class="chip">→ 30分前</span></span>
+          </div>
+
+          <div class="sheet-section">
+            <span class="lbl">メモ</span>
+            <div class="sheet-memo">v6スクリプトで生成した予選成績シートを <code>build_sorted_sheet_v6.py</code> 出力と照合。同スコア組のソート順を重点確認。</div>
+          </div>
+
+          <div class="sheet-section">
+            <span class="lbl">サブタスク (1/3)</span>
+            <div class="sub-row"><div class="check done"></div><span style="text-decoration:line-through;color:var(--ink-4)">v6を実行して新シート生成</span></div>
+            <div class="sub-row"><div class="check"></div><span>同スコア組のソート順を目視確認</span></div>
+            <div class="sub-row"><div class="check"></div><span>印刷プレビューで A4 横向き</span></div>
+          </div>
+
+          <div class="sheet-actions">
+            <div class="sheet-action primary"><svg class="ic" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>完了にする</div>
+            <div class="sheet-action"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>付箋化</div>
+          </div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+    <div class="phone-name"><span class="num">04</span>タスク詳細（ボトムシート）</div>
+  </div>
+
+</div>
+
+</body>
+</html>

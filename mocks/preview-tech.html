@@ -1,0 +1,1247 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stickit — Tech Direction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500;600;700&family=IBM+Plex+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --bg-2: #F4F4F4;
+    --surface: #FFFFFF;
+    --surface-2: #F8F8F8;
+    --border: #E8E8E8;
+    --border-2: #EFEFEF;
+    --ink: #0A0A0A;
+    --ink-2: #404040;
+    --ink-3: #737373;
+    --ink-4: #A3A3A3;
+    --ink-5: #D4D4D4;
+    --accent: #00C853;
+    --accent-soft: #DCFCE7;
+    --accent-deep: #047857;
+    --warn: #F97316;
+    --crit: #EF4444;
+    --info: #3B82F6;
+    --grad: linear-gradient(135deg, #00C853 0%, #00A152 100%);
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03);
+    --shadow-lg: 0 24px 48px -12px rgba(0,0,0,.18);
+    --r-sm: 6px;
+    --r: 10px;
+    --r-lg: 14px;
+    --sans: "Geist", "IBM Plex Sans JP", -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: "Geist Mono", "IBM Plex Sans JP", "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 13.5px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.005em;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input { font-family: inherit; color: inherit; }
+
+  /* ---------- App Frame ---------- */
+  .app { display: grid; grid-template-columns: 240px 1fr; height: 100vh; }
+  .app[data-detail="open"] { grid-template-columns: 240px 1fr 380px; }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 14px 10px;
+    display: flex; flex-direction: column;
+    gap: 18px;
+    overflow-y: auto;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 10px 4px;
+  }
+  .brand-mark {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    background: var(--ink);
+    color: var(--accent);
+    display: grid; place-items: center;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 13px;
+    position: relative;
+  }
+  .brand-mark::after {
+    content: "";
+    position: absolute;
+    bottom: -2px; right: -2px;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: 2px solid var(--surface);
+  }
+  .brand-name {
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+  }
+  .brand-ver {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-4);
+    background: var(--bg-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .search {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px;
+    background: var(--bg-2);
+    border-radius: var(--r-sm);
+    border: 1px solid transparent;
+    color: var(--ink-3);
+    font-size: 12.5px;
+    margin: 0 4px;
+    transition: all 100ms ease;
+  }
+  .search:hover { border-color: var(--border); }
+  .search .kbd {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-4);
+    background: var(--surface);
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  .nav-section { display: flex; flex-direction: column; gap: 1px; padding: 0 4px; }
+  .nav-label {
+    text-transform: uppercase;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-4);
+    font-weight: 500;
+    padding: 8px 8px 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 6px 8px;
+    border-radius: var(--r-sm);
+    color: var(--ink-2);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 80ms ease, color 80ms ease;
+    width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--bg-2); color: var(--ink); }
+  .nav-item.active {
+    background: var(--ink);
+    color: #fff;
+  }
+  .nav-item.active .count { color: rgba(255,255,255,.55); }
+  .nav-item .icon { width: 14px; height: 14px; flex-shrink: 0; }
+  .nav-item .count {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-4);
+    font-weight: 500;
+  }
+  .nav-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  .sidebar-foot {
+    margin-top: auto;
+    padding: 12px 8px 4px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--grad);
+    color: #fff;
+    display: grid; place-items: center;
+    font-weight: 600;
+    font-size: 11px;
+    font-family: var(--mono);
+  }
+  .avatar-meta { display: flex; flex-direction: column; line-height: 1.2; }
+  .avatar-name { font-weight: 600; font-size: 12.5px; }
+  .avatar-role { font-size: 10.5px; color: var(--ink-4); font-family: var(--mono); }
+
+  /* ---------- Main ---------- */
+  .main { overflow-y: auto; padding: 32px 48px 60px; max-width: 100%; }
+  .topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 24px; }
+  .page-meta { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-bottom: 8px; }
+  .page-meta .pulse {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); position: relative;
+  }
+  .page-meta .pulse::after {
+    content: ""; position: absolute; inset: -3px;
+    border-radius: 50%;
+    background: var(--accent); opacity: .3;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: .3; }
+    50% { transform: scale(1.6); opacity: 0; }
+  }
+  .page-title {
+    font-weight: 600;
+    font-size: 30px;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+  .page-sub {
+    color: var(--ink-3);
+    font-size: 13px;
+    margin-top: 6px;
+    font-family: var(--mono);
+  }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px;
+    border-radius: var(--r-sm);
+    font-weight: 500;
+    font-size: 12.5px;
+    transition: all 80ms ease;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #000; }
+  .btn-primary .kbd {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(255,255,255,.5);
+    background: rgba(255,255,255,.1);
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+  .btn-soft {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--ink-2);
+  }
+  .btn-soft:hover { border-color: var(--ink-5); }
+
+  /* ---------- View Switcher (segmented) ---------- */
+  .seg {
+    display: inline-flex; gap: 0;
+    background: var(--bg-2);
+    border-radius: var(--r-sm);
+    padding: 3px;
+    border: 1px solid var(--border-2);
+  }
+  .seg button {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-3);
+    border-radius: 5px;
+    font-family: var(--mono);
+  }
+  .seg button.active {
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-xs);
+  }
+
+  /* ---------- Stats Strip ---------- */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; max-width: 800px; }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 12px 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-label { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-value { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-top: 4px; font-feature-settings: "tnum"; }
+  .stat-delta { font-family: var(--mono); font-size: 10.5px; color: var(--accent-deep); margin-top: 2px; }
+  .stat-delta.warn { color: var(--warn); }
+
+  /* ---------- Today list ---------- */
+  .group { margin-bottom: 24px; max-width: 800px; }
+  .group-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0 10px;
+    border-bottom: 1px solid var(--border-2);
+    margin-bottom: 4px;
+  }
+  .group-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+  .group-line { flex: 1; }
+  .group-meta { font-family: var(--mono); font-size: 11px; color: var(--ink-4); }
+
+  .task {
+    display: grid;
+    grid-template-columns: 18px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: var(--r-sm);
+    border: 1px solid transparent;
+    transition: all 80ms ease;
+    cursor: pointer;
+    position: relative;
+  }
+  .task:hover { background: var(--surface); border-color: var(--border); }
+  .task::before {
+    content: "";
+    position: absolute; left: 0; top: 8px; bottom: 8px;
+    width: 2px;
+    border-radius: 2px;
+    background: transparent;
+  }
+  .task[data-pri="high"]::before { background: var(--crit); }
+  .task[data-pri="med"]::before { background: var(--warn); }
+  .task[data-pri="low"]::before { background: var(--info); }
+  .task.done .task-title { color: var(--ink-4); text-decoration: line-through; text-decoration-thickness: 1px; }
+
+  .check {
+    width: 17px; height: 17px;
+    border: 1.4px solid var(--ink-5);
+    border-radius: 5px;
+    background: var(--surface);
+    display: grid; place-items: center;
+    transition: all 120ms ease;
+  }
+  .check:hover { border-color: var(--accent); }
+  .task.done .check { background: var(--accent); border-color: var(--accent); }
+  .task.done .check::after {
+    content: "";
+    width: 8px; height: 4px;
+    border-left: 1.6px solid #fff;
+    border-bottom: 1.6px solid #fff;
+    transform: rotate(-45deg) translate(1px, -1px);
+  }
+
+  .task-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .task-title { font-weight: 500; font-size: 13.5px; color: var(--ink); line-height: 1.4; }
+  .task-meta {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-4);
+  }
+  .task-meta .sep { color: var(--ink-5); }
+  .task-meta .proj {
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+  .task-meta .proj-dot { width: 6px; height: 6px; border-radius: 2px; display: inline-block; margin-right: 5px; vertical-align: middle; }
+  .task-meta .tag { color: var(--accent-deep); }
+  .task-side { display: flex; gap: 6px; align-items: center; }
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--bg-2);
+    color: var(--ink-3);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .badge.crit { background: #FEE2E2; color: #991B1B; }
+
+  .quick-add {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 12px;
+    color: var(--ink-3);
+    font-size: 12.5px;
+    font-family: var(--mono);
+    cursor: text;
+    border: 1px dashed var(--border);
+    border-radius: var(--r-sm);
+    margin-top: 8px;
+    transition: all 80ms ease;
+  }
+  .quick-add:hover { border-color: var(--accent); color: var(--accent-deep); }
+  .quick-add .kbd-c {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-4);
+    background: var(--bg-2);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ---------- Sticky board (tech: cards-as-tiles, no rotation) ---------- */
+  .sticky-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .sticky-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 14px 12px;
+    display: flex; flex-direction: column; gap: 12px;
+    cursor: pointer;
+    transition: all 100ms ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 140px;
+  }
+  .sticky-tile:hover {
+    border-color: var(--ink-5);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+  .sticky-tile::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+  .sticky-tile[data-pri="high"]::before { background: var(--crit); }
+  .sticky-tile[data-pri="med"]::before { background: var(--warn); }
+  .sticky-tile[data-pri="low"]::before { background: var(--info); }
+  .sticky-head {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .sticky-id { color: var(--ink-4); }
+  .sticky-title {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--ink);
+    flex: 1;
+  }
+  .sticky-foot {
+    display: flex; align-items: center; gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-2);
+  }
+  .sticky-tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+  }
+  .sticky-due {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+  }
+
+  /* ---------- Detail panel ---------- */
+  .detail {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 28px 24px;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .detail-head { display: flex; justify-content: space-between; gap: 12px; }
+  .detail-id {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-4);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .detail-close {
+    width: 26px; height: 26px;
+    border-radius: var(--r-sm);
+    color: var(--ink-3);
+    display: grid; place-items: center;
+    font-size: 14px;
+    border: 1px solid var(--border);
+  }
+  .detail-close:hover { background: var(--bg-2); color: var(--ink); }
+  .detail-title-input {
+    border: none; background: none; outline: none;
+    font-weight: 600;
+    font-size: 19px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    width: 100%;
+    padding: 0;
+    line-height: 1.3;
+  }
+  .detail-row {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-2);
+    font-size: 12.5px;
+  }
+  .detail-row .label {
+    color: var(--ink-4);
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 10px;
+  }
+  .detail-row .value { color: var(--ink); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--bg-2);
+    border: 1px solid var(--border-2);
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--ink-2);
+    font-family: var(--mono);
+  }
+  .chip.crit { background: #FEE2E2; border-color: #FCA5A5; color: #991B1B; }
+  .chip.accent { background: var(--accent-soft); border-color: #86EFAC; color: var(--accent-deep); }
+  .chip-dot { width: 6px; height: 6px; border-radius: 2px; }
+
+  .memo {
+    background: var(--bg-2);
+    border-radius: var(--r-sm);
+    padding: 12px;
+    font-size: 12.5px;
+    color: var(--ink-2);
+    line-height: 1.6;
+    border: 1px solid var(--border-2);
+    font-family: var(--sans);
+  }
+  .memo code { font-family: var(--mono); background: var(--surface); padding: 1px 5px; border-radius: 3px; font-size: 11.5px; }
+
+  .subtask { display: flex; align-items: center; gap: 9px; padding: 5px 0; font-size: 12.5px; }
+  .subtask .check { width: 14px; height: 14px; border-radius: 4px; }
+
+  .attach {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-2);
+    border-radius: var(--r-sm);
+    font-size: 11.5px;
+    color: var(--ink-2);
+    font-family: var(--mono);
+  }
+  .attach-icon {
+    width: 26px; height: 26px;
+    border-radius: 4px;
+    background: var(--ink);
+    color: var(--accent);
+    display: grid; place-items: center;
+    font-size: 9px;
+    font-weight: 600;
+  }
+
+  /* ---------- Calendar (tech: dense grid, mono numbers) ---------- */
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .cal-month { font-weight: 600; font-size: 22px; letter-spacing: -0.02em; font-family: var(--mono); }
+  .cal-month em { font-style: normal; color: var(--ink-4); font-weight: 400; margin-left: 8px; }
+  .cal-nav { display: flex; gap: 4px; }
+  .cal-nav button {
+    width: 28px; height: 28px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-2);
+    display: grid; place-items: center;
+    font-size: 13px;
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+    background: var(--border-2);
+    gap: 1px;
+  }
+  .cal-dow {
+    background: var(--surface-2);
+    padding: 8px 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--ink-4);
+    text-transform: uppercase;
+  }
+  .cal-cell {
+    background: var(--surface);
+    min-height: 100px;
+    padding: 7px 9px;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .cal-cell.muted { background: var(--bg); color: var(--ink-4); }
+  .cal-cell.today { background: var(--accent-soft); }
+  .cal-day {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+  .cal-cell.today .cal-day { color: var(--accent-deep); font-weight: 700; }
+  .cal-cell.muted .cal-day { color: var(--ink-4); }
+  .cal-event {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border-left: 2px solid;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ev-acc { border-color: var(--accent); }
+  .ev-warn { border-color: var(--warn); background: #FFF7ED; color: #9A3412; }
+  .ev-info { border-color: var(--info); background: #EFF6FF; color: #1E40AF; }
+  .ev-crit { border-color: var(--crit); background: #FEF2F2; color: #991B1B; }
+
+  /* ---------- Login ---------- */
+  .login-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: grid; place-items: center;
+    z-index: 100;
+    overflow: hidden;
+  }
+  .login-screen::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 0%, var(--accent-soft) 0%, transparent 40%),
+      radial-gradient(circle at 80% 100%, #DBEAFE 0%, transparent 40%);
+    pointer-events: none;
+  }
+  .login-screen::after {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border-2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border-2) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-position: -1px -1px;
+    mask-image: radial-gradient(circle at 50% 50%, #000 20%, transparent 70%);
+    opacity: .5;
+    pointer-events: none;
+  }
+  .login-card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: 32px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    z-index: 1;
+  }
+  .login-brand { display: flex; align-items: center; gap: 9px; margin-bottom: 22px; }
+  .login-h {
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    margin: 0 0 6px;
+  }
+  .login-sub { color: var(--ink-3); font-size: 13px; margin: 0 0 22px; }
+  .field-label {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+  .field-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    font-size: 13px;
+    background: var(--surface);
+    transition: all 100ms ease;
+  }
+  .field-input:focus {
+    outline: none;
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+  }
+  .login-btn {
+    width: 100%;
+    padding: 11px;
+    background: var(--ink);
+    color: #fff;
+    border-radius: var(--r-sm);
+    font-weight: 500;
+    font-size: 13px;
+    margin-top: 16px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 100ms ease;
+  }
+  .login-btn:hover { background: #000; }
+  .login-btn .arrow { font-family: var(--mono); }
+  .login-foot {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    color: var(--ink-4);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    margin-top: 18px;
+  }
+  .login-foot .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  /* ---------- Mock Switcher ---------- */
+  .mock-switcher {
+    position: fixed; bottom: 16px; right: 16px;
+    background: var(--ink);
+    border-radius: 999px;
+    padding: 4px;
+    display: flex; gap: 2px;
+    z-index: 200;
+    box-shadow: var(--shadow-lg);
+  }
+  .mock-switcher button {
+    color: rgba(255,255,255,.6);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 500;
+    font-family: var(--mono);
+  }
+  .mock-switcher button.active { background: var(--accent); color: var(--ink); }
+  .mock-switcher button:hover:not(.active) { color: #fff; }
+  .hidden { display: none !important; }
+
+  .ic { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div class="login-screen" id="screen-login">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark">S</div>
+      <div class="brand-name">Stickit</div>
+      <div class="brand-ver">v0.1</div>
+    </div>
+    <h1 class="login-h">サインイン</h1>
+    <p class="login-sub">パスワード不要。ご登録メールにマジックリンクをお送りします。</p>
+    <label class="field-label">→ メールアドレス</label>
+    <input class="field-input" type="email" placeholder="you@example.com" value="nkhtnkht@gmail.com" />
+    <button class="login-btn">マジックリンクを送る <span class="arrow">→</span></button>
+    <div class="login-foot"><span class="pulse-dot"></span> 稼働中</div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app hidden" id="screen-app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div class="brand-name">Stickit</div>
+      <div class="brand-ver">v0.1</div>
+    </div>
+
+    <div class="search">
+      <svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <span>タスクを検索...</span>
+      <span class="kbd">⌘K</span>
+    </div>
+
+    <div class="nav-section">
+      <button class="nav-item active">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        今日 <span class="count">7</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        明日 <span class="count">3</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+        今後7日間 <span class="count">19</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/></svg>
+        すべて <span class="count">42</span>
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">// プロジェクト</div>
+      <button class="nav-item"><span class="nav-dot" style="background:#00C853"></span>支配人業務 <span class="count">12</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#EF4444"></span>キャプテンカップ <span class="count">8</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#F97316"></span>OTA戦略 <span class="count">5</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#3B82F6"></span>個人 <span class="count">9</span></button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">// タグ</div>
+      <button class="nav-item"><span style="font-family:var(--mono);color:var(--ink-4)">#</span>至急</button>
+      <button class="nav-item"><span style="font-family:var(--mono);color:var(--ink-4)">#</span>会議</button>
+      <button class="nav-item"><span style="font-family:var(--mono);color:var(--ink-4)">#</span>待ち</button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">// ツール</div>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 001 1h4M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/></svg>
+        シフト取込
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        TickTick 移行
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33"/></svg>
+        設定
+      </button>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="avatar">NK</div>
+      <div class="avatar-meta">
+        <span class="avatar-name">中畑 慶治</span>
+        <span class="avatar-role">支配人</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- TODAY -->
+  <main class="main" id="view-today">
+    <div class="topbar">
+      <div>
+        <div class="page-meta"><span class="pulse"></span> 同期済 · 2026-05-13 14:03 JST</div>
+        <h1 class="page-title">今日</h1>
+        <div class="page-sub">水曜日 · 未完了 7件 · 2/9 完了 · 残り約 3.5h</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="seg">
+          <button class="active" onclick="switchView('today')">リスト</button>
+          <button onclick="switchView('calendar')">月</button>
+          <button onclick="switchView('sticky')">付箋</button>
+        </div>
+        <button class="btn btn-soft">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+          絞り込み
+        </button>
+        <button class="btn btn-primary">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          新規 <span class="kbd">N</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">未完了</div>
+        <div class="stat-value">7</div>
+        <div class="stat-delta">昨日比 −2</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">本日完了</div>
+        <div class="stat-value">2</div>
+        <div class="stat-delta">進捗 22%</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">優先度 高</div>
+        <div class="stat-value">1</div>
+        <div class="stat-delta warn">⚠ 残り 4h</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">連続達成</div>
+        <div class="stat-value">12</div>
+        <div class="stat-delta">日</div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head">
+        <span class="group-name">/ 朝</span>
+        <span class="group-line"></span>
+        <span class="group-meta">3件</span>
+      </div>
+
+      <div class="task done" onclick="toggleDetail()">
+        <div class="check"></div>
+        <div class="task-body">
+          <div class="task-title">朝礼で本日の予約状況を共有</div>
+          <div class="task-meta">
+            <span>08:30</span>
+            <span class="sep">·</span>
+            <span class="proj"><span class="proj-dot" style="background:#00C853"></span>支配人業務</span>
+            <span class="sep">·</span>
+            <span class="tag">#会議</span>
+          </div>
+        </div>
+        <div class="task-side"></div>
+      </div>
+
+      <div class="task done">
+        <div class="check"></div>
+        <div class="task-body">
+          <div class="task-title">芝コンディション確認 (グリーン #3, #7)</div>
+          <div class="task-meta">
+            <span>09:00</span>
+            <span class="sep">·</span>
+            <span class="proj"><span class="proj-dot" style="background:#00C853"></span>支配人業務</span>
+          </div>
+        </div>
+        <div class="task-side"></div>
+      </div>
+
+      <div class="task" data-pri="high" onclick="toggleDetail()">
+        <div class="check"></div>
+        <div class="task-body">
+          <div class="task-title">キャプテンカップ予選成績シートを最終確認</div>
+          <div class="task-meta">
+            <span>10:30</span>
+            <span class="sep">·</span>
+            <span class="proj"><span class="proj-dot" style="background:#EF4444"></span>キャプテンカップ</span>
+            <span class="sep">·</span>
+            <span class="tag">#至急</span>
+          </div>
+        </div>
+        <div class="task-side"><span class="badge crit">P0</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head">
+        <span class="group-name">/ 午後</span>
+        <span class="group-line"></span>
+        <span class="group-meta">3件</span>
+      </div>
+
+      <div class="task" data-pri="med">
+        <div class="check"></div>
+        <div class="task-body">
+          <div class="task-title">OTA戦略レビュー — 自社WEB誘導の数値確認</div>
+          <div class="task-meta">
+            <span>13:00</span>
+            <span class="sep">·</span>
+            <span class="proj"><span class="proj-dot" style="background:#F97316"></span>OTA戦略</span>
+          </div>
+        </div>
+        <div class="task-side"><span class="badge">P1</span></div>
+      </div>
+
+      <div class="task">
+        <div class="check"></div>
+        <div class="task-body">
+          <div class="task-title">来月のシフト表をTickTickに登録</div>
+          <div class="task-meta">
+            <span>15:00</span>
+            <span class="sep">·</span>
+            <span class="proj"><span class="proj-dot" style="background:#00C853"></span>支配人業務</span>
+          </div>
+        </div>
+        <div class="task-side"></div>
+      </div>
+
+      <div class="task" data-pri="low">
+        <div class="check"></div>
+        <div class="task-body">
+          <div class="task-title">スタッフ面談 (山田さん)</div>
+          <div class="task-meta">
+            <span>16:00</span>
+            <span class="sep">·</span>
+            <span class="tag">#会議</span>
+          </div>
+        </div>
+        <div class="task-side"><span class="badge">P2</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-head">
+        <span class="group-name">/ 夜</span>
+        <span class="group-line"></span>
+        <span class="group-meta">1件</span>
+      </div>
+
+      <div class="task">
+        <div class="check"></div>
+        <div class="task-body">
+          <div class="task-title">月次RM分析の前準備 — 売上CSVをダウンロード</div>
+          <div class="task-meta">
+            <span>—</span>
+            <span class="sep">·</span>
+            <span class="tag">#待ち</span>
+          </div>
+        </div>
+        <div class="task-side"></div>
+      </div>
+
+      <div class="quick-add">
+        <span style="color:var(--ink-4)">$</span>
+        <span>タスクを追加...</span>
+        <span class="kbd-c">N</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- CALENDAR -->
+  <main class="main hidden" id="view-calendar">
+    <div class="topbar">
+      <div>
+        <div class="page-meta"><span class="pulse"></span> 同期済 · 月表示</div>
+        <h1 class="page-title">カレンダー</h1>
+        <div class="page-sub">2026-05 · ドラッグで日付を変更</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="seg">
+          <button onclick="switchView('today')">リスト</button>
+          <button class="active" onclick="switchView('calendar')">月</button>
+          <button onclick="switchView('sticky')">付箋</button>
+        </div>
+        <button class="btn btn-primary">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          新規 <span class="kbd">N</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="cal-head">
+      <div class="cal-month">2026年 5月 <em>// Q2</em></div>
+      <div class="cal-nav"><button>‹</button><button class="btn btn-soft" style="font-size:11px;padding:5px 10px">今日</button><button>›</button></div>
+    </div>
+
+    <div class="cal-grid">
+      <div class="cal-dow">日</div><div class="cal-dow">月</div><div class="cal-dow">火</div><div class="cal-dow">水</div><div class="cal-dow">木</div><div class="cal-dow">金</div><div class="cal-dow">土</div>
+
+      <div class="cal-cell muted"><div class="cal-day">26</div></div>
+      <div class="cal-cell muted"><div class="cal-day">27</div></div>
+      <div class="cal-cell muted"><div class="cal-day">28</div></div>
+      <div class="cal-cell muted"><div class="cal-day">29</div></div>
+      <div class="cal-cell muted"><div class="cal-day">30</div></div>
+      <div class="cal-cell"><div class="cal-day">01</div><div class="cal-event ev-acc">朝礼</div></div>
+      <div class="cal-cell"><div class="cal-day">02</div></div>
+
+      <div class="cal-cell"><div class="cal-day">03</div></div>
+      <div class="cal-cell"><div class="cal-day">04</div><div class="cal-event ev-warn">OTA mtg</div></div>
+      <div class="cal-cell"><div class="cal-day">05</div><div class="cal-event ev-crit">CC prep</div></div>
+      <div class="cal-cell"><div class="cal-day">06</div></div>
+      <div class="cal-cell"><div class="cal-day">07</div><div class="cal-event ev-acc">朝礼</div><div class="cal-event ev-info">面談</div></div>
+      <div class="cal-cell"><div class="cal-day">08</div></div>
+      <div class="cal-cell"><div class="cal-day">09</div><div class="cal-event ev-warn">RM 分析</div></div>
+
+      <div class="cal-cell"><div class="cal-day">10</div></div>
+      <div class="cal-cell"><div class="cal-day">11</div><div class="cal-event ev-acc">朝礼</div></div>
+      <div class="cal-cell"><div class="cal-day">12</div><div class="cal-event ev-crit">予選成績</div><div class="cal-event ev-warn">OTA レビュー</div></div>
+      <div class="cal-cell today">
+        <div class="cal-day">13</div>
+        <div class="cal-event ev-crit">予選成績</div>
+        <div class="cal-event ev-warn">OTA</div>
+        <div class="cal-event ev-info">面談</div>
+      </div>
+      <div class="cal-cell"><div class="cal-day">14</div><div class="cal-event ev-acc">朝礼</div><div class="cal-event ev-warn">RM 提出</div></div>
+      <div class="cal-cell"><div class="cal-day">15</div><div class="cal-event ev-crit">CC 本戦</div></div>
+      <div class="cal-cell"><div class="cal-day">16</div><div class="cal-event ev-crit">CC 本戦</div></div>
+
+      <div class="cal-cell"><div class="cal-day">17</div></div>
+      <div class="cal-cell"><div class="cal-day">18</div><div class="cal-event ev-acc">朝礼</div></div>
+      <div class="cal-cell"><div class="cal-day">19</div></div>
+      <div class="cal-cell"><div class="cal-day">20</div><div class="cal-event ev-warn">支配人会議</div></div>
+      <div class="cal-cell"><div class="cal-day">21</div><div class="cal-event ev-acc">朝礼</div></div>
+      <div class="cal-cell"><div class="cal-day">22</div></div>
+      <div class="cal-cell"><div class="cal-day">23</div></div>
+
+      <div class="cal-cell"><div class="cal-day">24</div></div>
+      <div class="cal-cell"><div class="cal-day">25</div><div class="cal-event ev-acc">朝礼</div></div>
+      <div class="cal-cell"><div class="cal-day">26</div></div>
+      <div class="cal-cell"><div class="cal-day">27</div></div>
+      <div class="cal-cell"><div class="cal-day">28</div><div class="cal-event ev-acc">朝礼</div></div>
+      <div class="cal-cell"><div class="cal-day">29</div></div>
+      <div class="cal-cell"><div class="cal-day">30</div><div class="cal-event ev-warn">RM 締め</div></div>
+
+      <div class="cal-cell"><div class="cal-day">31</div></div>
+      <div class="cal-cell muted"><div class="cal-day">01</div></div>
+      <div class="cal-cell muted"><div class="cal-day">02</div></div>
+      <div class="cal-cell muted"><div class="cal-day">03</div></div>
+      <div class="cal-cell muted"><div class="cal-day">04</div></div>
+      <div class="cal-cell muted"><div class="cal-day">05</div></div>
+      <div class="cal-cell muted"><div class="cal-day">06</div></div>
+    </div>
+  </main>
+
+  <!-- STICKY (tile-grid, no rotation) -->
+  <main class="main hidden" id="view-sticky">
+    <div class="topbar">
+      <div>
+        <div class="page-meta"><span class="pulse"></span> ボード · キャプテンカップ</div>
+        <h1 class="page-title">付箋ボード</h1>
+        <div class="page-sub">8件 · ポップアウトで小窓化（OS で「常に手前」設定可）</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="seg">
+          <button onclick="switchView('today')">リスト</button>
+          <button onclick="switchView('calendar')">月</button>
+          <button class="active" onclick="switchView('sticky')">付箋</button>
+        </div>
+        <button class="btn btn-soft">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M9 21H3v-6M21 9V3h-6M21 3l-7 7M3 21l7-7"/></svg>
+          ポップアウト
+        </button>
+        <button class="btn btn-primary">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          新規
+        </button>
+      </div>
+    </div>
+
+    <div class="sticky-board">
+      <div class="sticky-tile" data-pri="high">
+        <div class="sticky-head"><span>CC-001</span><span>05/12 12:00</span></div>
+        <div class="sticky-title">予選成績シートを最終確認 — タイ表示の検証</div>
+        <div class="sticky-foot"><span class="sticky-tag">#至急</span><span class="sticky-tag">v6</span><span class="sticky-due">残り 4h</span></div>
+      </div>
+      <div class="sticky-tile" data-pri="med">
+        <div class="sticky-head"><span>CC-002</span><span>05/14</span></div>
+        <div class="sticky-title">参加者リスト印刷 (A4 × 80部)</div>
+        <div class="sticky-foot"><span class="sticky-tag">#準備</span><span class="sticky-due">明日</span></div>
+      </div>
+      <div class="sticky-tile" data-pri="high">
+        <div class="sticky-head"><span>CC-003</span><span>05/15</span></div>
+        <div class="sticky-title">受付テーブル設営 — 8:00 AM 集合</div>
+        <div class="sticky-foot"><span class="sticky-tag">#当日</span><span class="sticky-tag">#会議</span><span class="sticky-due">2日後</span></div>
+      </div>
+      <div class="sticky-tile">
+        <div class="sticky-head"><span>CC-004</span><span>05/15</span></div>
+        <div class="sticky-title">優勝カップ・賞品の最終確認</div>
+        <div class="sticky-foot"><span class="sticky-tag">#準備</span><span class="sticky-due">2日後</span></div>
+      </div>
+      <div class="sticky-tile" data-pri="med">
+        <div class="sticky-head"><span>CC-005</span><span>05/16</span></div>
+        <div class="sticky-title">表彰式進行台本 — リハーサル</div>
+        <div class="sticky-foot"><span class="sticky-tag">#本番</span><span class="sticky-due">3日後</span></div>
+      </div>
+      <div class="sticky-tile">
+        <div class="sticky-head"><span>CC-006</span><span>05/17</span></div>
+        <div class="sticky-title">スコア集計プログラム動作チェック</div>
+        <div class="sticky-foot"><span class="sticky-tag">#技術</span><span class="sticky-due">4日後</span></div>
+      </div>
+      <div class="sticky-tile">
+        <div class="sticky-head"><span>CC-007</span><span>05/18</span></div>
+        <div class="sticky-title">写真撮影スポット5箇所をマーキング</div>
+        <div class="sticky-foot"><span class="sticky-tag">#準備</span><span class="sticky-due">5日後</span></div>
+      </div>
+      <div class="sticky-tile" data-pri="low">
+        <div class="sticky-head"><span>CC-008</span><span>05/19</span></div>
+        <div class="sticky-title">参加者へのお礼メール下書き</div>
+        <div class="sticky-foot"><span class="sticky-tag">#事後</span><span class="sticky-due">6日後</span></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- DETAIL PANEL -->
+  <aside class="detail" id="detail-panel" hidden>
+    <div class="detail-head">
+      <div>
+        <div class="detail-id">// task_a83f29</div>
+        <input class="detail-title-input" value="キャプテンカップ予選成績シートを最終確認" />
+      </div>
+      <button class="detail-close" onclick="toggleDetail()">×</button>
+    </div>
+
+    <div class="detail-row"><span class="label">プロジェクト</span><span class="value"><span class="chip"><span class="chip-dot" style="background:#EF4444"></span>キャプテンカップ</span></span></div>
+    <div class="detail-row"><span class="label">期限</span><span class="value">2026-05-13 10:30 JST</span></div>
+    <div class="detail-row"><span class="label">優先度</span><span class="value"><span class="chip crit">P0 · 高</span></span></div>
+    <div class="detail-row"><span class="label">タグ</span><span class="value"><span class="chip">#至急</span><span class="chip">#会議</span></span></div>
+    <div class="detail-row"><span class="label">繰り返し</span><span class="value">なし</span></div>
+    <div class="detail-row"><span class="label">リマインダー</span><span class="value"><span class="chip accent">→ 30分前</span></span></div>
+
+    <div>
+      <span class="label" style="display:block;margin-bottom:8px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-4)">メモ</span>
+      <div class="memo">
+        v6スクリプトで生成した予選成績シートを <code>build_sorted_sheet_v6.py</code> 出力と照合。<br><br>
+        コンパウンドキー方式でタイ表示が解消されているか、特に同スコア複数組の表示順を重点確認。
+      </div>
+    </div>
+
+    <div>
+      <span class="label" style="display:block;margin-bottom:8px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-4)">サブタスク (1/3)</span>
+      <div class="subtask"><div class="check" style="background:var(--accent);border-color:var(--accent)"></div><span style="text-decoration:line-through;color:var(--ink-4)">v6を実行して新シート生成</span></div>
+      <div class="subtask"><div class="check"></div><span>同スコア組のソート順を目視確認</span></div>
+      <div class="subtask"><div class="check"></div><span>印刷プレビューで A4 横向き レイアウト確認</span></div>
+    </div>
+
+    <div>
+      <span class="label" style="display:block;margin-bottom:8px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-4)">添付</span>
+      <div class="attach"><div class="attach-icon">XLS</div><div>captain_cup_sorted_v6.xlsx<br><span style="color:var(--ink-4)">142kb · 2026-05-12 22:14</span></div></div>
+    </div>
+  </aside>
+
+</div>
+
+<div class="mock-switcher">
+  <button onclick="showScreen('login')">ログイン</button>
+  <button class="active" onclick="showScreen('app')">アプリ</button>
+</div>
+
+<script>
+  function showScreen(name) {
+    document.getElementById('screen-login').classList.toggle('hidden', name !== 'login');
+    document.getElementById('screen-app').classList.toggle('hidden', name !== 'app');
+    document.querySelectorAll('.mock-switcher button').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+  function switchView(name) {
+    ['today','calendar','sticky'].forEach(v => {
+      document.getElementById('view-'+v).classList.toggle('hidden', v !== name);
+    });
+    document.getElementById('detail-panel').setAttribute('hidden','');
+    document.querySelector('.app').removeAttribute('data-detail');
+  }
+  function toggleDetail() {
+    const panel = document.getElementById('detail-panel');
+    const app = document.querySelector('.app');
+    if (panel.hasAttribute('hidden')) {
+      panel.removeAttribute('hidden');
+      app.setAttribute('data-detail','open');
+    } else {
+      panel.setAttribute('hidden','');
+      app.removeAttribute('data-detail');
+    }
+  }
+</script>
+
+</body>
+</html>
