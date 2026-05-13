@@ -6,7 +6,37 @@
 
 **Architecture:** Vite + React + TypeScript の SPA を PWA 化。Supabase で Auth/Postgres、RLS で `user_id = auth.uid()` 分離。GitHub Actions で GitHub Pages にビルド配信。
 
-**Tech Stack:** React 18, Vite 5, TypeScript, Tailwind CSS, shadcn/ui, vite-plugin-pwa, @supabase/supabase-js, React Router 6, Vitest + React Testing Library
+**Tech Stack:** React 18, Vite 5, TypeScript, Tailwind CSS（カスタム設計トークン）, vite-plugin-pwa, @supabase/supabase-js, React Router 6, Vitest + React Testing Library
+**フォント:** Geist Sans + Geist Mono + IBM Plex Sans JP（Google Fonts CDN）
+
+## Design System Reference（必読）
+
+**全UIタスクは `mocks/preview-tech-*.html` を視覚リファレンスとして実装すること。** モックと見比べて差分があれば調整する。
+
+### モック対応表
+| タスク | 参照モック |
+|---|---|
+| ログイン (Task 8) | `mocks/preview-tech.html` のログイン画面 |
+| サイドバー / Layout (Task 9) | `mocks/preview-tech.html` のサイドバー |
+| TaskItem (Task 12) | `mocks/preview-tech.html` の `.task` 行 |
+| TaskForm (Task 13) | TickTick詳細風（`mocks/preview-tech-popout-flow.html` の `.popup-task`） |
+| TaskList / 4ページ (Task 14-15) | `mocks/preview-tech.html` の今日ビュー |
+
+### 設計トークン（モック由来、Tailwind config に反映）
+```
+背景: #FAFAFA / サーフェス: #FFFFFF / セカンダリ面: #F8F8F8
+ボーダー: #E8E8E8 / ボーダー薄: #EFEFEF
+インク: #0A0A0A / インク2: #404040 / インク3: #737373 / インク4: #A3A3A3 / インク5: #D4D4D4
+アクセント: #00C853 / アクセントソフト: #DCFCE7 / アクセント濃: #047857
+P0=#EF4444赤 / P1=#F97316橙 / P2=#3B82F6青
+プロジェクト色: 支配人業務(青/#1E40AF) / CC(赤/#991B1B) / OTA(黄/#92400E) / 個人(青) / シフト(紫/#5B21B6)
+角丸: 6 / 10 / 14
+```
+
+### 書体
+- Sans: `"Geist", "IBM Plex Sans JP", -apple-system, sans-serif`
+- Mono: `"Geist Mono", "IBM Plex Sans JP", "SF Mono", monospace`
+- Inter / Roboto / 游ゴシック等の汎用フォントは使用禁止
 
 ## File Structure
 
@@ -97,49 +127,77 @@ git commit -m "chore: scaffold Vite + React + TS project"
 
 ---
 
-## Task 2: Tailwind CSS + shadcn/ui セットアップ
+## Task 2: Tailwind CSS + デザイントークン（モック準拠）
 
 **Files:**
-- Create: `tailwind.config.ts`, `postcss.config.js`, `src/styles/globals.css`, `components.json`
-- Modify: `src/main.tsx` (globals.css をimport), `tsconfig.json`, `vite.config.ts`
+- Create: `tailwind.config.ts`, `postcss.config.js`, `src/styles/globals.css`
+- Modify: `src/main.tsx`, `tsconfig.json`, `vite.config.ts`, `index.html`
 
-- [ ] **Step 1: Tailwindと依存をインストール**
+shadcn/ui CLI は使わず、モック (`mocks/preview-tech.html` 等) で確定したデザイントークンを直接 Tailwind と CSS 変数にセットする。Dialog 等のコンポーネントは必要時に Radix UI から個別導入する。
+
+- [ ] **Step 1: Tailwind と依存をインストール**
 
 ```bash
+cd "/c/Users/keiji.nakahata/Desktop/Claude/Stickit"
 npm install -D tailwindcss@3 postcss autoprefixer
 npx tailwindcss init -p
 ```
 
-- [ ] **Step 2: tailwind.config.js を tailwind.config.ts にリネームし内容を置換**
+- [ ] **Step 2: index.html に Google Fonts を追加**
+
+`index.html` の `<head>` 内に追加:
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700&family=IBM+Plex+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+```
+
+- [ ] **Step 3: tailwind.config.js を tailwind.config.ts にリネームし、モック由来の設計トークンを反映**
 
 ```ts
 import type { Config } from "tailwindcss";
 
 export default {
-  darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Geist"', '"IBM Plex Sans JP"', "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        mono: ['"Geist Mono"', '"IBM Plex Sans JP"', '"SF Mono"', "Menlo", "monospace"],
+      },
       colors: {
-        border: "hsl(var(--border))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+        bg: { DEFAULT: "#FAFAFA", 2: "#F4F4F4" },
+        surface: { DEFAULT: "#FFFFFF", 2: "#F8F8F8" },
+        border: { DEFAULT: "#E8E8E8", 2: "#EFEFEF" },
+        ink: { DEFAULT: "#0A0A0A", 2: "#404040", 3: "#737373", 4: "#A3A3A3", 5: "#D4D4D4" },
+        accent: { DEFAULT: "#00C853", soft: "#DCFCE7", deep: "#047857" },
+        crit: { DEFAULT: "#EF4444", soft: "#FEE2E2" },
+        warn: { DEFAULT: "#F97316", soft: "#FFEDD5" },
+        info: { DEFAULT: "#3B82F6", soft: "#DBEAFE" },
+        // プロジェクトカラータイント
+        proj: {
+          mgmt:   { bg: "#DCEAF7", fg: "#1E40AF" },
+          cc:     { bg: "#FCE0E0", fg: "#991B1B" },
+          ota:    { bg: "#FCEACB", fg: "#92400E" },
+          event:  { bg: "#EDE3FB", fg: "#5B21B6" },
         },
       },
+      borderRadius: { sm: "6px", DEFAULT: "10px", lg: "14px" },
+      boxShadow: {
+        xs: "0 1px 2px rgba(0,0,0,.04)",
+        sm: "0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.03)",
+        md: "0 4px 12px rgba(0,0,0,.08)",
+        lg: "0 12px 28px rgba(0,0,0,.16), 0 4px 10px rgba(0,0,0,.08)",
+        xl: "0 24px 48px -8px rgba(0,0,0,.20), 0 8px 16px rgba(0,0,0,.06)",
+      },
+      letterSpacing: { tightish: "-0.005em" },
     },
   },
   plugins: [],
 } satisfies Config;
 ```
 
-- [ ] **Step 3: globals.css を作成**
+- [ ] **Step 4: globals.css を作成**
 
 `src/styles/globals.css`:
 ```css
@@ -148,33 +206,49 @@ export default {
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 0 0% 100%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --border: 214 32% 91%;
+  html, body {
+    margin: 0;
+    background: #FAFAFA;
+    color: #0A0A0A;
+    font-family: "Geist", "IBM Plex Sans JP", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.005em;
   }
-  .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --border: 217 33% 20%;
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #D4D4D4; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #A3A3A3; }
+  ::-webkit-scrollbar-track { background: transparent; }
+}
+
+@layer components {
+  /* パルスドット同期インジケータ（モック共通） */
+  .pulse-dot {
+    @apply relative inline-block w-1.5 h-1.5 rounded-full bg-accent;
   }
-  body { @apply bg-background text-foreground; }
+  .pulse-dot::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 9999px;
+    background: #00C853;
+    opacity: .3;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: .3; }
+    50% { transform: scale(1.6); opacity: 0; }
+  }
 }
 ```
 
-- [ ] **Step 4: main.tsx で globals.css をimport**
+- [ ] **Step 5: main.tsx で globals.css を import**
 
-`src/main.tsx` の `import './index.css'` を `import './styles/globals.css'` に置換。古い `src/index.css` と `src/App.css` を削除。
+`src/main.tsx` で `import "./styles/globals.css"` を追加。古い `src/index.css` と `src/App.css` を削除。
 
-- [ ] **Step 5: tsconfig.json と vite.config.ts に @ alias を追加**
+- [ ] **Step 6: tsconfig と vite.config に @ alias を追加**
 
 `tsconfig.json` の `compilerOptions` に追加:
 ```json
@@ -194,47 +268,39 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 6: shadcn/ui CLI 初期化**
-
-```bash
-npx shadcn@latest init -d
-```
-プロンプトはデフォルト（Default style, Slate base color, CSS variables）でOK。
-
-- [ ] **Step 7: 試しにButtonコンポーネントを追加**
-
-```bash
-npx shadcn@latest add button
-```
-
-- [ ] **Step 8: App.tsx を最小化**
+- [ ] **Step 7: スモーク App.tsx で書体・配色を確認**
 
 `src/App.tsx`:
 ```tsx
-import { Button } from "@/components/ui/button";
-
 export default function App() {
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold">Stickit</h1>
-      <Button>Hello</Button>
+    <div className="p-8 space-y-4">
+      <h1 className="text-2xl font-semibold tracking-tight">Stickit</h1>
+      <p className="font-mono text-xs text-ink-3">// design tokens loaded</p>
+      <div className="flex gap-2 items-center">
+        <span className="pulse-dot"></span>
+        <span className="font-mono text-xs">SYNCED</span>
+      </div>
+      <button className="bg-ink text-white px-3 py-1.5 rounded text-sm font-medium">新規 <span className="font-mono text-[10px] text-white/50 ml-1 px-1 py-px rounded bg-white/10">N</span></button>
     </div>
   );
 }
 ```
 
-- [ ] **Step 9: 動作確認**
+- [ ] **Step 8: 動作確認**
 
 ```bash
 npm run dev
 ```
-ボタンが表示されればOK。
+- Geist 書体でレンダリングされている（ブラウザDevToolsの Computed → font-family で確認）
+- 緑のパルスドットが脈動している
+- ボタンが黒地・白文字で `N` キーバッジ付き
 
-- [ ] **Step 10: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add -A
-git commit -m "chore: setup Tailwind CSS and shadcn/ui"
+git commit -m "feat: setup Tailwind with tech design tokens (Geist + IBM Plex JP)"
 ```
 
 ---
@@ -662,13 +728,12 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
 }
 ```
 
-- [ ] **Step 4: Login ページ作成**
+- [ ] **Step 4: Login ページ作成（モック準拠 — `mocks/preview-tech.html` のログイン画面を見ながら実装）**
 
 `src/pages/Login.tsx`:
 ```tsx
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 
 export default function Login() {
   const { signInWithEmail } = useAuth();
@@ -685,25 +750,61 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-bold">Stickit ログイン</h1>
+    <div className="min-h-screen grid place-items-center p-4 relative overflow-hidden">
+      {/* 背景: 微妙なグリッド + 緑/青のラジアルグロー */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(circle at 20% 0%, #DCFCE7 0%, transparent 40%), radial-gradient(circle at 80% 100%, #DBEAFE 0%, transparent 40%)",
+        }} />
+      <div className="absolute inset-0 pointer-events-none opacity-50"
+        style={{
+          backgroundImage: "linear-gradient(#EFEFEF 1px, transparent 1px), linear-gradient(90deg, #EFEFEF 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+          maskImage: "radial-gradient(circle at 50% 50%, #000 20%, transparent 70%)",
+        }} />
+
+      <form onSubmit={onSubmit} className="relative w-full max-w-[380px] bg-surface border border-border rounded-lg shadow-lg p-8">
+        {/* ブランド */}
+        <div className="flex items-center gap-2 mb-6">
+          <div className="w-[26px] h-[26px] rounded-md bg-ink text-accent grid place-items-center font-mono font-semibold text-[13px] relative">
+            S
+            <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-accent border-2 border-surface" />
+          </div>
+          <span className="font-semibold text-[15px] tracking-tightish">Stickit</span>
+          <span className="ml-auto font-mono text-[10px] text-ink-4 bg-bg-2 px-1.5 py-px rounded">v0.1</span>
+        </div>
+
+        <h1 className="text-[22px] font-semibold tracking-[-0.025em] leading-tight">サインイン</h1>
+        <p className="text-ink-3 text-[13px] mt-1 mb-6">パスワード不要。ご登録メールにマジックリンクをお送りします。</p>
+
         {sent ? (
-          <p className="text-sm">メールを確認してリンクをクリックしてください。</p>
+          <p className="text-[13px] text-ink-2">メールを確認してリンクをクリックしてください。</p>
         ) : (
           <>
+            <label className="flex items-center gap-1.5 font-mono text-[10.5px] font-medium uppercase tracking-wider text-ink-3 mb-1.5">
+              → メールアドレス
+            </label>
             <input
               type="email"
               required
-              placeholder="email@example.com"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded px-3 py-2"
+              className="w-full px-3 py-2.5 border border-border rounded text-[13px] bg-surface focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
             />
-            <Button type="submit" className="w-full">マジックリンクを送信</Button>
-            {error && <p className="text-red-600 text-sm">{error}</p>}
+            <button
+              type="submit"
+              className="w-full mt-4 py-2.5 bg-ink text-white rounded font-medium text-[13px] flex items-center justify-center gap-2 hover:bg-black transition-colors"
+            >
+              マジックリンクを送る <span className="font-mono">→</span>
+            </button>
+            {error && <p className="mt-3 text-crit text-[12px]">{error}</p>}
           </>
         )}
+
+        <div className="flex items-center justify-center gap-1.5 text-ink-4 font-mono text-[10.5px] mt-5">
+          <span className="pulse-dot" /> 稼働中
+        </div>
       </form>
     </div>
   );
@@ -800,46 +901,102 @@ git commit -m "feat: add auth context and magic link login"
 - Create: `src/components/Layout.tsx`, `src/components/Sidebar.tsx`
 - Modify: `src/App.tsx`
 
-- [ ] **Step 1: Sidebar 作成**
+- [ ] **Step 1: Sidebar 作成（モック準拠 — `mocks/preview-tech.html` のサイドバー）**
 
 `src/components/Sidebar.tsx`:
 ```tsx
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 
-const items = [
-  { to: "/today", label: "今日" },
-  { to: "/tomorrow", label: "明日" },
-  { to: "/next7", label: "7日間" },
-  { to: "/all", label: "すべて" },
+type Item = { to: string; label: string; count?: number; icon: React.ReactNode };
+
+const Ic = ({ d }: { d: string }) => (
+  <svg className="w-3.5 h-3.5 stroke-current fill-none" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: d }} />
+);
+
+const mainNav: Item[] = [
+  { to: "/today",    label: "今日",      count: 7,  icon: <Ic d='<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' /> },
+  { to: "/tomorrow", label: "明日",      count: 3,  icon: <Ic d='<path d="M3 6h18M3 12h18M3 18h18"/>' /> },
+  { to: "/next7",    label: "今後7日間",  count: 19, icon: <Ic d='<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>' /> },
+  { to: "/all",      label: "すべて",    count: 42, icon: <Ic d='<path d="M5 6h14M5 12h14M5 18h14"/>' /> },
 ];
 
 export function Sidebar() {
   const { signOut } = useAuth();
   return (
-    <aside className="w-56 border-r bg-muted/30 p-4 flex flex-col gap-1">
-      <h1 className="text-lg font-bold mb-4">Stickit</h1>
-      {items.map((it) => (
-        <NavLink
-          key={it.to}
-          to={it.to}
-          className={({ isActive }) =>
-            `px-3 py-2 rounded text-sm ${isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`
-          }
-        >
-          {it.label}
-        </NavLink>
-      ))}
-      <div className="mt-auto">
-        <Button variant="ghost" size="sm" onClick={signOut} className="w-full">
-          ログアウト
-        </Button>
+    <aside className="w-60 bg-surface border-r border-border p-2.5 pt-3.5 flex flex-col gap-4 overflow-y-auto">
+      {/* ブランド */}
+      <div className="flex items-center gap-2 px-2.5 pt-1">
+        <div className="w-[26px] h-[26px] rounded-md bg-ink text-accent grid place-items-center font-mono font-semibold text-[13px] relative">
+          S
+          <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-accent border-2 border-surface" />
+        </div>
+        <span className="font-semibold text-[15px] tracking-tightish">Stickit</span>
+        <span className="ml-auto font-mono text-[10px] text-ink-4 bg-bg-2 px-1.5 py-px rounded">v0.1</span>
+      </div>
+
+      {/* 検索（プレースホルダ — Task 別実装） */}
+      <div className="mx-1 flex items-center gap-2 px-2.5 py-1.5 bg-bg-2 rounded text-ink-3 text-[12.5px]">
+        <Ic d='<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>' />
+        <span>タスクを検索...</span>
+        <span className="ml-auto font-mono text-[10.5px] text-ink-4 bg-surface border border-border px-1.5 py-px rounded">⌘K</span>
+      </div>
+
+      {/* メインナビ */}
+      <nav className="px-1 flex flex-col gap-px">
+        {mainNav.map((it) => (
+          <NavLink
+            key={it.to}
+            to={it.to}
+            className={({ isActive }) =>
+              `flex items-center gap-2.5 px-2 py-1.5 rounded text-[13px] font-medium ${
+                isActive ? "bg-ink text-white" : "text-ink-2 hover:bg-bg-2 hover:text-ink"
+              }`
+            }
+          >
+            {it.icon}
+            {it.label}
+            {it.count !== undefined && (
+              <span className={`ml-auto font-mono text-[11px] ${false ? "text-white/55" : "text-ink-4"}`}>{it.count}</span>
+            )}
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* プロジェクト（Plan 1 ではダミー静的、Plan 2 で動的化） */}
+      <div className="px-1">
+        <div className="font-mono text-[10px] uppercase tracking-wider text-ink-4 px-2 py-1.5">// プロジェクト</div>
+        {[
+          { name: "支配人業務", color: "#00C853", count: 12 },
+          { name: "キャプテンカップ", color: "#EF4444", count: 8 },
+          { name: "OTA戦略", color: "#F97316", count: 5 },
+          { name: "個人", color: "#3B82F6", count: 9 },
+        ].map((p) => (
+          <button key={p.name} className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-[13px] font-medium text-ink-2 hover:bg-bg-2 hover:text-ink">
+            <span className="w-2 h-2 rounded-sm" style={{ background: p.color }} />
+            {p.name}
+            <span className="ml-auto font-mono text-[11px] text-ink-4">{p.count}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* アバター */}
+      <div className="mt-auto pt-3 px-2 border-t border-border flex items-center gap-2.5">
+        <div className="w-[26px] h-[26px] rounded-full grid place-items-center text-white font-mono font-semibold text-[11px]"
+             style={{ background: "linear-gradient(135deg, #00C853, #00A152)" }}>
+          NK
+        </div>
+        <div className="flex flex-col leading-tight">
+          <span className="font-semibold text-[12.5px]">中畑 慶治</span>
+          <button onClick={signOut} className="font-mono text-[10.5px] text-ink-4 hover:text-ink text-left">支配人 · 退出</button>
+        </div>
       </div>
     </aside>
   );
 }
 ```
+
+> **Note:** 上の static なプロジェクト・タグリストは Plan 1 範囲では仮データ。Plan 2 で `useProjects`/`useTags` フックを作って動的化する。
 
 - [ ] **Step 2: Layout 作成**
 
@@ -1088,7 +1245,7 @@ git commit -m "feat: add useTasks hook"
 **Files:**
 - Create: `src/components/tasks/TaskItem.tsx`
 
-- [ ] **Step 1: 実装**
+- [ ] **Step 1: 実装（モック準拠 — `mocks/preview-tech.html` の `.task` 行）**
 
 `src/components/tasks/TaskItem.tsx`:
 ```tsx
@@ -1101,51 +1258,66 @@ type Props = {
   onDelete?: (id: string) => void;
 };
 
-const PRIORITY_COLOR = ["text-muted-foreground", "text-blue-500", "text-amber-500", "text-red-500"];
+const PRI_BAR = ["", "bg-info", "bg-warn", "bg-crit"];
+const PRI_BADGE = ["", "P2", "P1", "P0"];
 
 function formatDue(iso: string | null): string {
-  if (!iso) return "";
+  if (!iso) return "—";
   const d = new Date(iso);
-  return d.toLocaleString("ja-JP", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
 }
 
 export function TaskItem({ task, onToggle, onClick, onDelete }: Props) {
+  const done = task.status === "done";
+  const pri = task.priority ?? 0;
   return (
-    <div className="flex items-center gap-3 px-3 py-2 border-b hover:bg-muted/50">
-      <input
-        type="checkbox"
-        checked={task.status === "done"}
-        onChange={() => onToggle(task)}
-        className="h-4 w-4"
-      />
+    <div
+      onClick={() => onClick?.(task)}
+      className="grid grid-cols-[18px_1fr_auto] items-center gap-3 px-3 py-2.5 rounded-md border border-transparent hover:bg-surface hover:border-border cursor-pointer relative"
+    >
+      {pri > 0 && <div className={`absolute left-0 top-2 bottom-2 w-0.5 rounded ${PRI_BAR[pri]}`} />}
       <button
         type="button"
-        onClick={() => onClick?.(task)}
-        className="flex-1 text-left"
+        onClick={(e) => { e.stopPropagation(); onToggle(task); }}
+        aria-label="toggle done"
+        className={`w-[17px] h-[17px] rounded border-[1.4px] grid place-items-center transition-colors ${
+          done ? "bg-accent border-accent" : "border-ink-5 bg-surface hover:border-accent"
+        }`}
       >
-        <span className={task.status === "done" ? "line-through text-muted-foreground" : ""}>
-          {task.title}
-        </span>
-        {task.due_at && (
-          <span className="ml-2 text-xs text-muted-foreground">{formatDue(task.due_at)}</span>
+        {done && (
+          <span className="block w-2 h-1 border-l-[1.6px] border-b-[1.6px] border-white -translate-y-px translate-x-px -rotate-45" />
         )}
       </button>
-      <span className={`text-xs ${PRIORITY_COLOR[task.priority ?? 0]}`}>
-        {["", "低", "中", "高"][task.priority ?? 0]}
-      </span>
-      {onDelete && (
-        <button
-          onClick={() => onDelete(task.id)}
-          className="text-xs text-muted-foreground hover:text-red-500"
-          aria-label="delete"
-        >
-          ×
-        </button>
-      )}
+
+      <div className="flex flex-col gap-0.5 min-w-0">
+        <div className={`text-[13.5px] font-medium leading-tight ${done ? "line-through text-ink-4" : "text-ink"}`}>
+          {task.title}
+        </div>
+        <div className="flex items-center gap-2 font-mono text-[11px] text-ink-4">
+          <span>{formatDue(task.due_at)}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1.5">
+        {pri > 0 && (
+          <span className={`font-mono text-[10px] px-1.5 py-px rounded font-medium ${
+            pri === 3 ? "bg-crit-soft text-[#991B1B]" : "bg-bg-2 text-ink-3"
+          }`}>{PRI_BADGE[pri]}</span>
+        )}
+        {onDelete && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
+            className="text-ink-4 hover:text-crit text-sm px-1"
+            aria-label="delete"
+          >×</button>
+        )}
+      </div>
     </div>
   );
 }
 ```
+
+> **Note:** プロジェクト色タグ・タグ表示は Plan 2 で `tasks` テーブルに `project_id` を結合した時に追加。Plan 1 はタイトル・期限・優先度のみ。
 
 - [ ] **Step 2: Commit**
 
@@ -1161,19 +1333,40 @@ git commit -m "feat: add TaskItem component"
 **Files:**
 - Create: `src/components/tasks/TaskForm.tsx`
 
-- [ ] **Step 1: shadcn dialog を追加**
+- [ ] **Step 1: 軽量モーダルラッパーを作成（shadcn は使わない）**
 
-```bash
-npx shadcn@latest add dialog
+`src/components/ui/Modal.tsx`:
+```tsx
+import { ReactNode, useEffect } from "react";
+
+type Props = { open: boolean; onClose: () => void; children: ReactNode };
+
+export function Modal({ open, onClose, children }: Props) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center p-4">
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      <div role="dialog" aria-modal="true" className="relative bg-surface border border-border rounded-lg shadow-xl w-full max-w-[420px] p-5">
+        {children}
+      </div>
+    </div>
+  );
+}
 ```
 
-- [ ] **Step 2: TaskForm 実装**
+- [ ] **Step 2: TaskForm 実装（モック準拠 — `mocks/preview-tech-popout-flow.html` の `.popup-task` 構造を参考）**
 
 `src/components/tasks/TaskForm.tsx`:
 ```tsx
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/Modal";
 import type { Task } from "@/hooks/useTasks";
 
 type Props = {
@@ -1224,52 +1417,59 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{task ? "タスク編集" : "新規タスク"}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handle} className="space-y-3">
+    <Modal open={open} onClose={() => onOpenChange(false)}>
+      <div className="font-mono text-[10.5px] uppercase tracking-wider text-ink-4 mb-1">// {task ? "edit" : "new"}</div>
+      <h2 className="text-[18px] font-semibold tracking-[-0.02em] mb-3">
+        {task ? "タスクを編集" : "新規タスク"}
+      </h2>
+      <form onSubmit={handle} className="space-y-3">
+        <input
+          autoFocus
+          required
+          placeholder="タスクのタイトル"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full border border-border rounded px-3 py-2 text-[14px] focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
+        />
+        <textarea
+          placeholder="メモ（任意）"
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+          className="w-full border border-border rounded px-3 py-2 text-[13px] resize-none focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
+          rows={3}
+        />
+        <div className="flex gap-2">
           <input
-            autoFocus
-            required
-            placeholder="タイトル"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full border rounded px-3 py-2"
+            type="datetime-local"
+            value={dueLocal}
+            onChange={(e) => setDueLocal(e.target.value)}
+            className="flex-1 border border-border rounded px-3 py-2 text-[13px] font-mono focus:outline-none focus:border-ink"
           />
-          <textarea
-            placeholder="メモ"
-            value={memo}
-            onChange={(e) => setMemo(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-            rows={3}
-          />
-          <div className="flex gap-3">
-            <input
-              type="datetime-local"
-              value={dueLocal}
-              onChange={(e) => setDueLocal(e.target.value)}
-              className="flex-1 border rounded px-3 py-2"
-            />
-            <select
-              value={priority}
-              onChange={(e) => setPriority(Number(e.target.value))}
-              className="border rounded px-3 py-2"
-            >
-              <option value={0}>優先度なし</option>
-              <option value={1}>低</option>
-              <option value={2}>中</option>
-              <option value={3}>高</option>
-            </select>
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>キャンセル</Button>
-            <Button type="submit" disabled={busy}>{task ? "保存" : "追加"}</Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          <select
+            value={priority}
+            onChange={(e) => setPriority(Number(e.target.value))}
+            className="border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-ink"
+          >
+            <option value={0}>優先度なし</option>
+            <option value={1}>P2 低</option>
+            <option value={2}>P1 中</option>
+            <option value={3}>P0 高</option>
+          </select>
+        </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="px-3 py-1.5 text-[12.5px] text-ink-2 hover:bg-bg-2 rounded font-medium"
+          >キャンセル</button>
+          <button
+            type="submit"
+            disabled={busy}
+            className="px-3 py-1.5 text-[12.5px] bg-ink text-white rounded font-medium hover:bg-black disabled:opacity-50"
+          >{task ? "保存" : "追加"}</button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 ```
