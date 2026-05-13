@@ -258,8 +258,11 @@ push_subscriptions (
 7. **設定** — プロフィール、通知許可、テーマ、プッシュ購読管理
 
 ## 7. 認証
-- Supabase Auth マジックリンク（メールリンク）
-- パスワード不要、初回ログインで `profiles` 行作成
+- **Supabase Auth × Google OAuth**（マジックリンクから移行）
+- 1クリックサインイン、パスワード不要
+- 初回ログインで `profiles` 行を `handle_new_user` トリガーが自動作成
+- 各人の Gmail（個人 or 会社）でサインイン可能
+- 将来的に Google Calendar 連携への布石
 
 ## 8. 通知（Web Push）
 - フロントで通知許可を取得し、`push_subscriptions` に保存

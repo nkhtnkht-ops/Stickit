@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 type AuthCtx = {
   session: Session | null;
   loading: boolean;
-  signInWithEmail: (email: string) => Promise<{ error: Error | null }>;
+  signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 };
 
@@ -24,12 +24,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  const signInWithEmail = async (email: string) => {
-    // BASE_URL は Vite の base 設定。本番 = "/Stickit/", dev = "/"
+  const signInWithGoogle = async () => {
+    // BASE_URL = 本番 "/Stickit/" / dev "/" — 末尾スラ除去して /auth/callback を結合
     const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}${base}/auth/callback` },
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}${base}/auth/callback`,
+        queryParams: { access_type: "offline", prompt: "consent" },
+      },
     });
     return { error };
   };
@@ -39,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <Ctx.Provider value={{ session, loading, signInWithEmail, signOut }}>
+    <Ctx.Provider value={{ session, loading, signInWithGoogle, signOut }}>
       {children}
     </Ctx.Provider>
   );
