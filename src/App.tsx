@@ -3,13 +3,10 @@ import Login from "@/pages/Login";
 import AuthCallback from "@/pages/AuthCallback";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Layout } from "@/components/Layout";
-
-const Placeholder = ({ name }: { name: string }) => (
-  <div className="p-8">
-    <h1 className="text-2xl font-semibold tracking-tight">{name}</h1>
-    <p className="font-mono text-xs text-ink-3 mt-2">// placeholder — Task 14-15 で TaskList を接続</p>
-  </div>
-);
+import Today from "@/pages/Today";
+import Tomorrow from "@/pages/Tomorrow";
+import Next7Days from "@/pages/Next7Days";
+import All from "@/pages/All";
 
 export default function App() {
   return (
@@ -23,10 +20,10 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/today" element={<Placeholder name="今日" />} />
-        <Route path="/tomorrow" element={<Placeholder name="明日" />} />
-        <Route path="/next7" element={<Placeholder name="今後7日間" />} />
-        <Route path="/all" element={<Placeholder name="すべて" />} />
+        <Route path="/today" element={<Today />} />
+        <Route path="/tomorrow" element={<Tomorrow />} />
+        <Route path="/next7" element={<Next7Days />} />
+        <Route path="/all" element={<All />} />
       </Route>
       <Route path="*" element={<Navigate to="/today" replace />} />
     </Routes>

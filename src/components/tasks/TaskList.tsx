@@ -1,0 +1,61 @@
+import { useState } from "react";
+import { useTasks, type TaskFilter, type Task } from "@/hooks/useTasks";
+import { TaskItem } from "./TaskItem";
+import { TaskForm } from "./TaskForm";
+
+type Props = { title: string; subtitle?: string; filter: TaskFilter };
+
+export function TaskList({ title, subtitle, filter }: Props) {
+  const { tasks, loading, error, createTask, updateTask, toggleComplete, deleteTask } = useTasks(filter);
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Task | null>(null);
+
+  const handleSubmit = async (input: { title: string; memo: string | null; due_at: string | null; priority: number }) => {
+    if (editing) await updateTask(editing.id, input);
+    else await createTask(input);
+    setEditing(null);
+  };
+
+  return (
+    <div className="p-8 max-w-3xl">
+      {/* Top bar */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <div className="font-mono text-[10.5px] text-ink-3 flex items-center gap-1.5 mb-2">
+            <span className="pulse-dot" /> 同期済
+          </div>
+          <h1 className="text-[28px] font-semibold tracking-[-0.025em] leading-tight">{title}</h1>
+          {subtitle && <div className="font-mono text-[12px] text-ink-3 mt-1">{subtitle}</div>}
+        </div>
+        <button
+          onClick={() => { setEditing(null); setOpen(true); }}
+          className="px-3 py-1.5 bg-ink text-white rounded text-[12.5px] font-medium hover:bg-black flex items-center gap-1.5"
+        >
+          + 新規
+          <span className="font-mono text-[10px] text-white/50 px-1 py-px rounded bg-white/10 ml-1">N</span>
+        </button>
+      </div>
+
+      {error && <p className="text-crit text-[12.5px] mb-3">{error}</p>}
+      {loading ? (
+        <p className="text-ink-3 font-mono text-[12px]">// loading…</p>
+      ) : tasks.length === 0 ? (
+        <p className="text-ink-3 font-mono text-[12px]">// no tasks</p>
+      ) : (
+        <div className="bg-bg rounded-lg">
+          {tasks.map((t) => (
+            <TaskItem
+              key={t.id}
+              task={t}
+              onToggle={toggleComplete}
+              onClick={(task) => { setEditing(task); setOpen(true); }}
+              onDelete={deleteTask}
+            />
+          ))}
+        </div>
+      )}
+
+      <TaskForm open={open} onOpenChange={setOpen} task={editing} onSubmit={handleSubmit} />
+    </div>
+  );
+}
