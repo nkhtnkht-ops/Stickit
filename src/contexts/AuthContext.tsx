@@ -25,9 +25,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithEmail = async (email: string) => {
+    // BASE_URL は Vite の base 設定。本番 = "/Stickit/", dev = "/"
+    const base = import.meta.env.BASE_URL.replace(/\/$/, "");
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: { emailRedirectTo: `${window.location.origin}${base}/auth/callback` },
     });
     return { error };
   };
