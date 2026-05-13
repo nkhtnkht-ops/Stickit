@@ -11,3 +11,8 @@ Thumbs.db
 coverage/
 .vscode/
 .idea/
+
+# tsc --build emit artifacts from composite tsconfig.node.json
+vite.config.js
+vite.config.d.ts
+*.tsbuildinfo
