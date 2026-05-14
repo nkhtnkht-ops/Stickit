@@ -1,7 +1,10 @@
 import type { Task } from "@/hooks/useTasks";
+import type { Project } from "@/hooks/useProjects";
 
 type Props = {
   task: Task;
+  project?: Project | null;
+  tagNames?: string[];
   onToggle: (t: Task) => void;
   onClick?: (t: Task) => void;
   onDelete?: (id: string) => void;
@@ -16,7 +19,7 @@ function formatDue(iso: string | null): string {
   return d.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
 }
 
-export function TaskItem({ task, onToggle, onClick, onDelete }: Props) {
+export function TaskItem({ task, project, tagNames, onToggle, onClick, onDelete }: Props) {
   const done = task.status === "done";
   const pri = task.priority ?? 0;
   return (
@@ -42,8 +45,28 @@ export function TaskItem({ task, onToggle, onClick, onDelete }: Props) {
         <div className={`text-[13.5px] font-medium leading-tight ${done ? "line-through text-ink-4" : "text-ink"}`}>
           {task.title}
         </div>
-        <div className="flex items-center gap-2 font-mono text-[11px] text-ink-4">
+        <div className="flex items-center gap-2 font-mono text-[11px] text-ink-4 flex-wrap">
           <span>{formatDue(task.due_at)}</span>
+          {project && (
+            <>
+              <span className="text-ink-5">·</span>
+              <span
+                className="inline-flex items-center gap-1 px-1.5 py-px rounded font-medium"
+                style={{ background: `${project.color}1F`, color: project.color ?? "#94a3b8" }}
+              >
+                <span className="w-1.5 h-1.5 rounded-sm" style={{ background: project.color ?? "#94a3b8" }} />
+                {project.name}
+              </span>
+            </>
+          )}
+          {tagNames && tagNames.length > 0 && (
+            <>
+              <span className="text-ink-5">·</span>
+              {tagNames.map((n) => (
+                <span key={n} className="text-accent-deep">#{n}</span>
+              ))}
+            </>
+          )}
         </div>
       </div>
 
@@ -54,11 +77,7 @@ export function TaskItem({ task, onToggle, onClick, onDelete }: Props) {
           }`}>{PRI_BADGE[pri]}</span>
         )}
         {onDelete && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
-            className="text-ink-4 hover:text-crit text-sm px-1"
-            aria-label="delete"
-          >×</button>
+          <button onClick={(e) => { e.stopPropagation(); onDelete(task.id); }} className="text-ink-4 hover:text-crit text-sm px-1" aria-label="delete">×</button>
         )}
       </div>
     </div>

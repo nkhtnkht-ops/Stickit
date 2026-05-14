@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTasks, type TaskFilter, type Task } from "@/hooks/useTasks";
+import { useProjects } from "@/hooks/useProjects";
 import { TaskItem } from "./TaskItem";
 import { TaskForm } from "./TaskForm";
 
@@ -7,10 +8,12 @@ type Props = { title: string; subtitle?: string; filter: TaskFilter };
 
 export function TaskList({ title, subtitle, filter }: Props) {
   const { tasks, loading, error, createTask, updateTask, toggleComplete, deleteTask } = useTasks(filter);
+  const { projects } = useProjects();
+  const projectMap = Object.fromEntries(projects.map((p) => [p.id, p]));
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Task | null>(null);
 
-  const handleSubmit = async (input: { title: string; memo: string | null; due_at: string | null; priority: number }) => {
+  const handleSubmit = async (input: { title: string; memo: string | null; due_at: string | null; priority: number; project_id: string | null }) => {
     if (editing) await updateTask(editing.id, input);
     else await createTask(input);
     setEditing(null);
@@ -47,6 +50,7 @@ export function TaskList({ title, subtitle, filter }: Props) {
             <TaskItem
               key={t.id}
               task={t}
+              project={t.project_id ? projectMap[t.project_id] : null}
               onToggle={toggleComplete}
               onClick={(task) => { setEditing(task); setOpen(true); }}
               onDelete={deleteTask}

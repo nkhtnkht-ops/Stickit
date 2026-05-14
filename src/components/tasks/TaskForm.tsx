@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Modal } from "@/components/ui/Modal";
 import type { Task } from "@/hooks/useTasks";
+import { useProjects } from "@/hooks/useProjects";
 
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   task?: Task | null;
-  onSubmit: (input: { title: string; memo: string | null; due_at: string | null; priority: number }) => Promise<void>;
+  onSubmit: (input: { title: string; memo: string | null; due_at: string | null; priority: number; project_id: string | null }) => Promise<void>;
 };
 
 function toLocalInput(iso: string | null): string {
@@ -21,7 +22,10 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
   const [memo, setMemo] = useState("");
   const [dueLocal, setDueLocal] = useState("");
   const [priority, setPriority] = useState(0);
+  const [projectId, setProjectId] = useState<string | "none">("none");
   const [busy, setBusy] = useState(false);
+
+  const { projects } = useProjects();
 
   useEffect(() => {
     if (open) {
@@ -29,6 +33,7 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
       setMemo(task?.memo ?? "");
       setDueLocal(toLocalInput(task?.due_at ?? null));
       setPriority(task?.priority ?? 0);
+      setProjectId(task?.project_id ?? "none");
     }
   }, [open, task]);
 
@@ -42,6 +47,7 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
         memo: memo.trim() || null,
         due_at: dueLocal ? new Date(dueLocal).toISOString() : null,
         priority,
+        project_id: projectId === "none" ? null : projectId,
       });
       onOpenChange(false);
     } finally {
@@ -71,13 +77,21 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
           className="w-full border border-border rounded px-3 py-2 text-[13px] resize-none focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
           rows={3}
         />
+        <input
+          type="datetime-local"
+          value={dueLocal}
+          onChange={(e) => setDueLocal(e.target.value)}
+          className="w-full border border-border rounded px-3 py-2 text-[13px] font-mono focus:outline-none focus:border-ink"
+        />
         <div className="flex gap-2">
-          <input
-            type="datetime-local"
-            value={dueLocal}
-            onChange={(e) => setDueLocal(e.target.value)}
-            className="flex-1 border border-border rounded px-3 py-2 text-[13px] font-mono focus:outline-none focus:border-ink"
-          />
+          <select
+            value={projectId}
+            onChange={(e) => setProjectId(e.target.value as string | "none")}
+            className="flex-1 border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-ink"
+          >
+            <option value="none">プロジェクトなし</option>
+            {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
           <select
             value={priority}
             onChange={(e) => setPriority(Number(e.target.value))}
