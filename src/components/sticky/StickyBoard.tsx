@@ -13,8 +13,8 @@ export function StickyBoard({ projectId = "all" }: Props) {
     : { status: "all" as const, project_id: projectId };
   const { tasks, toggleComplete, loading } = useTasks(filter);
 
-  if (loading) return <div className="p-6 text-ink-3 font-mono text-[12px]">// loading…</div>;
-  if (tasks.length === 0) return <div className="p-6 text-ink-3 font-mono text-[12px]">// このボードにタスクはありません</div>;
+  if (loading) return <div className="p-6 text-ink-3 font-mono text-[13.5px]">// loading…</div>;
+  if (tasks.length === 0) return <div className="p-6 text-ink-3 font-mono text-[13.5px]">// このボードにタスクはありません</div>;
 
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3.5 p-6">

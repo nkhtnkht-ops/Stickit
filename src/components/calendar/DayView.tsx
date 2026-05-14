@@ -39,18 +39,18 @@ export function DayView({ anchor }: Props) {
   return (
     <div className="grid grid-cols-[280px_1fr] h-full overflow-hidden">
       <aside className="border-r border-border bg-surface-2 p-5 overflow-y-auto">
-        <div className="text-[22px] font-semibold tracking-[-0.02em]">{ymd}</div>
-        <div className="font-mono text-[11px] text-ink-3 mb-4">// day stats</div>
-        <div className="flex flex-col gap-1.5 text-[12.5px]">
-          <div className="bg-surface border border-border rounded px-3 py-2 flex items-center gap-2.5"><span className="font-mono font-semibold text-[15px] text-crit min-w-[28px]">{high}</span><span className="text-ink-3">優先度 高 (P0)</span></div>
-          <div className="bg-surface border border-border rounded px-3 py-2 flex items-center gap-2.5"><span className="font-mono font-semibold text-[15px] text-warn min-w-[28px]">{open}</span><span className="text-ink-3">未完了</span></div>
-          <div className="bg-surface border border-border rounded px-3 py-2 flex items-center gap-2.5"><span className="font-mono font-semibold text-[15px] text-accent-deep min-w-[28px]">{done}</span><span className="text-ink-3">完了</span></div>
+        <div className="text-[26px] font-semibold tracking-[-0.02em]">{ymd}</div>
+        <div className="font-mono text-[12.5px] text-ink-3 mb-4">// day stats</div>
+        <div className="flex flex-col gap-1.5 text-[14px]">
+          <div className="bg-surface border border-border rounded px-3 py-2 flex items-center gap-2.5"><span className="font-mono font-semibold text-[17px] text-crit min-w-[28px]">{high}</span><span className="text-ink-3">優先度 高 (P0)</span></div>
+          <div className="bg-surface border border-border rounded px-3 py-2 flex items-center gap-2.5"><span className="font-mono font-semibold text-[17px] text-warn min-w-[28px]">{open}</span><span className="text-ink-3">未完了</span></div>
+          <div className="bg-surface border border-border rounded px-3 py-2 flex items-center gap-2.5"><span className="font-mono font-semibold text-[17px] text-accent-deep min-w-[28px]">{done}</span><span className="text-ink-3">完了</span></div>
         </div>
       </aside>
       <div className="grid grid-cols-[56px_1fr] overflow-y-auto relative">
         <div className="border-r border-border bg-surface-2">
           {HOURS.map((h) => (
-            <div key={h} className="border-b border-border-2 text-right pr-2 pt-1 font-mono text-[10px] text-ink-4 font-medium" style={{ height: HOUR_PX }}>{String(h).padStart(2, "0")}:00</div>
+            <div key={h} className="border-b border-border-2 text-right pr-2 pt-1 font-mono text-[11.5px] text-ink-4 font-medium" style={{ height: HOUR_PX }}>{String(h).padStart(2, "0")}:00</div>
           ))}
         </div>
         <div className="relative">
@@ -63,8 +63,8 @@ export function DayView({ anchor }: Props) {
             const bg = proj ? `${proj.color}26` : "rgba(0,0,0,.06)";
             const fg = proj ? proj.color! : "#404040";
             return (
-              <div key={t.id} className="absolute left-2 right-4 rounded px-3 py-2 text-[12.5px] cursor-pointer shadow-sm" style={{ top, minHeight: 48, background: bg, borderLeft: `3px solid ${fg}` }}>
-                <div className="font-mono text-[10px] opacity-70" style={{ color: fg }}>{`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`}</div>
+              <div key={t.id} className="absolute left-2 right-4 rounded px-3 py-2 text-[14px] cursor-pointer shadow-sm" style={{ top, minHeight: 48, background: bg, borderLeft: `3px solid ${fg}` }}>
+                <div className="font-mono text-[11.5px] opacity-70" style={{ color: fg }}>{`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`}</div>
                 <div className="font-medium" style={{ color: "#0A0A0A" }}>{t.title}</div>
               </div>
             );
@@ -73,7 +73,7 @@ export function DayView({ anchor }: Props) {
             <div className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: nowOffset }}>
               <div className="border-t-[1.5px] border-accent" />
               <div className="absolute -left-1.5 -top-1.5 w-2.5 h-2.5 rounded-full bg-accent" style={{ boxShadow: "0 0 0 3px rgba(0,200,83,.18)" }} />
-              <div className="absolute -left-12 -top-2 bg-accent text-white font-mono text-[9.5px] font-semibold px-1.5 py-px rounded">{`${String(nh).padStart(2, "0")}:${String(nm).padStart(2, "0")}`}</div>
+              <div className="absolute -left-12 -top-2 bg-accent text-white font-mono text-[11px] font-semibold px-1.5 py-px rounded">{`${String(nh).padStart(2, "0")}:${String(nm).padStart(2, "0")}`}</div>
             </div>
           )}
         </div>

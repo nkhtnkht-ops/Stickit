@@ -40,8 +40,8 @@ export function ProjectForm({ open, onOpenChange, project, onSubmit }: Props) {
 
   return (
     <Modal open={open} onClose={() => onOpenChange(false)}>
-      <div className="font-mono text-[10.5px] uppercase tracking-wider text-ink-4 mb-1">// {project ? "edit project" : "new project"}</div>
-      <h2 className="text-[18px] font-semibold tracking-[-0.02em] mb-3">{project ? "プロジェクトを編集" : "新規プロジェクト"}</h2>
+      <div className="font-mono text-[12px] uppercase tracking-wider text-ink-4 mb-1">// {project ? "edit project" : "new project"}</div>
+      <h2 className="text-[21px] font-semibold tracking-[-0.02em] mb-3">{project ? "プロジェクトを編集" : "新規プロジェクト"}</h2>
       <form onSubmit={handle} className="space-y-3">
         <input
           autoFocus
@@ -49,10 +49,10 @@ export function ProjectForm({ open, onOpenChange, project, onSubmit }: Props) {
           placeholder="プロジェクト名"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full border border-border rounded px-3 py-2 text-[14px] focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
+          className="w-full border border-border rounded px-3 py-2 text-[16px] focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
         />
         <div>
-          <div className="font-mono text-[10.5px] uppercase tracking-wider text-ink-3 mb-2">// カラー</div>
+          <div className="font-mono text-[12px] uppercase tracking-wider text-ink-3 mb-2">// カラー</div>
           <div className="flex gap-2 flex-wrap">
             {PRESET_COLORS.map((c) => (
               <button
@@ -67,8 +67,8 @@ export function ProjectForm({ open, onOpenChange, project, onSubmit }: Props) {
           </div>
         </div>
         <div className="flex justify-end gap-2 pt-2">
-          <button type="button" onClick={() => onOpenChange(false)} className="px-3 py-1.5 text-[12.5px] text-ink-2 hover:bg-bg-2 rounded font-medium">キャンセル</button>
-          <button type="submit" disabled={busy} className="px-3 py-1.5 text-[12.5px] bg-ink text-white rounded font-medium hover:bg-black disabled:opacity-50">{project ? "保存" : "追加"}</button>
+          <button type="button" onClick={() => onOpenChange(false)} className="px-3 py-1.5 text-[14px] text-ink-2 hover:bg-bg-2 rounded font-medium">キャンセル</button>
+          <button type="submit" disabled={busy} className="px-3 py-1.5 text-[14px] bg-ink text-white rounded font-medium hover:bg-black disabled:opacity-50">{project ? "保存" : "追加"}</button>
         </div>
       </form>
     </Modal>

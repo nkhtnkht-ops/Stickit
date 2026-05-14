@@ -97,7 +97,7 @@ export function MonthView({ anchor, onPeriodChange }: Props) {
       {/* DOW header */}
       <div className="grid grid-cols-7 border-b border-border bg-surface sticky top-0 z-10">
         {DOW_LABELS.map((d, i) => (
-          <div key={d} className={`px-3.5 py-2.5 text-[11.5px] font-medium ${i === 0 ? "text-crit" : i === 6 ? "text-info" : "text-ink-3"}`}>
+          <div key={d} className={`px-3.5 py-2.5 text-[13px] font-medium ${i === 0 ? "text-crit" : i === 6 ? "text-info" : "text-ink-3"}`}>
             {d}
           </div>
         ))}
@@ -128,11 +128,11 @@ export function MonthView({ anchor, onPeriodChange }: Props) {
               >
                 <div className="flex items-baseline gap-1 min-h-[18px]">
                   {isFirst ? (
-                    <span className={`text-[12.5px] font-semibold tracking-tightish ${isOther ? "text-ink-4 opacity-55" : "text-ink"}`}>
+                    <span className={`text-[14px] font-semibold tracking-tightish ${isOther ? "text-ink-4 opacity-55" : "text-ink"}`}>
                       {cellMonth}月{day}日
                     </span>
                   ) : (
-                    <span className={`text-[12.5px] font-medium font-mono ${isOther ? "text-ink-4 opacity-55" : isSun ? "text-crit" : isSat ? "text-info" : "text-ink-2"} ${isToday ? "bg-accent-deep text-white w-5 h-5 rounded-full grid place-items-center text-[11px] font-bold" : ""}`}>
+                    <span className={`text-[14px] font-medium font-mono ${isOther ? "text-ink-4 opacity-55" : isSun ? "text-crit" : isSat ? "text-info" : "text-ink-2"} ${isToday ? "bg-accent-deep text-white w-5 h-5 rounded-full grid place-items-center text-[12.5px] font-bold" : ""}`}>
                       {day}
                     </span>
                   )}
@@ -144,7 +144,7 @@ export function MonthView({ anchor, onPeriodChange }: Props) {
                   return (
                     <div
                       key={t.id}
-                      className={`text-[11.5px] px-2 py-px rounded font-medium overflow-hidden text-ellipsis whitespace-nowrap ${isOther ? "opacity-50" : ""}`}
+                      className={`text-[13px] px-2 py-px rounded font-medium overflow-hidden text-ellipsis whitespace-nowrap ${isOther ? "opacity-50" : ""}`}
                       style={{ background: bg, color: fg }}
                     >
                       {t.title}
@@ -152,7 +152,7 @@ export function MonthView({ anchor, onPeriodChange }: Props) {
                   );
                 })}
                 {dayTasks.length > 3 && (
-                  <div className="text-[10.5px] text-ink-3 px-2 font-mono">+{dayTasks.length - 3}件</div>
+                  <div className="text-[12px] text-ink-3 px-2 font-mono">+{dayTasks.length - 3}件</div>
                 )}
               </div>
             );

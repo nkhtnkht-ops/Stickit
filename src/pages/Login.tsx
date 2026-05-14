@@ -44,22 +44,22 @@ export default function Login() {
       <div className="relative w-full max-w-[380px] bg-surface border border-border rounded-lg shadow-lg p-8">
         {/* ブランド */}
         <div className="flex items-center gap-2 mb-6">
-          <div className="w-[26px] h-[26px] rounded-md bg-ink text-accent grid place-items-center font-mono font-semibold text-[13px] relative">
+          <div className="w-[26px] h-[26px] rounded-md bg-ink text-accent grid place-items-center font-mono font-semibold text-[14.5px] relative">
             S
             <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-accent border-2 border-surface" />
           </div>
-          <span className="font-semibold text-[15px] tracking-tightish">
+          <span className="font-semibold text-[17px] tracking-tightish">
             Stickit
           </span>
-          <span className="ml-auto font-mono text-[10px] text-ink-4 bg-bg px-1.5 py-px rounded">
+          <span className="ml-auto font-mono text-[11.5px] text-ink-4 bg-bg px-1.5 py-px rounded">
             v0.1
           </span>
         </div>
 
-        <h1 className="text-[22px] font-semibold tracking-[-0.025em] leading-tight">
+        <h1 className="text-[26px] font-semibold tracking-[-0.025em] leading-tight">
           サインイン
         </h1>
-        <p className="text-ink-3 text-[13px] mt-1 mb-6">
+        <p className="text-ink-3 text-[14.5px] mt-1 mb-6">
           Google アカウントでサインインしてください。パスワード不要、1クリックです。
         </p>
 
@@ -67,7 +67,7 @@ export default function Login() {
           type="button"
           onClick={onClickGoogle}
           disabled={busy}
-          className="w-full py-3 bg-surface border border-border rounded font-medium text-[14px] text-ink flex items-center justify-center gap-3 hover:bg-bg-2 hover:border-ink-5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full py-3 bg-surface border border-border rounded font-medium text-[16px] text-ink flex items-center justify-center gap-3 hover:bg-bg-2 hover:border-ink-5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {/* Google G ロゴ */}
           <svg className="w-[18px] h-[18px]" viewBox="0 0 18 18" aria-hidden="true">
@@ -80,10 +80,10 @@ export default function Login() {
         </button>
 
         {error && (
-          <p className="mt-3 text-crit text-[12px]">{error}</p>
+          <p className="mt-3 text-crit text-[13.5px]">{error}</p>
         )}
 
-        <div className="flex items-center justify-center gap-1.5 text-ink-4 font-mono text-[10.5px] mt-5">
+        <div className="flex items-center justify-center gap-1.5 text-ink-4 font-mono text-[12px] mt-5">
           <span className="pulse-dot" /> 稼働中
         </div>
       </div>

@@ -57,8 +57,8 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
 
   return (
     <Modal open={open} onClose={() => onOpenChange(false)}>
-      <div className="font-mono text-[10.5px] uppercase tracking-wider text-ink-4 mb-1">// {task ? "edit" : "new"}</div>
-      <h2 className="text-[18px] font-semibold tracking-[-0.02em] mb-3">
+      <div className="font-mono text-[12px] uppercase tracking-wider text-ink-4 mb-1">// {task ? "edit" : "new"}</div>
+      <h2 className="text-[21px] font-semibold tracking-[-0.02em] mb-3">
         {task ? "タスクを編集" : "新規タスク"}
       </h2>
       <form onSubmit={handle} className="space-y-3">
@@ -68,26 +68,26 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
           placeholder="タスクのタイトル"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full border border-border rounded px-3 py-2 text-[14px] focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
+          className="w-full border border-border rounded px-3 py-2 text-[16px] focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
         />
         <textarea
           placeholder="メモ（任意）"
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
-          className="w-full border border-border rounded px-3 py-2 text-[13px] resize-none focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
+          className="w-full border border-border rounded px-3 py-2 text-[14.5px] resize-none focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
           rows={3}
         />
         <input
           type="datetime-local"
           value={dueLocal}
           onChange={(e) => setDueLocal(e.target.value)}
-          className="w-full border border-border rounded px-3 py-2 text-[13px] font-mono focus:outline-none focus:border-ink"
+          className="w-full border border-border rounded px-3 py-2 text-[14.5px] font-mono focus:outline-none focus:border-ink"
         />
         <div className="flex gap-2">
           <select
             value={projectId}
             onChange={(e) => setProjectId(e.target.value as string | "none")}
-            className="flex-1 border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-ink"
+            className="flex-1 border border-border rounded px-3 py-2 text-[14.5px] focus:outline-none focus:border-ink"
           >
             <option value="none">プロジェクトなし</option>
             {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -95,7 +95,7 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
           <select
             value={priority}
             onChange={(e) => setPriority(Number(e.target.value))}
-            className="border border-border rounded px-3 py-2 text-[13px] focus:outline-none focus:border-ink"
+            className="border border-border rounded px-3 py-2 text-[14.5px] focus:outline-none focus:border-ink"
           >
             <option value={0}>優先度なし</option>
             <option value={1}>P2 低</option>
@@ -107,12 +107,12 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="px-3 py-1.5 text-[12.5px] text-ink-2 hover:bg-bg-2 rounded font-medium"
+            className="px-3 py-1.5 text-[14px] text-ink-2 hover:bg-bg-2 rounded font-medium"
           >キャンセル</button>
           <button
             type="submit"
             disabled={busy}
-            className="px-3 py-1.5 text-[12.5px] bg-ink text-white rounded font-medium hover:bg-black disabled:opacity-50"
+            className="px-3 py-1.5 text-[14px] bg-ink text-white rounded font-medium hover:bg-black disabled:opacity-50"
           >{task ? "保存" : "追加"}</button>
         </div>
       </form>

@@ -24,14 +24,14 @@ export function StickyCard({ task, project, onClick, onToggle }: Props) {
         className={`absolute top-0 left-0 right-0 h-[3px] ${accent}`}
         style={pri === 0 && project?.color ? { background: project.color } : undefined}
       />
-      <div className="font-mono text-[10.5px] text-ink-3 uppercase tracking-wider flex items-center justify-between">
+      <div className="font-mono text-[12px] text-ink-3 uppercase tracking-wider flex items-center justify-between">
         <span>{project?.name ?? "—"}</span>
         <span>{formatDue(task.due_at)}</span>
       </div>
-      <div className={`font-medium text-[14px] leading-snug ${done ? "line-through text-ink-3" : "text-ink"}`}>
+      <div className={`font-medium text-[16px] leading-snug ${done ? "line-through text-ink-3" : "text-ink"}`}>
         {task.title}
       </div>
-      <div className="mt-auto pt-2 border-t border-border-2 flex items-center gap-2 text-[10.5px] font-mono text-ink-4">
+      <div className="mt-auto pt-2 border-t border-border-2 flex items-center gap-2 text-[12px] font-mono text-ink-4">
         <button
           onClick={(e) => { e.stopPropagation(); onToggle?.(task); }}
           className={`w-4 h-4 rounded border-[1.4px] grid place-items-center ${done ? "bg-accent border-accent" : "border-ink-5"}`}

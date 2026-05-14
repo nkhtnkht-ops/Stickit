@@ -47,8 +47,8 @@ export function WeekView({ anchor }: Props) {
           const isSun = i === 0, isSat = i === 6;
           return (
             <div key={ymd} className={`px-3 py-2 border-r border-border last:border-r-0 ${isToday ? "bg-accent-soft" : ""}`}>
-              <div className={`font-mono text-[10.5px] uppercase tracking-wider font-semibold ${isToday ? "text-accent-deep" : isSun ? "text-crit" : isSat ? "text-info" : "text-ink-4"}`}>{DOW_LABELS_EN[i]}</div>
-              <div className={`text-[17px] font-semibold tracking-tight mt-0.5 ${isToday ? "text-accent-deep" : ""}`}>{jstDate(d)}</div>
+              <div className={`font-mono text-[12px] uppercase tracking-wider font-semibold ${isToday ? "text-accent-deep" : isSun ? "text-crit" : isSat ? "text-info" : "text-ink-4"}`}>{DOW_LABELS_EN[i]}</div>
+              <div className={`text-[19px] font-semibold tracking-tight mt-0.5 ${isToday ? "text-accent-deep" : ""}`}>{jstDate(d)}</div>
             </div>
           );
         })}
@@ -57,7 +57,7 @@ export function WeekView({ anchor }: Props) {
       {/* Time labels column */}
       <div className="border-r border-border bg-surface-2 overflow-y-auto">
         {HOURS.map((h) => (
-          <div key={h} className="border-b border-border-2 text-right pr-2 pt-1 font-mono text-[10px] text-ink-4 font-medium" style={{ height: HOUR_PX }}>
+          <div key={h} className="border-b border-border-2 text-right pr-2 pt-1 font-mono text-[11.5px] text-ink-4 font-medium" style={{ height: HOUR_PX }}>
             {String(h).padStart(2, "0")}:00
           </div>
         ))}
@@ -82,8 +82,8 @@ export function WeekView({ anchor }: Props) {
                 const bg = proj ? `${proj.color}26` : "rgba(0,0,0,.06)";
                 const fg = proj ? proj.color! : "#404040";
                 return (
-                  <div key={t.id} className="absolute left-1 right-1 rounded px-1.5 py-1 text-[11px] cursor-pointer overflow-hidden" style={{ top, minHeight: 32, background: bg, borderLeft: `3px solid ${fg}` }}>
-                    <div className="font-mono text-[9.5px] opacity-70" style={{ color: fg }}>{`${String(th).padStart(2, "0")}:${String(tm).padStart(2, "0")}`}</div>
+                  <div key={t.id} className="absolute left-1 right-1 rounded px-1.5 py-1 text-[12.5px] cursor-pointer overflow-hidden" style={{ top, minHeight: 32, background: bg, borderLeft: `3px solid ${fg}` }}>
+                    <div className="font-mono text-[11px] opacity-70" style={{ color: fg }}>{`${String(th).padStart(2, "0")}:${String(tm).padStart(2, "0")}`}</div>
                     <div className="font-medium truncate" style={{ color: "#0A0A0A" }}>{t.title}</div>
                   </div>
                 );

@@ -51,8 +51,8 @@ export default function AuthCallback() {
     return (
       <div className="min-h-screen grid place-items-center p-4">
         <div className="text-center">
-          <div className="font-mono text-[11px] text-crit mb-2">// auth error</div>
-          <p className="text-[13px] text-ink-2">{error}</p>
+          <div className="font-mono text-[12.5px] text-crit mb-2">// auth error</div>
+          <p className="text-[14.5px] text-ink-2">{error}</p>
         </div>
       </div>
     );
@@ -63,9 +63,9 @@ export default function AuthCallback() {
       <div className="text-center">
         <div className="flex items-center justify-center gap-2 mb-3">
           <span className="pulse-dot" />
-          <span className="font-mono text-[11px] text-ink-3">// signing in…</span>
+          <span className="font-mono text-[12.5px] text-ink-3">// signing in…</span>
         </div>
-        <p className="text-[13px] text-ink-3">Google アカウントで認証中</p>
+        <p className="text-[14.5px] text-ink-3">Google アカウントで認証中</p>
       </div>
     </div>
   );

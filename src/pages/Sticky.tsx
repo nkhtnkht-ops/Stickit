@@ -10,7 +10,7 @@ export default function Sticky() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center px-6 py-4 border-b border-border bg-surface gap-3">
-        <h1 className="text-[20px] font-semibold tracking-tight">付箋ボード</h1>
+        <h1 className="text-[23px] font-semibold tracking-tight">付箋ボード</h1>
         <div className="ml-auto">
           <PopoutButton projectId={tab} />
         </div>
@@ -32,7 +32,7 @@ function TabBtn({ label, color, active, onClick }: { label: string; color?: stri
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-3.5 py-2.5 text-[12.5px] font-medium whitespace-nowrap border-b-2 -mb-px ${
+      className={`flex items-center gap-2 px-3.5 py-2.5 text-[14px] font-medium whitespace-nowrap border-b-2 -mb-px ${
         active ? "text-ink border-accent font-semibold" : "text-ink-3 border-transparent hover:text-ink-2"
       }`}
     >

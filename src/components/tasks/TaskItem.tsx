@@ -42,10 +42,10 @@ export function TaskItem({ task, project, tagNames, onToggle, onClick, onDelete 
       </button>
 
       <div className="flex flex-col gap-0.5 min-w-0">
-        <div className={`text-[13.5px] font-medium leading-tight ${done ? "line-through text-ink-4" : "text-ink"}`}>
+        <div className={`text-[15px] font-medium leading-tight ${done ? "line-through text-ink-4" : "text-ink"}`}>
           {task.title}
         </div>
-        <div className="flex items-center gap-2 font-mono text-[11px] text-ink-4 flex-wrap">
+        <div className="flex items-center gap-2 font-mono text-[12.5px] text-ink-4 flex-wrap">
           <span>{formatDue(task.due_at)}</span>
           {project && (
             <>
@@ -72,7 +72,7 @@ export function TaskItem({ task, project, tagNames, onToggle, onClick, onDelete 
 
       <div className="flex items-center gap-1.5">
         {pri > 0 && (
-          <span className={`font-mono text-[10px] px-1.5 py-px rounded font-medium ${
+          <span className={`font-mono text-[11.5px] px-1.5 py-px rounded font-medium ${
             pri === 3 ? "bg-crit-soft text-[#991B1B]" : "bg-bg-2 text-ink-3"
           }`}>{PRI_BADGE[pri]}</span>
         )}
