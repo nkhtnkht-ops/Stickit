@@ -1,4 +1,5 @@
 import { ProjectList } from "@/components/projects/ProjectList";
+import { TagList } from "@/components/tags/TagList";
 
 export default function Settings() {
   return (
@@ -8,6 +9,9 @@ export default function Settings() {
       <div className="space-y-8">
         <section>
           <ProjectList />
+        </section>
+        <section>
+          <TagList />
         </section>
       </div>
     </div>
