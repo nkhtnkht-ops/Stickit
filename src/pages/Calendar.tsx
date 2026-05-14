@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MonthView } from "@/components/calendar/MonthView";
 import { WeekView } from "@/components/calendar/WeekView";
+import { DayView } from "@/components/calendar/DayView";
 
 type View = "day" | "week" | "month";
 
@@ -36,7 +37,7 @@ export default function Calendar() {
       <div className="flex-1 overflow-hidden">
         {view === "month" && <MonthView anchor={anchor} onPeriodChange={setPeriod} />}
         {view === "week" && <WeekView anchor={anchor} />}
-        {view === "day" && <div className="grid place-items-center h-full text-ink-4 font-mono text-[12px]">// day view — Task 12 で実装</div>}
+        {view === "day" && <DayView anchor={anchor} />}
       </div>
     </div>
   );
