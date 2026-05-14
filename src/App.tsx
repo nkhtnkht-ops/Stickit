@@ -10,12 +10,14 @@ import All from "@/pages/All";
 import Settings from "@/pages/Settings";
 import Calendar from "@/pages/Calendar";
 import Sticky from "@/pages/Sticky";
+import Popout from "@/pages/Popout";
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route path="/popout" element={<Popout />} />
       <Route
         element={
           <ProtectedRoute>
