@@ -3,6 +3,7 @@ import { useTasks, type TaskFilter, type Task } from "@/hooks/useTasks";
 import { useProjects } from "@/hooks/useProjects";
 import { TaskItem } from "./TaskItem";
 import { TaskForm } from "./TaskForm";
+import { syncReminders, type ReminderOffsetKey } from "@/hooks/useReminders";
 
 type Props = { title: string; subtitle?: string; filter: TaskFilter };
 
@@ -13,9 +14,21 @@ export function TaskList({ title, subtitle, filter }: Props) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Task | null>(null);
 
-  const handleSubmit = async (input: { title: string; memo: string | null; due_at: string | null; priority: number; project_id: string | null; recurrence_rule: string | null }) => {
-    if (editing) await updateTask(editing.id, input);
-    else await createTask(input);
+  const handleSubmit = async (input: {
+    title: string; memo: string | null; due_at: string | null; priority: number;
+    project_id: string | null; recurrence_rule: string | null;
+    reminderOffsets: ReminderOffsetKey[];
+  }) => {
+    const { reminderOffsets, ...rest } = input;
+    let id: string;
+    if (editing) {
+      await updateTask(editing.id, rest);
+      id = editing.id;
+    } else {
+      const created = await createTask(rest);
+      id = created.id;
+    }
+    await syncReminders(id, rest.due_at, reminderOffsets);
     setEditing(null);
   };
 

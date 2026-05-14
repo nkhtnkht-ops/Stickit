@@ -3,12 +3,17 @@ import { Modal } from "@/components/ui/Modal";
 import type { Task } from "@/hooks/useTasks";
 import { useProjects } from "@/hooks/useProjects";
 import { RECURRENCE_PRESETS, RECURRENCE_LABELS, detectPreset, type RecurrencePresetKey } from "@/utils/recurrence";
+import { REMINDER_OFFSETS, REMINDER_LABELS, type ReminderOffsetKey, getReminderOffsets } from "@/hooks/useReminders";
 
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   task?: Task | null;
-  onSubmit: (input: { title: string; memo: string | null; due_at: string | null; priority: number; project_id: string | null; recurrence_rule: string | null }) => Promise<void>;
+  onSubmit: (input: {
+    title: string; memo: string | null; due_at: string | null; priority: number;
+    project_id: string | null; recurrence_rule: string | null;
+    reminderOffsets: ReminderOffsetKey[];
+  }) => Promise<void>;
 };
 
 function toLocalInput(iso: string | null): string {
@@ -25,6 +30,7 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
   const [priority, setPriority] = useState(0);
   const [projectId, setProjectId] = useState<string | "none">("none");
   const [recurrence, setRecurrence] = useState<RecurrencePresetKey | "none">("none");
+  const [reminders, setReminders] = useState<ReminderOffsetKey[]>([]);
   const [busy, setBusy] = useState(false);
 
   const { projects } = useProjects();
@@ -37,6 +43,11 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
       setPriority(task?.priority ?? 0);
       setProjectId(task?.project_id ?? "none");
       setRecurrence(detectPreset(task?.recurrence_rule) ?? "none");
+      if (task?.id && task.due_at) {
+        getReminderOffsets(task.id, task.due_at).then(setReminders);
+      } else {
+        setReminders([]);
+      }
     }
   }, [open, task]);
 
@@ -52,6 +63,7 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
         priority,
         project_id: projectId === "none" ? null : projectId,
         recurrence_rule: recurrence === "none" ? null : RECURRENCE_PRESETS[recurrence],
+        reminderOffsets: reminders,
       });
       onOpenChange(false);
     } finally {
@@ -119,6 +131,25 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
               <option key={k} value={k}>{RECURRENCE_LABELS[k]}</option>
             ))}
           </select>
+        </div>
+        <div>
+          <div className="font-mono text-[12px] uppercase tracking-wider text-ink-3 mb-1.5">// リマインダー</div>
+          <div className="flex flex-wrap gap-1.5">
+            {(Object.keys(REMINDER_OFFSETS) as ReminderOffsetKey[]).map((k) => {
+              const active = reminders.includes(k);
+              return (
+                <button
+                  type="button"
+                  key={k}
+                  onClick={() => setReminders((prev) => active ? prev.filter((x) => x !== k) : [...prev, k])}
+                  className={`px-2.5 py-1 text-[13px] rounded font-medium border ${active ? "bg-ink text-white border-ink" : "bg-surface text-ink-2 border-border hover:border-ink-5"}`}
+                >
+                  {REMINDER_LABELS[k]}
+                </button>
+              );
+            })}
+          </div>
+          <div className="font-mono text-[12px] text-ink-4 mt-1.5">期限の指定時間前に通知</div>
         </div>
         <div className="flex justify-end gap-2 pt-2">
           <button
