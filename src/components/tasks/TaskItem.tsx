@@ -59,6 +59,14 @@ export function TaskItem({ task, project, tagNames, onToggle, onClick, onDelete 
               </span>
             </>
           )}
+          {task.recurrence_rule && (
+            <>
+              <span className="text-ink-5">·</span>
+              <span title="繰り返し" className="inline-flex items-center text-ink-3">
+                <svg className="w-3 h-3 stroke-current fill-none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7L21 8M21 3v5h-5"/></svg>
+              </span>
+            </>
+          )}
           {tagNames && tagNames.length > 0 && (
             <>
               <span className="text-ink-5">·</span>
