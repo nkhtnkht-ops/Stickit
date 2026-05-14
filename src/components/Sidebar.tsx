@@ -2,6 +2,8 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProjects } from "@/hooks/useProjects";
 import { useTags } from "@/hooks/useTags";
+import { useTasks } from "@/hooks/useTasks";
+import { todayRange, tomorrowRange, next7DaysRange } from "@/utils/dateRange";
 import { ReactNode } from "react";
 
 type NavItemDef = { to: string; label: string; count?: number; icon: ReactNode };
@@ -10,19 +12,23 @@ const Ic = ({ d }: { d: string }) => (
   <svg className="w-3.5 h-3.5 stroke-current fill-none flex-shrink-0" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: d }} />
 );
 
-const mainNav: NavItemDef[] = [
-  { to: "/today",    label: "今日",      count: 0,  icon: <Ic d='<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' /> },
-  { to: "/tomorrow", label: "明日",      count: 0,  icon: <Ic d='<path d="M3 6h18M3 12h18M3 18h18"/>' /> },
-  { to: "/next7",    label: "今後7日間",  count: 0,  icon: <Ic d='<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>' /> },
-  { to: "/calendar", label: "カレンダー", icon: <Ic d='<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>' /> },
-  { to: "/sticky",   label: "付箋ボード", icon: <Ic d='<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>' /> },
-  { to: "/all",      label: "すべて",    count: 0,  icon: <Ic d='<path d="M5 6h14M5 12h14M5 18h14"/>' /> },
-];
-
 export function Sidebar() {
   const { signOut } = useAuth();
   const { projects } = useProjects();
   const { tags } = useTags();
+  const todayCount = useTasks(todayRange()).tasks.length;
+  const tomorrowCount = useTasks(tomorrowRange()).tasks.length;
+  const next7Count = useTasks(next7DaysRange()).tasks.length;
+  const allCount = useTasks({ status: "all" }).tasks.length;
+
+  const mainNav: NavItemDef[] = [
+    { to: "/today",    label: "今日",      count: todayCount,    icon: <Ic d='<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' /> },
+    { to: "/tomorrow", label: "明日",      count: tomorrowCount, icon: <Ic d='<path d="M3 6h18M3 12h18M3 18h18"/>' /> },
+    { to: "/next7",    label: "今後7日間",  count: next7Count,    icon: <Ic d='<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>' /> },
+    { to: "/calendar", label: "カレンダー",                       icon: <Ic d='<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>' /> },
+    { to: "/sticky",   label: "付箋ボード",                       icon: <Ic d='<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>' /> },
+    { to: "/all",      label: "すべて",     count: allCount,      icon: <Ic d='<path d="M5 6h14M5 12h14M5 18h14"/>' /> },
+  ];
   return (
     <aside className="w-60 bg-surface border-r border-border p-2.5 pt-3.5 flex flex-col gap-4 overflow-y-auto">
       {/* ブランド */}
