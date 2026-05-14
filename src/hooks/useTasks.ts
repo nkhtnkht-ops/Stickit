@@ -10,6 +10,7 @@ export type TaskFilter = {
   from?: Date;
   to?: Date;
   status?: "open" | "done" | "all";
+  project_id?: string | "none";  // "none" = unassigned tasks
 };
 
 export function useTasks(filter: TaskFilter = {}) {
@@ -24,11 +25,13 @@ export function useTasks(filter: TaskFilter = {}) {
     else if (!filter.status) q = q.eq("status", "open");
     if (filter.from) q = q.gte("due_at", filter.from.toISOString());
     if (filter.to) q = q.lt("due_at", filter.to.toISOString());
+    if (filter.project_id === "none") q = q.is("project_id", null);
+    else if (filter.project_id) q = q.eq("project_id", filter.project_id);
     const { data, error } = await q;
     if (error) setError(error.message);
     else setTasks(data ?? []);
     setLoading(false);
-  }, [filter.from?.getTime(), filter.to?.getTime(), filter.status]);
+  }, [filter.from?.getTime(), filter.to?.getTime(), filter.status, filter.project_id]);
 
   useEffect(() => { fetchTasks(); }, [fetchTasks]);
 
