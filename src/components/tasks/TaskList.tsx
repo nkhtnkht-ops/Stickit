@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import { useTasks, type TaskFilter, type Task } from "@/hooks/useTasks";
 import { useProjects } from "@/hooks/useProjects";
 import { TaskItem } from "./TaskItem";
@@ -13,6 +14,17 @@ export function TaskList({ title, subtitle, filter }: Props) {
   const projectMap = Object.fromEntries(projects.map((p) => [p.id, p]));
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Task | null>(null);
+  const [reminderTaskIds, setReminderTaskIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (tasks.length === 0) {
+      setReminderTaskIds(new Set());
+      return;
+    }
+    const ids = tasks.map((t) => t.id);
+    supabase.from("reminders").select("task_id").in("task_id", ids).then(({ data }) => {
+      setReminderTaskIds(new Set((data ?? []).map((r) => r.task_id as string)));
+    });
+  }, [tasks]);
 
   const handleSubmit = async (input: {
     title: string; memo: string | null; due_at: string | null; priority: number;
@@ -64,6 +76,7 @@ export function TaskList({ title, subtitle, filter }: Props) {
               key={t.id}
               task={t}
               project={t.project_id ? projectMap[t.project_id] : null}
+              hasReminder={reminderTaskIds.has(t.id)}
               onToggle={toggleComplete}
               onClick={(task) => { setEditing(task); setOpen(true); }}
               onDelete={deleteTask}

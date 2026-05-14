@@ -5,6 +5,7 @@ type Props = {
   task: Task;
   project?: Project | null;
   tagNames?: string[];
+  hasReminder?: boolean;
   onToggle: (t: Task) => void;
   onClick?: (t: Task) => void;
   onDelete?: (id: string) => void;
@@ -19,7 +20,7 @@ function formatDue(iso: string | null): string {
   return d.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
 }
 
-export function TaskItem({ task, project, tagNames, onToggle, onClick, onDelete }: Props) {
+export function TaskItem({ task, project, tagNames, hasReminder, onToggle, onClick, onDelete }: Props) {
   const done = task.status === "done";
   const pri = task.priority ?? 0;
   return (
@@ -64,6 +65,14 @@ export function TaskItem({ task, project, tagNames, onToggle, onClick, onDelete 
               <span className="text-ink-5">·</span>
               <span title="繰り返し" className="inline-flex items-center text-ink-3">
                 <svg className="w-3 h-3 stroke-current fill-none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7L21 8M21 3v5h-5"/></svg>
+              </span>
+            </>
+          )}
+          {hasReminder && (
+            <>
+              <span className="text-ink-5">·</span>
+              <span title="リマインダー設定済" className="inline-flex items-center text-accent-deep">
+                <svg className="w-3 h-3 stroke-current fill-none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg>
               </span>
             </>
           )}
