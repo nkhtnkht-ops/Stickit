@@ -7,6 +7,7 @@ import Today from "@/pages/Today";
 import Tomorrow from "@/pages/Tomorrow";
 import Next7Days from "@/pages/Next7Days";
 import All from "@/pages/All";
+import Settings from "@/pages/Settings";
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/tomorrow" element={<Tomorrow />} />
         <Route path="/next7" element={<Next7Days />} />
         <Route path="/all" element={<All />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/today" replace />} />
     </Routes>
