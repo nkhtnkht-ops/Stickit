@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Database } from "@/lib/database.types";
+import { nextOccurrence } from "@/utils/recurrence";
 
 export type Task = Database["public"]["Tables"]["tasks"]["Row"];
 export type TaskInsert = Database["public"]["Tables"]["tasks"]["Insert"];
@@ -55,11 +56,41 @@ export function useTasks(filter: TaskFilter = {}) {
   };
 
   const toggleComplete = async (task: Task) => {
-    const next = task.status === "done" ? "open" : "done";
-    await updateTask(task.id, {
-      status: next,
-      completed_at: next === "done" ? new Date().toISOString() : null,
-    });
+    const completing = task.status !== "done";
+
+    if (completing && task.recurrence_rule && task.due_at) {
+      // Recurring: mark current as done AND clone next instance
+      const next = nextOccurrence(task.recurrence_rule, new Date(task.due_at));
+      await updateTask(task.id, { status: "done", completed_at: new Date().toISOString() });
+      if (next) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        // Compute next start_at preserving the original delta
+        let nextStart: string | null = null;
+        if (task.start_at) {
+          const delta = new Date(task.due_at).getTime() - new Date(task.start_at).getTime();
+          nextStart = new Date(next.getTime() - delta).toISOString();
+        }
+        await supabase.from("tasks").insert({
+          user_id: user.id,
+          project_id: task.project_id,
+          title: task.title,
+          memo: task.memo,
+          priority: task.priority,
+          start_at: nextStart,
+          due_at: next.toISOString(),
+          recurrence_rule: task.recurrence_rule,
+          status: "open",
+        });
+        await fetchTasks();
+      }
+    } else {
+      const next = completing ? "done" : "open";
+      await updateTask(task.id, {
+        status: next,
+        completed_at: next === "done" ? new Date().toISOString() : null,
+      });
+    }
   };
 
   const deleteTask = async (id: string) => {
