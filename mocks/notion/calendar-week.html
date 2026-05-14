@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stickit — Calendar Week (Notion)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Notion design tokens */
+    --canvas: #FFFFFF;
+    --surface: #F6F5F4;
+    --surface-soft: #FAFAF9;
+    --hairline: #E5E3DF;
+    --hairline-soft: #EDE9E4;
+    --hairline-strong: #C8C4BE;
+    --charcoal: #37352F;
+    --slate: #5D5B54;
+    --steel: #787671;
+    --stone: #A4A097;
+    --muted: #BBB8B1;
+    --primary: #5645D4;
+    --primary-pressed: #4534B3;
+    --primary-soft: rgba(86,69,212,.08);
+    --primary-soft-strong: rgba(86,69,212,.14);
+    --link: #0075DE;
+
+    /* Card tints */
+    --tint-peach: #FFE8D4;
+    --tint-rose: #FDE0EC;
+    --tint-mint: #D9F3E1;
+    --tint-lavender: #E6E0F5;
+    --tint-sky: #DCECFA;
+    --tint-yellow: #FEF7D6;
+    --tint-cream: #F8F5E8;
+    --tint-gray: #F0EEEC;
+
+    /* Tint text colors (high contrast on tints) */
+    --tint-peach-fg: #793400;
+    --tint-rose-fg: #A02E6D;
+    --tint-mint-fg: #1A6B3F;
+    --tint-lavender-fg: #391C57;
+    --tint-sky-fg: #1A4480;
+    --tint-yellow-fg: #6B5611;
+    --tint-cream-fg: #5D4A1F;
+
+    --r-xs: 4px;
+    --r-sm: 6px;
+    --r-md: 8px;
+    --r-lg: 12px;
+    --r-xl: 16px;
+    --r-full: 9999px;
+
+    --sans: "Inter", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    background: var(--canvas);
+    color: var(--charcoal);
+    font-size: 16px;
+    line-height: 1.55;
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input { font-family: inherit; color: inherit; }
+
+  .ic {
+    width: 16px; height: 16px;
+    stroke: currentColor; fill: none;
+    stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+
+  /* ---------- App Frame ---------- */
+  .app {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--hairline);
+    padding: 12px 8px;
+    display: flex; flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+  }
+
+  .brand {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px 8px;
+  }
+  .brand-mark {
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    background: var(--charcoal);
+    color: #fff;
+    display: grid; place-items: center;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .brand-name {
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.005em;
+  }
+  .brand-meta {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--steel);
+  }
+
+  .search {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px;
+    border-radius: var(--r-sm);
+    color: var(--steel);
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .search:hover { background: var(--hairline-soft); }
+  .search .kbd {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--stone);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .nav-section { display: flex; flex-direction: column; gap: 1px; }
+  .nav-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--steel);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 12px 10px 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 10px;
+    border-radius: var(--r-sm);
+    color: var(--charcoal);
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background 80ms ease;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--hairline-soft); }
+  .nav-item.active {
+    background: var(--primary-soft-strong);
+    color: var(--primary);
+    font-weight: 500;
+  }
+  .nav-item.active .ic { color: var(--primary); }
+  .nav-item .ic { color: var(--steel); }
+  .nav-item .count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--stone);
+  }
+  .nav-item.active .count { color: var(--primary); opacity: .7; }
+  .nav-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  .sidebar-foot {
+    margin-top: auto;
+    border-top: 1px solid var(--hairline);
+    padding: 10px 6px 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--charcoal);
+    color: #fff;
+    display: grid; place-items: center;
+    font-weight: 600;
+    font-size: 11px;
+  }
+  .avatar-meta { display: flex; flex-direction: column; line-height: 1.2; }
+  .avatar-name { font-weight: 500; font-size: 13px; color: var(--charcoal); }
+  .avatar-role { font-size: 11.5px; color: var(--steel); }
+
+  /* ---------- Main ---------- */
+  .main {
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    background: var(--canvas);
+  }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex; align-items: center;
+    padding: 14px 24px;
+    gap: 14px;
+    border-bottom: 1px solid var(--hairline);
+    flex-wrap: wrap;
+  }
+  .nav-btns {
+    display: flex; gap: 2px;
+    align-items: center;
+  }
+  .nav-btns .arrow {
+    width: 28px; height: 28px;
+    border-radius: var(--r-sm);
+    color: var(--slate);
+    display: grid; place-items: center;
+    font-size: 16px;
+  }
+  .nav-btns .arrow:hover { background: var(--surface); }
+  .nav-btns .today-btn {
+    padding: 5px 12px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--hairline-strong);
+    color: var(--charcoal);
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--canvas);
+    margin: 0 4px;
+  }
+  .nav-btns .today-btn:hover { background: var(--surface); }
+
+  .toolbar-period {
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    color: var(--charcoal);
+  }
+  .toolbar-period .month-num { color: var(--charcoal); }
+  .toolbar-period .year { color: var(--stone); font-weight: 400; margin-left: 4px; }
+
+  .seg {
+    display: inline-flex;
+    background: var(--surface);
+    border-radius: var(--r-sm);
+    padding: 3px;
+    margin-left: auto;
+    border: 1px solid var(--hairline);
+  }
+  .seg button {
+    padding: 5px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--steel);
+    border-radius: var(--r-xs);
+  }
+  .seg button.active {
+    background: var(--canvas);
+    color: var(--charcoal);
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    padding: 7px 14px;
+    border-radius: var(--r-md);
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary:hover { background: var(--primary-pressed); }
+
+  /* ---------- Calendar Week View ---------- */
+  .week {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    grid-template-rows: auto auto 1fr;
+    overflow: hidden;
+    background: var(--canvas);
+  }
+
+  .week-corner {
+    border-right: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  /* Day headers */
+  .week-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .week-day-h {
+    padding: 14px 16px 12px;
+    border-right: 1px solid var(--hairline);
+    text-align: left;
+  }
+  .week-day-h:last-child { border-right: none; }
+  .week-dow {
+    font-size: 11.5px;
+    color: var(--steel);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .week-day-h.sun .week-dow { color: #C04848; }
+  .week-day-h.sat .week-dow { color: var(--link); }
+  .week-date {
+    margin-top: 4px;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--charcoal);
+  }
+  .week-day-h.today .week-date {
+    color: #fff;
+    background: var(--primary);
+    width: 30px; height: 30px;
+    border-radius: var(--r-full);
+    display: grid; place-items: center;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* All-day row */
+  .week-allday-label {
+    padding: 8px 12px;
+    border-right: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    font-size: 11px;
+    color: var(--stone);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: right;
+  }
+  .week-allday {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid var(--hairline);
+    min-height: 38px;
+  }
+  .week-allday-cell {
+    border-right: 1px solid var(--hairline);
+    padding: 4px 6px;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .week-allday-cell:last-child { border-right: none; }
+  .allday-pill {
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: var(--r-sm);
+    background: var(--tint-mint);
+    color: var(--tint-mint-fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .allday-pill.t-cc { background: var(--tint-rose); color: var(--tint-rose-fg); }
+  .allday-pill.t-mgmt { background: var(--tint-sky); color: var(--tint-sky-fg); }
+  .allday-pill.t-event { background: var(--tint-lavender); color: var(--tint-lavender-fg); }
+
+  /* Time labels */
+  .week-times {
+    border-right: 1px solid var(--hairline);
+    overflow-y: auto;
+  }
+  .week-times-row {
+    height: 56px;
+    border-bottom: 1px solid var(--hairline-soft);
+    padding: 4px 8px 0;
+    text-align: right;
+    font-size: 11px;
+    color: var(--stone);
+    font-weight: 500;
+  }
+
+  /* Day columns */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    overflow-y: auto;
+    position: relative;
+  }
+  .day-col {
+    border-right: 1px solid var(--hairline);
+    position: relative;
+  }
+  .day-col:last-child { border-right: none; }
+  .day-col.today { background: rgba(86,69,212,.025); }
+  .day-col.weekend { background: var(--surface-soft); }
+
+  .hour-line {
+    height: 56px;
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+
+  /* Now-line */
+  .now-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 0;
+    border-top: 1.5px solid var(--primary);
+    z-index: 5;
+    pointer-events: none;
+  }
+  .now-line::before {
+    content: "";
+    position: absolute;
+    left: -5px; top: -5px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 0 3px rgba(86,69,212,.18);
+  }
+
+  /* Event cards */
+  .ev {
+    position: absolute;
+    left: 4px; right: 4px;
+    border-radius: var(--r-sm);
+    padding: 6px 8px;
+    font-size: 12.5px;
+    cursor: pointer;
+    overflow: hidden;
+    background: var(--tint-mint);
+    color: var(--tint-mint-fg);
+    z-index: 2;
+    transition: transform 80ms ease, box-shadow 80ms ease;
+    border-left: 3px solid currentColor;
+  }
+  .ev:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+    z-index: 4;
+  }
+  .ev .ev-time {
+    font-size: 10.5px;
+    opacity: .7;
+    font-weight: 500;
+    margin-bottom: 1px;
+  }
+  .ev .ev-title {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    line-height: 1.3;
+  }
+  .ev.t-mgmt   { background: var(--tint-sky);      color: var(--tint-sky-fg); }
+  .ev.t-cc     { background: var(--tint-rose);     color: var(--tint-rose-fg); }
+  .ev.t-ota    { background: var(--tint-yellow);   color: var(--tint-yellow-fg); }
+  .ev.t-event  { background: var(--tint-lavender); color: var(--tint-lavender-fg); }
+  .ev.t-personal { background: var(--tint-peach);  color: var(--tint-peach-fg); }
+  .ev.t-misc   { background: var(--tint-cream);    color: var(--tint-cream-fg); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <span class="brand-name">Stickit</span>
+      <span class="brand-meta">v0.1</span>
+    </div>
+
+    <div class="search">
+      <svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <span>検索</span>
+      <span class="kbd">⌘K</span>
+    </div>
+
+    <div class="nav-section">
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        今日 <span class="count">7</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h12"/></svg>
+        明日 <span class="count">3</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 12h18M5 6h14M7 18h10"/></svg>
+        今後 7 日間 <span class="count">19</span>
+      </button>
+      <button class="nav-item active">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+        カレンダー
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>
+        付箋ボード
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/></svg>
+        すべて <span class="count">42</span>
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">プロジェクト</div>
+      <button class="nav-item">
+        <span class="nav-dot" style="background:#1A4480"></span>
+        支配人業務 <span class="count">12</span>
+      </button>
+      <button class="nav-item">
+        <span class="nav-dot" style="background:#A02E6D"></span>
+        キャプテンカップ <span class="count">8</span>
+      </button>
+      <button class="nav-item">
+        <span class="nav-dot" style="background:#793400"></span>
+        OTA戦略 <span class="count">5</span>
+      </button>
+      <button class="nav-item">
+        <span class="nav-dot" style="background:#1A6B3F"></span>
+        個人 <span class="count">9</span>
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">ツール</div>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 001 1h4M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/></svg>
+        シフト取込
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33"/></svg>
+        設定
+      </button>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="avatar">NK</div>
+      <div class="avatar-meta">
+        <span class="avatar-name">中畑 慶治</span>
+        <span class="avatar-role">支配人</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== Main ===== -->
+  <div class="main">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="nav-btns">
+        <button class="arrow">‹</button>
+        <button class="today-btn">今日</button>
+        <button class="arrow">›</button>
+      </div>
+      <div class="toolbar-period">
+        <span class="month-num">5月</span> 10日 — 16日
+        <span class="year">2026</span>
+      </div>
+      <div class="seg">
+        <button>日</button>
+        <button class="active">週</button>
+        <button>月</button>
+      </div>
+      <button class="btn-primary">
+        <svg class="ic" viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#fff"><path d="M12 5v14M5 12h14"/></svg>
+        新規
+      </button>
+    </div>
+
+    <!-- Week View -->
+    <div class="week">
+      <!-- Empty corner -->
+      <div class="week-corner"></div>
+
+      <!-- Day headers -->
+      <div class="week-header">
+        <div class="week-day-h sun"><div class="week-dow">日</div><div class="week-date">10</div></div>
+        <div class="week-day-h"><div class="week-dow">月</div><div class="week-date">11</div></div>
+        <div class="week-day-h"><div class="week-dow">火</div><div class="week-date">12</div></div>
+        <div class="week-day-h today"><div class="week-dow" style="color:var(--primary)">水</div><div class="week-date">13</div></div>
+        <div class="week-day-h"><div class="week-dow">木</div><div class="week-date">14</div></div>
+        <div class="week-day-h"><div class="week-dow">金</div><div class="week-date">15</div></div>
+        <div class="week-day-h sat"><div class="week-dow">土</div><div class="week-date">16</div></div>
+      </div>
+
+      <!-- All-day row -->
+      <div class="week-allday-label">終日</div>
+      <div class="week-allday">
+        <div class="week-allday-cell"></div>
+        <div class="week-allday-cell"><div class="allday-pill t-mgmt">朝礼</div></div>
+        <div class="week-allday-cell"></div>
+        <div class="week-allday-cell"><div class="allday-pill t-cc">CC 予選 締切</div></div>
+        <div class="week-allday-cell"><div class="allday-pill t-ota">月次RM 提出</div></div>
+        <div class="week-allday-cell"><div class="allday-pill t-cc">CC 本戦</div></div>
+        <div class="week-allday-cell"><div class="allday-pill t-cc">CC 本戦</div></div>
+      </div>
+
+      <!-- Time labels -->
+      <div class="week-times">
+        <div class="week-times-row">07:00</div>
+        <div class="week-times-row">08:00</div>
+        <div class="week-times-row">09:00</div>
+        <div class="week-times-row">10:00</div>
+        <div class="week-times-row">11:00</div>
+        <div class="week-times-row">12:00</div>
+        <div class="week-times-row">13:00</div>
+        <div class="week-times-row">14:00</div>
+        <div class="week-times-row">15:00</div>
+        <div class="week-times-row">16:00</div>
+        <div class="week-times-row">17:00</div>
+        <div class="week-times-row">18:00</div>
+        <div class="week-times-row">19:00</div>
+        <div class="week-times-row">20:00</div>
+        <div class="week-times-row">21:00</div>
+        <div class="week-times-row">22:00</div>
+      </div>
+
+      <!-- Day columns with events -->
+      <div class="week-grid">
+
+        <!-- Sun 10 -->
+        <div class="day-col weekend">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+        </div>
+
+        <!-- Mon 11 -->
+        <div class="day-col">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="ev t-mgmt" style="top: 84px; height: 36px;">
+            <div class="ev-time">08:30 — 09:00</div>
+            <div class="ev-title">朝礼</div>
+          </div>
+          <div class="ev t-mgmt" style="top: 168px; height: 56px;">
+            <div class="ev-time">10:00 — 11:00</div>
+            <div class="ev-title">支配人会議</div>
+          </div>
+          <div class="ev t-ota" style="top: 392px; height: 84px;">
+            <div class="ev-time">14:00 — 15:30</div>
+            <div class="ev-title">OTA担当 MTG</div>
+          </div>
+        </div>
+
+        <!-- Tue 12 -->
+        <div class="day-col">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="ev t-mgmt" style="top: 84px; height: 36px;">
+            <div class="ev-time">08:30</div>
+            <div class="ev-title">朝礼</div>
+          </div>
+          <div class="ev t-cc" style="top: 280px; height: 70px;">
+            <div class="ev-time">12:00 — 13:00</div>
+            <div class="ev-title">v6 検証</div>
+          </div>
+          <div class="ev t-mgmt" style="top: 532px; height: 56px;">
+            <div class="ev-time">16:30 — 17:30</div>
+            <div class="ev-title">芝管理ミーティング</div>
+          </div>
+        </div>
+
+        <!-- Wed 13 (today) -->
+        <div class="day-col today">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+
+          <div class="ev t-mgmt" style="top: 84px; height: 36px;">
+            <div class="ev-time">08:30</div>
+            <div class="ev-title">朝礼で本日の予約状況を共有</div>
+          </div>
+          <div class="ev t-mgmt" style="top: 120px; height: 56px;">
+            <div class="ev-time">09:00 — 10:00</div>
+            <div class="ev-title">芝コンディション確認 (#3, #7)</div>
+          </div>
+          <div class="ev t-cc" style="top: 196px; height: 84px;">
+            <div class="ev-time">10:30 — 12:00</div>
+            <div class="ev-title">キャプテンカップ予選成績シート最終確認</div>
+          </div>
+          <div class="ev t-ota" style="top: 336px; height: 112px;">
+            <div class="ev-time">13:00 — 15:00</div>
+            <div class="ev-title">OTA戦略レビュー — 自社WEB誘導の数値確認</div>
+          </div>
+          <div class="ev t-personal" style="top: 504px; height: 56px;">
+            <div class="ev-time">16:00 — 17:00</div>
+            <div class="ev-title">スタッフ面談 (山田さん)</div>
+          </div>
+          <div class="ev t-misc" style="top: 728px; height: 56px;">
+            <div class="ev-time">20:00 — 21:00</div>
+            <div class="ev-title">月次RM 売上CSV DL</div>
+          </div>
+
+          <!-- Now line at 14:03 (offset = (14-7)*56 + 3/60*56 = 392 + 2.8) -->
+          <div class="now-line" style="top: 395px;"></div>
+        </div>
+
+        <!-- Thu 14 -->
+        <div class="day-col">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="ev t-mgmt" style="top: 84px; height: 36px;">
+            <div class="ev-time">08:30</div>
+            <div class="ev-title">朝礼</div>
+          </div>
+          <div class="ev t-ota" style="top: 224px; height: 84px;">
+            <div class="ev-time">11:00 — 12:30</div>
+            <div class="ev-title">月次RM 分析提出</div>
+          </div>
+          <div class="ev t-personal" style="top: 448px; height: 56px;">
+            <div class="ev-time">15:00 — 16:00</div>
+            <div class="ev-title">来月シフト表 配布</div>
+          </div>
+        </div>
+
+        <!-- Fri 15 -->
+        <div class="day-col">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="ev t-cc" style="top: 28px; height: 252px;">
+            <div class="ev-time">07:30 — 12:00</div>
+            <div class="ev-title">CC 本戦 / 受付・運営</div>
+            <div style="font-size:11px;margin-top:4px;opacity:.7">7:30 集合 / 8:00 受付開始</div>
+          </div>
+          <div class="ev t-cc" style="top: 336px; height: 168px;">
+            <div class="ev-time">13:00 — 16:00</div>
+            <div class="ev-title">CC 本戦 / 後半 + 表彰式</div>
+          </div>
+        </div>
+
+        <!-- Sat 16 -->
+        <div class="day-col weekend">
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div><div class="hour-line"></div>
+          <div class="ev t-cc" style="top: 56px; height: 252px;">
+            <div class="ev-time">08:00 — 12:30</div>
+            <div class="ev-title">CC 本戦 2日目</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
