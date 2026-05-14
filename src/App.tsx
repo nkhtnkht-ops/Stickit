@@ -9,6 +9,7 @@ import Next7Days from "@/pages/Next7Days";
 import All from "@/pages/All";
 import Settings from "@/pages/Settings";
 import Calendar from "@/pages/Calendar";
+import Sticky from "@/pages/Sticky";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/all" element={<All />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/calendar" element={<Calendar />} />
+        <Route path="/sticky" element={<Sticky />} />
       </Route>
       <Route path="*" element={<Navigate to="/today" replace />} />
     </Routes>

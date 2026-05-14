@@ -15,6 +15,7 @@ const mainNav: NavItemDef[] = [
   { to: "/tomorrow", label: "明日",      count: 0,  icon: <Ic d='<path d="M3 6h18M3 12h18M3 18h18"/>' /> },
   { to: "/next7",    label: "今後7日間",  count: 0,  icon: <Ic d='<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>' /> },
   { to: "/calendar", label: "カレンダー", icon: <Ic d='<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>' /> },
+  { to: "/sticky",   label: "付箋ボード", icon: <Ic d='<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>' /> },
   { to: "/all",      label: "すべて",    count: 0,  icon: <Ic d='<path d="M5 6h14M5 12h14M5 18h14"/>' /> },
 ];
 
