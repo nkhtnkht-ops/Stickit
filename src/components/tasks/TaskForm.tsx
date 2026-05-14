@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { Modal } from "@/components/ui/Modal";
 import type { Task } from "@/hooks/useTasks";
 import { useProjects } from "@/hooks/useProjects";
+import { RECURRENCE_PRESETS, RECURRENCE_LABELS, detectPreset, type RecurrencePresetKey } from "@/utils/recurrence";
 
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   task?: Task | null;
-  onSubmit: (input: { title: string; memo: string | null; due_at: string | null; priority: number; project_id: string | null }) => Promise<void>;
+  onSubmit: (input: { title: string; memo: string | null; due_at: string | null; priority: number; project_id: string | null; recurrence_rule: string | null }) => Promise<void>;
 };
 
 function toLocalInput(iso: string | null): string {
@@ -23,6 +24,7 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
   const [dueLocal, setDueLocal] = useState("");
   const [priority, setPriority] = useState(0);
   const [projectId, setProjectId] = useState<string | "none">("none");
+  const [recurrence, setRecurrence] = useState<RecurrencePresetKey | "none">("none");
   const [busy, setBusy] = useState(false);
 
   const { projects } = useProjects();
@@ -34,6 +36,7 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
       setDueLocal(toLocalInput(task?.due_at ?? null));
       setPriority(task?.priority ?? 0);
       setProjectId(task?.project_id ?? "none");
+      setRecurrence(detectPreset(task?.recurrence_rule) ?? "none");
     }
   }, [open, task]);
 
@@ -48,6 +51,7 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
         due_at: dueLocal ? new Date(dueLocal).toISOString() : null,
         priority,
         project_id: projectId === "none" ? null : projectId,
+        recurrence_rule: recurrence === "none" ? null : RECURRENCE_PRESETS[recurrence],
       });
       onOpenChange(false);
     } finally {
@@ -101,6 +105,19 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
             <option value={1}>P2 低</option>
             <option value={2}>P1 中</option>
             <option value={3}>P0 高</option>
+          </select>
+        </div>
+        <div>
+          <div className="font-mono text-[12px] uppercase tracking-wider text-ink-3 mb-1.5">// 繰り返し</div>
+          <select
+            value={recurrence}
+            onChange={(e) => setRecurrence(e.target.value as RecurrencePresetKey | "none")}
+            className="w-full border border-border rounded px-3 py-2 text-[14.5px] focus:outline-none focus:border-ink"
+          >
+            <option value="none">なし</option>
+            {(Object.keys(RECURRENCE_PRESETS) as RecurrencePresetKey[]).map((k) => (
+              <option key={k} value={k}>{RECURRENCE_LABELS[k]}</option>
+            ))}
           </select>
         </div>
         <div className="flex justify-end gap-2 pt-2">

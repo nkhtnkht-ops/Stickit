@@ -13,7 +13,7 @@ export function TaskList({ title, subtitle, filter }: Props) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Task | null>(null);
 
-  const handleSubmit = async (input: { title: string; memo: string | null; due_at: string | null; priority: number; project_id: string | null }) => {
+  const handleSubmit = async (input: { title: string; memo: string | null; due_at: string | null; priority: number; project_id: string | null; recurrence_rule: string | null }) => {
     if (editing) await updateTask(editing.id, input);
     else await createTask(input);
     setEditing(null);
