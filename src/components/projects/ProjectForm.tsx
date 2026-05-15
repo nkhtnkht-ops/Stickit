@@ -3,8 +3,14 @@ import { Modal } from "@/components/ui/Modal";
 import type { Project } from "@/hooks/useProjects";
 
 const PRESET_COLORS = [
-  "#00C853", "#EF4444", "#F97316", "#3B82F6", "#8B5CF6",
-  "#EC4899", "#94A3B8", "#0A0A0A",
+  "#7B5BFF", // primary purple
+  "#7BC4E0", // sky
+  "#E47B9F", // rose
+  "#E8A971", // peach
+  "#80C99A", // mint
+  "#D9802A", // warn
+  "#B83232", // crit
+  "#A0A0AE", // neutral
 ];
 
 type Props = {
@@ -40,35 +46,42 @@ export function ProjectForm({ open, onOpenChange, project, onSubmit }: Props) {
 
   return (
     <Modal open={open} onClose={() => onOpenChange(false)}>
-      <div className="font-mono text-[12px] uppercase tracking-wider text-ink-4 mb-1">// {project ? "edit project" : "new project"}</div>
-      <h2 className="text-[21px] font-semibold tracking-[-0.02em] mb-3">{project ? "プロジェクトを編集" : "新規プロジェクト"}</h2>
-      <form onSubmit={handle} className="space-y-3">
+      <h2 className="font-display text-[20px] font-semibold tracking-display text-ink mb-4">
+        {project ? "プロジェクトを編集" : "新規プロジェクト"}
+      </h2>
+      <form onSubmit={handle} className="space-y-4">
         <input
           autoFocus
           required
           placeholder="プロジェクト名"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full border border-border rounded px-3 py-2 text-[16px] focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
+          className="w-full rounded-md px-3 py-2 text-[16px] font-medium outline-none"
+          style={{ background: "rgba(255,255,255,.7)", border: "1px solid rgba(255,255,255,.55)", color: "#1A1A1F" }}
         />
         <div>
-          <div className="font-mono text-[12px] uppercase tracking-wider text-ink-3 mb-2">// カラー</div>
+          <div className="text-[11px] font-semibold uppercase text-ink-3 mb-2" style={{ letterSpacing: "0.06em" }}>カラー</div>
           <div className="flex gap-2 flex-wrap">
             {PRESET_COLORS.map((c) => (
               <button
                 type="button"
                 key={c}
                 onClick={() => setColor(c)}
-                className={`w-7 h-7 rounded ${color === c ? "ring-2 ring-offset-2 ring-ink" : ""}`}
-                style={{ background: c }}
+                className="w-8 h-8 rounded-md transition-all"
+                style={{
+                  background: c,
+                  boxShadow: color === c ? `0 0 0 2px #fff, 0 0 0 4px ${c}` : "0 1px 3px rgba(0,0,0,.10)",
+                }}
                 aria-label={c}
               />
             ))}
           </div>
         </div>
-        <div className="flex justify-end gap-2 pt-2">
-          <button type="button" onClick={() => onOpenChange(false)} className="px-3 py-1.5 text-[14px] text-ink-2 hover:bg-bg-2 rounded font-medium">キャンセル</button>
-          <button type="submit" disabled={busy} className="px-3 py-1.5 text-[14px] bg-ink text-white rounded font-medium hover:bg-black disabled:opacity-50">{project ? "保存" : "追加"}</button>
+        <div className="flex justify-end gap-2 pt-3">
+          <button type="button" onClick={() => onOpenChange(false)} className="btn-ghost-pill">キャンセル</button>
+          <button type="submit" disabled={busy} className="btn-primary disabled:opacity-50">
+            {project ? "保存" : "追加"}
+          </button>
         </div>
       </form>
     </Modal>

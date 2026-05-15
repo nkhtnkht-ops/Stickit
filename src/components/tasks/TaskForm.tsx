@@ -23,6 +23,14 @@ function toLocalInput(iso: string | null): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+const inputCls =
+  "w-full rounded-md px-3 py-2 text-[14px] outline-none transition-all";
+const inputStyle: React.CSSProperties = {
+  background: "rgba(255,255,255,.7)",
+  border: "1px solid rgba(255,255,255,.55)",
+  color: "#1A1A1F",
+};
+
 export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
   const [title, setTitle] = useState("");
   const [memo, setMemo] = useState("");
@@ -73,8 +81,7 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
 
   return (
     <Modal open={open} onClose={() => onOpenChange(false)}>
-      <div className="font-mono text-[12px] uppercase tracking-wider text-ink-4 mb-1">// {task ? "edit" : "new"}</div>
-      <h2 className="text-[21px] font-semibold tracking-[-0.02em] mb-3">
+      <h2 className="font-display text-[20px] font-semibold tracking-display text-ink mb-4">
         {task ? "タスクを編集" : "新規タスク"}
       </h2>
       <form onSubmit={handle} className="space-y-3">
@@ -84,26 +91,30 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
           placeholder="タスクのタイトル"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full border border-border rounded px-3 py-2 text-[16px] focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
+          className={inputCls}
+          style={{ ...inputStyle, fontSize: 16, fontWeight: 500 }}
         />
         <textarea
           placeholder="メモ（任意）"
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
-          className="w-full border border-border rounded px-3 py-2 text-[14.5px] resize-none focus:outline-none focus:border-ink focus:ring-2 focus:ring-black/5"
+          className={inputCls + " resize-none"}
+          style={inputStyle}
           rows={3}
         />
         <input
           type="datetime-local"
           value={dueLocal}
           onChange={(e) => setDueLocal(e.target.value)}
-          className="w-full border border-border rounded px-3 py-2 text-[14.5px] font-mono focus:outline-none focus:border-ink"
+          className={inputCls + " tabular-nums"}
+          style={inputStyle}
         />
         <div className="flex gap-2">
           <select
             value={projectId}
             onChange={(e) => setProjectId(e.target.value as string | "none")}
-            className="flex-1 border border-border rounded px-3 py-2 text-[14.5px] focus:outline-none focus:border-ink"
+            className={inputCls + " flex-1"}
+            style={inputStyle}
           >
             <option value="none">プロジェクトなし</option>
             {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -111,7 +122,8 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
           <select
             value={priority}
             onChange={(e) => setPriority(Number(e.target.value))}
-            className="border border-border rounded px-3 py-2 text-[14.5px] focus:outline-none focus:border-ink"
+            className={inputCls}
+            style={inputStyle}
           >
             <option value={0}>優先度なし</option>
             <option value={1}>P2 低</option>
@@ -120,11 +132,12 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
           </select>
         </div>
         <div>
-          <div className="font-mono text-[12px] uppercase tracking-wider text-ink-3 mb-1.5">// 繰り返し</div>
+          <div className="text-[11px] font-semibold uppercase text-ink-3 mb-1.5" style={{ letterSpacing: "0.06em" }}>繰り返し</div>
           <select
             value={recurrence}
             onChange={(e) => setRecurrence(e.target.value as RecurrencePresetKey | "none")}
-            className="w-full border border-border rounded px-3 py-2 text-[14.5px] focus:outline-none focus:border-ink"
+            className={inputCls}
+            style={inputStyle}
           >
             <option value="none">なし</option>
             {(Object.keys(RECURRENCE_PRESETS) as RecurrencePresetKey[]).map((k) => (
@@ -133,7 +146,7 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
           </select>
         </div>
         <div>
-          <div className="font-mono text-[12px] uppercase tracking-wider text-ink-3 mb-1.5">// リマインダー</div>
+          <div className="text-[11px] font-semibold uppercase text-ink-3 mb-1.5" style={{ letterSpacing: "0.06em" }}>リマインダー</div>
           <div className="flex flex-wrap gap-1.5">
             {(Object.keys(REMINDER_OFFSETS) as ReminderOffsetKey[]).map((k) => {
               const active = reminders.includes(k);
@@ -142,26 +155,31 @@ export function TaskForm({ open, onOpenChange, task, onSubmit }: Props) {
                   type="button"
                   key={k}
                   onClick={() => setReminders((prev) => active ? prev.filter((x) => x !== k) : [...prev, k])}
-                  className={`px-2.5 py-1 text-[13px] rounded font-medium border ${active ? "bg-ink text-white border-ink" : "bg-surface text-ink-2 border-border hover:border-ink-5"}`}
+                  className="px-3 py-1 text-[12.5px] rounded-full font-medium transition-all"
+                  style={
+                    active
+                      ? { background: "#7B5BFF", color: "#fff", border: "1px solid #7B5BFF", boxShadow: "0 2px 8px rgba(123,91,255,.35)" }
+                      : { background: "rgba(255,255,255,.55)", color: "#4A4A52", border: "1px solid rgba(255,255,255,.55)" }
+                  }
                 >
                   {REMINDER_LABELS[k]}
                 </button>
               );
             })}
           </div>
-          <div className="font-mono text-[12px] text-ink-4 mt-1.5">期限の指定時間前に通知</div>
+          <div className="text-[11px] text-ink-3 mt-1.5">期限の指定時間前に通知</div>
         </div>
-        <div className="flex justify-end gap-2 pt-2">
+        <div className="flex justify-end gap-2 pt-3">
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="px-3 py-1.5 text-[14px] text-ink-2 hover:bg-bg-2 rounded font-medium"
-          >キャンセル</button>
-          <button
-            type="submit"
-            disabled={busy}
-            className="px-3 py-1.5 text-[14px] bg-ink text-white rounded font-medium hover:bg-black disabled:opacity-50"
-          >{task ? "保存" : "追加"}</button>
+            className="btn-ghost-pill"
+          >
+            キャンセル
+          </button>
+          <button type="submit" disabled={busy} className="btn-primary disabled:opacity-50">
+            {task ? "保存" : "追加"}
+          </button>
         </div>
       </form>
     </Modal>
