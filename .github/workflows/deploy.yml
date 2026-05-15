@@ -31,6 +31,8 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          # VAPID public key — safe to expose, used by Service Worker subscribe()
+          VITE_VAPID_PUBLIC_KEY: BJgn5OSDGkyYuFa7ns1GpynhVmuUR4A_cWg5jc5Jl9Hph0ItoEBptlSlwW8NfKAT0ZacbFfvMdkn3xZtarv7E0s
       # SPA fallback: GitHub Pages does not natively support client-side routing.
       # Copy index.html to 404.html so /Stickit/auth/callback etc. serve the SPA.
       - run: cp dist/index.html dist/404.html
