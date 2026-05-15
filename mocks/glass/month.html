@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stickit — Month (Glass Morphism)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Glass morphism design tokens */
+    --canvas-glass: rgba(255,255,255,.55);
+    --canvas-glass-strong: rgba(255,255,255,.75);
+    --sidebar-glass: rgba(255,255,255,.42);
+    --hairline: rgba(255,255,255,.55);
+    --hairline-soft: rgba(0,0,0,.06);
+    --ink: #1A1A1F;
+    --ink-2: #4A4A52;
+    --ink-3: #757580;
+    --ink-4: #A0A0AE;
+    --primary: #7B5BFF;
+    --primary-deep: #5A3FD9;
+    --primary-glow: rgba(123,91,255,.35);
+    --primary-soft: rgba(123,91,255,.12);
+
+    /* Pastel event tints — soft, dreamy */
+    --t-mint:    #C9F0DA;  --t-mint-fg:    #1F5A3A;
+    --t-peach:   #FFD8C2;  --t-peach-fg:   #6F3014;
+    --t-sky:     #C9DEFC;  --t-sky-fg:     #1A3D80;
+    --t-lavender:#DAD2F5;  --t-lavender-fg:#3A2370;
+    --t-rose:    #FCD2E0;  --t-rose-fg:    #7A1E47;
+    --t-yellow:  #FCEEB7;  --t-yellow-fg:  #6F5210;
+    --t-coral:   #FFCFD0;  --t-coral-fg:   #7A1E1E;
+    --t-teal:    #BFE6E0;  --t-teal-fg:    #0E4F4A;
+
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 16px;
+    --r-xl: 22px;
+    --r-pill: 9999px;
+
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Noto Sans JP", system-ui, sans-serif;
+    --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Noto Sans JP", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.5;
+    letter-spacing: -0.012em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+  input { font-family: inherit; color: inherit; }
+
+  .ic { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  /* ============ Gradient mesh background ============ */
+  .gradient-bg {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(1200px 700px at 0% 0%,    rgba(180, 200, 255, .85) 0%, transparent 60%),
+      radial-gradient(900px  600px at 100% 0%,  rgba(255, 200, 220, .55) 0%, transparent 55%),
+      radial-gradient(1000px 800px at 100% 100%,rgba(200, 180, 255, .75) 0%, transparent 60%),
+      radial-gradient(900px  700px at 0% 100%,  rgba(180, 230, 255, .65) 0%, transparent 60%),
+      linear-gradient(135deg, #EFE6FB 0%, #E0E8FE 50%, #F0E0F5 100%);
+    z-index: -2;
+  }
+  .gradient-bg::after {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 25% 35%, rgba(255,255,255,.35), transparent 25%),
+      radial-gradient(circle at 75% 65%, rgba(255,255,255,.30), transparent 30%);
+    pointer-events: none;
+  }
+
+  /* ============ App Frame ============ */
+  .app {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    height: 100vh;
+    padding: 14px;
+    gap: 14px;
+    position: relative;
+  }
+
+  /* ============ Sidebar (frosted) ============ */
+  .sidebar {
+    background: var(--sidebar-glass);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xl);
+    padding: 18px 10px 14px;
+    display: flex; flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(70,40,140,.06);
+  }
+
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 12px 22px;
+  }
+  .brand-mark {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+    color: #fff;
+    display: grid; place-items: center;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -0.02em;
+    box-shadow: 0 4px 12px var(--primary-glow);
+  }
+  .brand-name {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.022em;
+    color: var(--ink);
+  }
+
+  .nav-section { display: flex; flex-direction: column; gap: 1px; padding: 0 2px; }
+
+  .nav-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    padding: 18px 14px 8px;
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 11px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: var(--r-md);
+    color: var(--ink-2);
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background 100ms ease, color 100ms ease;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: rgba(255,255,255,.40); color: var(--ink); }
+  .nav-item.active {
+    background: rgba(255,255,255,.85);
+    color: var(--primary-deep);
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(70,40,140,.08);
+  }
+  .nav-item .ic { width: 16px; height: 16px; color: var(--ink-3); }
+  .nav-item.active .ic { color: var(--primary); }
+  .nav-item .count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .nav-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Bottom Google G icon — official multicolor */
+  .google-foot {
+    margin-top: auto;
+    padding: 12px 10px 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .google-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    display: grid; place-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    cursor: pointer;
+    transition: transform 100ms ease;
+  }
+  .google-icon:hover { transform: scale(1.05); }
+
+  /* ============ Main panel (frosted) ============ */
+  .main {
+    background: var(--canvas-glass);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 8px 32px rgba(70,40,140,.06);
+  }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex; align-items: center;
+    height: 60px;
+    padding: 0 24px;
+    gap: 14px;
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+  .toolbar-period {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.020em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .toolbar-period .year { color: var(--ink-3); font-weight: 400; margin-left: 4px; font-size: 17px; }
+
+  .nav-btns { display: flex; align-items: center; gap: 4px; }
+  .nav-btns .arrow {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    color: var(--ink-2);
+    display: grid; place-items: center;
+    font-size: 16px;
+    transition: background 100ms ease;
+  }
+  .nav-btns .arrow:hover { background: rgba(255,255,255,.55); }
+
+  .seg {
+    display: inline-flex;
+    background: rgba(255,255,255,.55);
+    backdrop-filter: blur(20px);
+    border-radius: var(--r-pill);
+    padding: 3px;
+    margin-left: auto;
+    height: 32px;
+    border: 1px solid var(--hairline);
+  }
+  .seg button {
+    height: 26px;
+    padding: 0 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
+    border-radius: var(--r-pill);
+    letter-spacing: -0.014em;
+  }
+  .seg button.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 8px var(--primary-glow);
+  }
+
+  .today-btn {
+    height: 32px;
+    padding: 0 16px;
+    border-radius: var(--r-pill);
+    background: rgba(255,255,255,.55);
+    border: 1px solid var(--hairline);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.014em;
+    margin-left: 4px;
+  }
+  .today-btn:hover { background: rgba(255,255,255,.75); }
+
+  /* ============ Month grid ============ */
+  .month {
+    flex: 1;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  .month-dows {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+  .month-dow {
+    padding: 10px 14px;
+    font-size: 11.5px;
+    color: var(--ink-3);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .month-dow.sun { color: #C04A4A; }
+  .month-dow.sat { color: #2A6BC4; }
+
+  .month-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    overflow: hidden;
+  }
+
+  .day-cell {
+    border-right: 1px solid var(--hairline-soft);
+    border-bottom: 1px solid var(--hairline-soft);
+    padding: 6px 7px;
+    display: flex; flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+  }
+  .day-cell:nth-child(7n) { border-right: none; }
+  .day-cell:hover { background: rgba(255,255,255,.30); }
+  .day-cell.muted { opacity: .42; }
+
+  .day-num {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    padding: 2px 4px;
+    line-height: 1;
+    align-self: flex-start;
+  }
+  .day-cell.sun .day-num { color: #C04A4A; }
+  .day-cell.sat .day-num { color: #2A6BC4; }
+  .day-cell.today .day-num {
+    background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+    color: #fff;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 0;
+    box-shadow: 0 3px 10px var(--primary-glow);
+  }
+
+  /* Event chips */
+  .ev {
+    font-size: 11.5px;
+    line-height: 1.25;
+    padding: 2px 7px;
+    border-radius: var(--r-sm);
+    background: var(--t-mint);
+    color: var(--t-mint-fg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    font-weight: 500;
+    letter-spacing: -0.012em;
+  }
+  .ev.t-mint    { background: var(--t-mint);     color: var(--t-mint-fg); }
+  .ev.t-peach   { background: var(--t-peach);    color: var(--t-peach-fg); }
+  .ev.t-sky     { background: var(--t-sky);      color: var(--t-sky-fg); }
+  .ev.t-lavender{ background: var(--t-lavender); color: var(--t-lavender-fg); }
+  .ev.t-rose    { background: var(--t-rose);     color: var(--t-rose-fg); }
+  .ev.t-yellow  { background: var(--t-yellow);   color: var(--t-yellow-fg); }
+  .ev.t-coral   { background: var(--t-coral);    color: var(--t-coral-fg); }
+  .ev.t-teal    { background: var(--t-teal);     color: var(--t-teal-fg); }
+
+  .ev-more {
+    font-size: 10.5px;
+    color: var(--ink-3);
+    padding: 1px 6px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+</head>
+<body>
+
+<div class="gradient-bg"></div>
+
+<div class="app">
+
+  <!-- ============ Sidebar ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <span class="brand-name">Stickit</span>
+    </div>
+
+    <div class="nav-section">
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        今日 <span class="count">7</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h12"/></svg>
+        明日 <span class="count">3</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 12h18M5 6h14M7 18h10"/></svg>
+        今後 7 日間 <span class="count">19</span>
+      </button>
+      <button class="nav-item active">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+        カレンダー
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>
+        付箋ボード
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/></svg>
+        すべて <span class="count">42</span>
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">プロジェクト</div>
+      <button class="nav-item">
+        <span class="nav-dot" style="background:#7BC4E0"></span>
+        支配人業務 <span class="count">12</span>
+      </button>
+      <button class="nav-item">
+        <span class="nav-dot" style="background:#E47B9F"></span>
+        キャプテンカップ <span class="count">8</span>
+      </button>
+      <button class="nav-item">
+        <span class="nav-dot" style="background:#E8A971"></span>
+        OTA戦略 <span class="count">5</span>
+      </button>
+      <button class="nav-item">
+        <span class="nav-dot" style="background:#80C99A"></span>
+        個人 <span class="count">9</span>
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">ツール</div>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 001 1h4M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/></svg>
+        シフト取込
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33"/></svg>
+        設定
+      </button>
+    </div>
+
+    <!-- Google G icon (account) -->
+    <div class="google-foot">
+      <div class="google-icon" title="Google アカウント">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+          <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ Main ============ -->
+  <div class="main">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-period">5月 <span class="year">2026</span></div>
+      <div class="nav-btns">
+        <button class="arrow">‹</button>
+        <button class="arrow">›</button>
+      </div>
+      <button class="today-btn">今日</button>
+      <div class="seg">
+        <button>日</button>
+        <button>週</button>
+        <button class="active">月</button>
+        <button>リスト</button>
+      </div>
+    </div>
+
+    <div class="month">
+      <!-- DOW header -->
+      <div class="month-dows">
+        <div class="month-dow sun">日</div>
+        <div class="month-dow">月</div>
+        <div class="month-dow">火</div>
+        <div class="month-dow">水</div>
+        <div class="month-dow">木</div>
+        <div class="month-dow">金</div>
+        <div class="month-dow sat">土</div>
+      </div>
+
+      <!-- Grid: May 2026 starts on Friday, ends on Sunday May 31 -->
+      <div class="month-grid">
+        <!-- Week 1 (Apr 26 Sun - May 2 Sat) -->
+        <div class="day-cell muted sun"><div class="day-num">26</div></div>
+        <div class="day-cell muted"><div class="day-num">27</div></div>
+        <div class="day-cell muted"><div class="day-num">28</div></div>
+        <div class="day-cell muted"><div class="day-num">29</div></div>
+        <div class="day-cell muted"><div class="day-num">30</div></div>
+        <div class="day-cell">
+          <div class="day-num">1</div>
+          <div class="ev t-sky">朝礼</div>
+          <div class="ev t-peach">メーデー</div>
+        </div>
+        <div class="day-cell sat"><div class="day-num">2</div></div>
+
+        <!-- Week 2 (May 3-9) -->
+        <div class="day-cell sun"><div class="day-num">3</div><div class="ev t-coral">憲法記念日</div></div>
+        <div class="day-cell"><div class="day-num">4</div><div class="ev t-coral">みどりの日</div><div class="ev t-yellow">OTA mtg</div></div>
+        <div class="day-cell"><div class="day-num">5</div><div class="ev t-coral">こどもの日</div><div class="ev t-rose">CC 準備</div></div>
+        <div class="day-cell"><div class="day-num">6</div></div>
+        <div class="day-cell"><div class="day-num">7</div><div class="ev t-sky">朝礼</div><div class="ev t-lavender">面談</div></div>
+        <div class="day-cell"><div class="day-num">8</div></div>
+        <div class="day-cell sat"><div class="day-num">9</div><div class="ev t-yellow">RM 分析</div></div>
+
+        <!-- Week 3 (May 10-16) -->
+        <div class="day-cell sun"><div class="day-num">10</div></div>
+        <div class="day-cell"><div class="day-num">11</div><div class="ev t-sky">朝礼</div><div class="ev t-mint">支配人会議</div></div>
+        <div class="day-cell"><div class="day-num">12</div><div class="ev t-rose">予選成績</div><div class="ev t-yellow">OTA レビュー</div></div>
+        <div class="day-cell today">
+          <div class="day-num">13</div>
+          <div class="ev t-rose">CC 予選</div>
+          <div class="ev t-yellow">OTA 戦略</div>
+          <div class="ev t-lavender">面談</div>
+          <div class="ev-more">+ 4件</div>
+        </div>
+        <div class="day-cell"><div class="day-num">14</div><div class="ev t-sky">朝礼</div><div class="ev t-yellow">RM 提出</div></div>
+        <div class="day-cell"><div class="day-num">15</div><div class="ev t-rose">CC 本戦 1日目</div></div>
+        <div class="day-cell sat"><div class="day-num">16</div><div class="ev t-rose">CC 本戦 2日目</div></div>
+
+        <!-- Week 4 (May 17-23) -->
+        <div class="day-cell sun"><div class="day-num">17</div></div>
+        <div class="day-cell"><div class="day-num">18</div><div class="ev t-sky">朝礼</div></div>
+        <div class="day-cell"><div class="day-num">19</div><div class="ev t-lavender">CC 振り返り</div></div>
+        <div class="day-cell"><div class="day-num">20</div><div class="ev t-mint">支配人会議</div></div>
+        <div class="day-cell"><div class="day-num">21</div><div class="ev t-sky">朝礼</div></div>
+        <div class="day-cell"><div class="day-num">22</div></div>
+        <div class="day-cell sat"><div class="day-num">23</div></div>
+
+        <!-- Week 5 (May 24-30) -->
+        <div class="day-cell sun"><div class="day-num">24</div></div>
+        <div class="day-cell"><div class="day-num">25</div><div class="ev t-sky">朝礼</div></div>
+        <div class="day-cell"><div class="day-num">26</div></div>
+        <div class="day-cell"><div class="day-num">27</div></div>
+        <div class="day-cell"><div class="day-num">28</div><div class="ev t-sky">朝礼</div><div class="ev t-lavender">面談</div></div>
+        <div class="day-cell"><div class="day-num">29</div></div>
+        <div class="day-cell sat"><div class="day-num">30</div><div class="ev t-yellow">月末締め</div></div>
+
+        <!-- Week 6 (May 31 - Jun 6) -->
+        <div class="day-cell sun"><div class="day-num">31</div></div>
+        <div class="day-cell muted"><div class="day-num">1</div></div>
+        <div class="day-cell muted"><div class="day-num">2</div></div>
+        <div class="day-cell muted"><div class="day-num">3</div></div>
+        <div class="day-cell muted"><div class="day-num">4</div></div>
+        <div class="day-cell muted"><div class="day-num">5</div></div>
+        <div class="day-cell muted sat"><div class="day-num">6</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
