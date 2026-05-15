@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stickit — 設定 (Glass)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  .settings-wrap {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px 40px;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 28px;
+    max-width: 980px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .side-nav {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    display: flex; flex-direction: column;
+    gap: 2px;
+    padding-top: 4px;
+  }
+  .side-nav a {
+    padding: 8px 12px;
+    border-radius: var(--r-md);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-2);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 100ms ease;
+  }
+  .side-nav a:hover { background: rgba(255,255,255,.45); }
+  .side-nav a.active {
+    background: rgba(255,255,255,.85);
+    color: var(--primary-deep);
+    font-weight: 600;
+  }
+
+  .panels { display: flex; flex-direction: column; gap: 18px; }
+
+  .panel {
+    background: rgba(255,255,255,.55);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    padding: 22px 24px;
+    box-shadow: 0 4px 18px rgba(70,40,140,.05);
+  }
+  .panel h2 {
+    margin: 0 0 4px;
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    color: var(--ink);
+  }
+  .panel .desc {
+    margin: 0 0 18px;
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+
+  .row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 0;
+    border-top: 1px solid var(--hairline-soft);
+  }
+  .row:first-of-type { border-top: none; }
+  .row-label {
+    flex: 1;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .row-title { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .row-sub { font-size: 12px; color: var(--ink-3); }
+
+  /* Profile */
+  .profile-head {
+    display: flex; align-items: center; gap: 16px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--hairline-soft);
+    margin-bottom: 8px;
+  }
+  .g-avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: #fff;
+    display: grid; place-items: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,.10);
+  }
+  .profile-name {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.018em;
+  }
+  .profile-mail { font-size: 13px; color: var(--ink-3); }
+
+  /* Switch */
+  .switch {
+    width: 44px; height: 26px;
+    border-radius: 9999px;
+    background: rgba(0,0,0,.12);
+    position: relative;
+    cursor: pointer;
+    transition: background 120ms ease;
+    flex-shrink: 0;
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,.18);
+    transition: left 140ms ease;
+  }
+  .switch.on { background: var(--primary); }
+  .switch.on::after { left: 21px; }
+
+  /* Project / tag chips */
+  .item-list { display: flex; flex-direction: column; gap: 6px; }
+  .item-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--r-md);
+    background: rgba(255,255,255,.55);
+    border: 1px solid var(--hairline);
+  }
+  .item-row:hover { background: rgba(255,255,255,.75); }
+  .swatch {
+    width: 14px; height: 14px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .item-name { flex: 1; font-size: 14px; font-weight: 500; }
+  .item-count { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .item-actions { display: flex; gap: 4px; }
+  .icon-btn {
+    width: 28px; height: 28px;
+    display: grid; place-items: center;
+    border-radius: 6px;
+    color: var(--ink-3);
+    transition: background 100ms ease;
+  }
+  .icon-btn:hover { background: rgba(0,0,0,.06); color: var(--ink); }
+
+  .tag-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px 5px 8px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .tag-chip .x { font-size: 14px; line-height: 1; opacity: .55; cursor: pointer; }
+  .tag-chip .x:hover { opacity: 1; }
+
+  .add-row {
+    display: flex; gap: 8px;
+    margin-top: 12px;
+  }
+  .input {
+    flex: 1;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--hairline);
+    background: rgba(255,255,255,.7);
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    transition: border 100ms ease, box-shadow 100ms ease;
+  }
+  .input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+  .btn-ghost {
+    height: 34px;
+    padding: 0 14px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--hairline);
+    background: rgba(255,255,255,.55);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,.85); }
+
+  .danger {
+    color: #B83232;
+  }
+  .btn-danger {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: var(--r-md);
+    background: rgba(184,50,50,.08);
+    border: 1px solid rgba(184,50,50,.20);
+    color: #B83232;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .btn-danger:hover { background: rgba(184,50,50,.14); }
+
+  .select {
+    height: 32px;
+    padding: 0 28px 0 12px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--hairline);
+    background: rgba(255,255,255,.7);
+    font-size: 13px;
+    color: var(--ink);
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23757580' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+  }
+</style>
+</head>
+<body>
+<div class="gradient-bg"></div>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <div class="brand-name">Stickit</div>
+    </div>
+
+    <div class="nav-section">
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        今日
+        <span class="count">12</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 4v5h-5"/></svg>
+        次の7日間
+        <span class="count">34</span>
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+        カレンダー
+      </button>
+      <button class="nav-item">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/></svg>
+        付箋ボード
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">プロジェクト</div>
+      <button class="nav-item"><span class="nav-dot" style="background:#7BC4E0"></span>支配人業務<span class="count">8</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#E47B9F"></span>キャプテンカップ<span class="count">5</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#E8A971"></span>OTA戦略<span class="count">12</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#80C99A"></span>個人<span class="count">3</span></button>
+    </div>
+
+    <div class="nav-section" style="margin-top: 8px;">
+      <button class="nav-item active">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        設定
+      </button>
+    </div>
+
+    <div class="google-foot">
+      <div class="google-icon" title="nkhtnkht@gmail.com">
+        <svg width="18" height="18" viewBox="0 0 18 18">
+          <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.08-1.79 2.72v2.26h2.9c1.7-1.56 2.69-3.87 2.69-6.62z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.46-.81 5.95-2.18l-2.9-2.26c-.81.54-1.84.86-3.05.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33A9 9 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.97 10.71A5.41 5.41 0 0 1 3.68 9c0-.6.1-1.18.29-1.71V4.96H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.04l3.01-2.33z"/>
+          <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/>
+        </svg>
+      </div>
+      <div style="display:flex; flex-direction:column; min-width:0;">
+        <div style="font-size:12px; font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">中畑 啓二</div>
+        <div style="font-size:11px; color:var(--ink-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">nkhtnkht@gmail.com</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <section class="main">
+    <div class="toolbar">
+      <div class="toolbar-period">設定<span class="sub">アカウント・プロジェクト・通知</span></div>
+    </div>
+
+    <div class="settings-wrap">
+      <nav class="side-nav">
+        <a class="active">プロフィール</a>
+        <a>プロジェクト</a>
+        <a>タグ</a>
+        <a>通知</a>
+        <a>表示</a>
+        <a>データ</a>
+        <a>アカウント</a>
+      </nav>
+
+      <div class="panels">
+        <!-- Profile -->
+        <div class="panel">
+          <h2>プロフィール</h2>
+          <p class="desc">Googleアカウントから取得した情報を表示しています。</p>
+          <div class="profile-head">
+            <div class="g-avatar">
+              <svg width="28" height="28" viewBox="0 0 18 18">
+                <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.08-1.79 2.72v2.26h2.9c1.7-1.56 2.69-3.87 2.69-6.62z"/>
+                <path fill="#34A853" d="M9 18c2.43 0 4.46-.81 5.95-2.18l-2.9-2.26c-.81.54-1.84.86-3.05.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33A9 9 0 0 0 9 18z"/>
+                <path fill="#FBBC05" d="M3.97 10.71A5.41 5.41 0 0 1 3.68 9c0-.6.1-1.18.29-1.71V4.96H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.04l3.01-2.33z"/>
+                <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="profile-name">中畑 啓二</div>
+              <div class="profile-mail">nkhtnkht@gmail.com</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">表示名</div>
+              <div class="row-sub">タスクや付箋に表示されます</div>
+            </div>
+            <input class="input" style="max-width:240px" value="中畑 啓二" />
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">タイムゾーン</div>
+              <div class="row-sub">期限・繰り返し・通知の基準</div>
+            </div>
+            <select class="select">
+              <option>Asia/Tokyo (JST)</option>
+              <option>UTC</option>
+            </select>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">週の開始日</div>
+              <div class="row-sub">カレンダー / 週ビュー</div>
+            </div>
+            <select class="select">
+              <option>月曜日</option>
+              <option>日曜日</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Projects -->
+        <div class="panel">
+          <h2>プロジェクト</h2>
+          <p class="desc">タスク・付箋を分類するためのグループ。</p>
+          <div class="item-list">
+            <div class="item-row">
+              <span class="swatch" style="background:#7BC4E0"></span>
+              <span class="item-name">支配人業務</span>
+              <span class="item-count">8 件</span>
+              <div class="item-actions">
+                <button class="icon-btn" title="編集"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+                <button class="icon-btn" title="削除"><svg class="ic" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+              </div>
+            </div>
+            <div class="item-row">
+              <span class="swatch" style="background:#E47B9F"></span>
+              <span class="item-name">キャプテンカップ</span>
+              <span class="item-count">5 件</span>
+              <div class="item-actions">
+                <button class="icon-btn"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+                <button class="icon-btn"><svg class="ic" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+              </div>
+            </div>
+            <div class="item-row">
+              <span class="swatch" style="background:#E8A971"></span>
+              <span class="item-name">OTA戦略</span>
+              <span class="item-count">12 件</span>
+              <div class="item-actions">
+                <button class="icon-btn"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+                <button class="icon-btn"><svg class="ic" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+              </div>
+            </div>
+            <div class="item-row">
+              <span class="swatch" style="background:#80C99A"></span>
+              <span class="item-name">個人</span>
+              <span class="item-count">3 件</span>
+              <div class="item-actions">
+                <button class="icon-btn"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>
+                <button class="icon-btn"><svg class="ic" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+              </div>
+            </div>
+          </div>
+          <div class="add-row">
+            <input class="input" placeholder="新しいプロジェクト名" />
+            <button class="btn-ghost">+ 追加</button>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="panel">
+          <h2>タグ</h2>
+          <p class="desc">横断的なラベル。複数プロジェクトのタスクを束ねます。</p>
+          <div class="tag-chips">
+            <span class="tag-chip t-mint">#朝礼<span class="x">×</span></span>
+            <span class="tag-chip t-peach">#接客<span class="x">×</span></span>
+            <span class="tag-chip t-sky">#数値<span class="x">×</span></span>
+            <span class="tag-chip t-lavender">#企画<span class="x">×</span></span>
+            <span class="tag-chip t-rose">#キャンペーン<span class="x">×</span></span>
+            <span class="tag-chip t-yellow">#要承認<span class="x">×</span></span>
+            <span class="tag-chip t-coral">#急ぎ<span class="x">×</span></span>
+            <span class="tag-chip t-teal">#定例<span class="x">×</span></span>
+          </div>
+          <div class="add-row">
+            <input class="input" placeholder="新しいタグ名" />
+            <button class="btn-ghost">+ 追加</button>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="panel">
+          <h2>通知</h2>
+          <p class="desc">期限リマインドとプッシュ通知の設定。</p>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">ブラウザ通知</div>
+              <div class="row-sub">Web Push を許可してデスクトップに通知</div>
+            </div>
+            <div class="switch on"></div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">期限当日のリマインド</div>
+              <div class="row-sub">朝 8:00 に当日分をまとめて通知</div>
+            </div>
+            <div class="switch on"></div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">事前リマインド</div>
+              <div class="row-sub">期限の何分前に通知するか</div>
+            </div>
+            <select class="select">
+              <option>10 分前</option>
+              <option>30 分前</option>
+              <option>1 時間前</option>
+              <option>1 日前</option>
+            </select>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">サウンド</div>
+              <div class="row-sub">通知時に音を鳴らす</div>
+            </div>
+            <div class="switch"></div>
+          </div>
+        </div>
+
+        <!-- Display -->
+        <div class="panel">
+          <h2>表示</h2>
+          <p class="desc">外観とレイアウトのカスタマイズ。</p>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">テーマ</div>
+              <div class="row-sub">Glass Morphism (ライト) 固定</div>
+            </div>
+            <select class="select">
+              <option>Light Glass</option>
+              <option disabled>Dark Glass (準備中)</option>
+            </select>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">完了タスクを表示</div>
+              <div class="row-sub">リスト下部にグレーアウト表示</div>
+            </div>
+            <div class="switch on"></div>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">サブタスクをデフォルト展開</div>
+            </div>
+            <div class="switch"></div>
+          </div>
+        </div>
+
+        <!-- Data -->
+        <div class="panel">
+          <h2>データ</h2>
+          <p class="desc">インポート・エクスポート。</p>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">TickTick からインポート</div>
+              <div class="row-sub">.csv / .json をアップロード</div>
+            </div>
+            <button class="btn-ghost">ファイル選択</button>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">全データをエクスポート</div>
+              <div class="row-sub">JSON 形式でダウンロード</div>
+            </div>
+            <button class="btn-ghost">エクスポート</button>
+          </div>
+        </div>
+
+        <!-- Account -->
+        <div class="panel">
+          <h2>アカウント</h2>
+          <p class="desc">サインアウトと退会。</p>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title">サインアウト</div>
+              <div class="row-sub">このブラウザからログアウト</div>
+            </div>
+            <button class="btn-ghost">サインアウト</button>
+          </div>
+          <div class="row">
+            <div class="row-label">
+              <div class="row-title danger">アカウントを削除</div>
+              <div class="row-sub">全タスク・付箋・添付が完全に削除されます</div>
+            </div>
+            <button class="btn-danger">削除…</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

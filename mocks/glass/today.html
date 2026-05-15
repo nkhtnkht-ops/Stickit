@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stickit — 今日 (Glass)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  .today-page { flex: 1; overflow-y: auto; padding: 28px 36px 60px; }
+  .today-hero { max-width: 720px; margin-bottom: 24px; }
+  .today-hero .meta-line {
+    font-size: 12px; color: var(--ink-3); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .today-hero h1 {
+    font-family: var(--display);
+    font-size: 36px; font-weight: 700;
+    letter-spacing: -0.024em;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
+  .today-hero .stats {
+    display: flex; gap: 16px;
+    color: var(--ink-3); font-size: 14px;
+  }
+  .today-hero .stats b { color: var(--ink); font-weight: 600; }
+
+  .progress {
+    margin-top: 14px;
+    height: 6px;
+    background: rgba(255,255,255,.55);
+    border-radius: var(--r-pill);
+    overflow: hidden;
+  }
+  .progress > .fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), #BC92FF);
+    border-radius: var(--r-pill);
+  }
+
+  /* Task groups */
+  .group { max-width: 720px; margin-top: 28px; }
+  .group-head {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-bottom: 10px;
+    padding-left: 4px;
+  }
+  .group-name {
+    font-family: var(--display);
+    font-size: 17px; font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .group-meta { font-size: 13px; color: var(--ink-3); }
+
+  .task-list {
+    background: rgba(255,255,255,.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+  }
+
+  .task {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--hairline-soft);
+    cursor: pointer;
+    transition: background 100ms ease;
+  }
+  .task:last-child { border-bottom: none; }
+  .task:hover { background: rgba(255,255,255,.45); }
+
+  .check {
+    width: 20px; height: 20px;
+    border: 1.6px solid var(--ink-4);
+    border-radius: 6px;
+    background: rgba(255,255,255,.55);
+    cursor: pointer;
+    transition: all 100ms ease;
+  }
+  .check:hover { border-color: var(--primary); }
+  .task.done .check {
+    background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+    border-color: var(--primary);
+    position: relative;
+    box-shadow: 0 2px 8px var(--primary-glow);
+  }
+  .task.done .check::after {
+    content: ""; position: absolute;
+    left: 5px; top: 6px;
+    width: 8px; height: 4px;
+    border-left: 1.8px solid #fff;
+    border-bottom: 1.8px solid #fff;
+    transform: rotate(-45deg);
+  }
+
+  .task-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .task-title {
+    font-size: 15px; font-weight: 500;
+    color: var(--ink);
+    line-height: 1.4;
+    letter-spacing: -0.012em;
+  }
+  .task.done .task-title {
+    color: var(--ink-3);
+    text-decoration: line-through;
+  }
+  .task-meta {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12.5px;
+    color: var(--ink-3);
+  }
+  .task-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-4); }
+  .task-meta .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 9px;
+    border-radius: var(--r-pill);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .task-meta .tag { color: var(--primary); font-weight: 500; }
+
+  .task-side {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .priority-flag {
+    width: 18px; height: 18px;
+    display: grid; place-items: center;
+  }
+  .priority-flag.high svg { stroke: #DC4444; fill: #DC4444; opacity: .85; }
+  .priority-flag.med svg { stroke: #E89B36; fill: #E89B36; opacity: .85; }
+  .priority-flag.low svg { stroke: #6B9CDC; fill: #6B9CDC; opacity: .85; }
+
+  /* Quick add bar */
+  .quick-add {
+    margin-top: 14px;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px;
+    border: 1.5px dashed var(--hairline);
+    border-radius: var(--r-lg);
+    color: var(--ink-3);
+    font-size: 14px;
+    cursor: text;
+    transition: all 100ms ease;
+    background: rgba(255,255,255,.30);
+  }
+  .quick-add:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(255,255,255,.45);
+  }
+</style>
+</head>
+<body>
+
+<div class="gradient-bg"></div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">S</div>
+      <span class="brand-name">Stickit</span>
+    </div>
+    <div class="nav-section">
+      <button class="nav-item active"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>今日 <span class="count">7</span></button>
+      <button class="nav-item"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h12"/></svg>明日 <span class="count">3</span></button>
+      <button class="nav-item"><svg class="ic" viewBox="0 0 24 24"><path d="M3 12h18M5 6h14M7 18h10"/></svg>今後 7 日間 <span class="count">19</span></button>
+      <button class="nav-item"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>カレンダー</button>
+      <button class="nav-item"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>付箋ボード</button>
+      <button class="nav-item"><svg class="ic" viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/></svg>すべて <span class="count">42</span></button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">プロジェクト</div>
+      <button class="nav-item"><span class="nav-dot" style="background:#7BC4E0"></span>支配人業務 <span class="count">12</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#E47B9F"></span>キャプテンカップ <span class="count">8</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#E8A971"></span>OTA戦略 <span class="count">5</span></button>
+      <button class="nav-item"><span class="nav-dot" style="background:#80C99A"></span>個人 <span class="count">9</span></button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">ツール</div>
+      <button class="nav-item"><svg class="ic" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 001 1h4M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/></svg>シフト取込</button>
+      <button class="nav-item"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33"/></svg>設定</button>
+    </div>
+    <div class="google-foot">
+      <div class="google-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18">
+          <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="toolbar">
+      <div class="toolbar-period">今日 <span class="sub">5月 13日 (水)</span></div>
+      <button class="btn-primary" style="margin-left:auto">
+        <svg class="ic" viewBox="0 0 24 24" style="stroke:#fff;stroke-width:2"><path d="M12 5v14M5 12h14"/></svg>
+        新規タスク
+      </button>
+    </div>
+
+    <div class="today-page">
+      <div class="today-hero">
+        <div class="meta-line">2026 年 5月 13日 · 水曜日</div>
+        <h1>今日 のタスク</h1>
+        <div class="stats">
+          <span><b>7</b> 件 未完了</span>
+          <span>·</span>
+          <span><b>2</b> / 9 完了</span>
+          <span>·</span>
+          <span>残り 約 <b>3.5h</b></span>
+        </div>
+        <div class="progress"><div class="fill" style="width:22%"></div></div>
+      </div>
+
+      <div class="group">
+        <div class="group-head">
+          <div class="group-name">朝</div>
+          <div class="group-meta">3 件</div>
+        </div>
+        <div class="task-list">
+          <div class="task done">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">朝礼で本日の予約状況を共有</div>
+              <div class="task-meta">
+                <span>08:30</span>
+                <span class="dot"></span>
+                <span class="pill t-sky">支配人業務</span>
+                <span class="dot"></span>
+                <span class="tag">#会議</span>
+              </div>
+            </div>
+            <div class="task-side"></div>
+          </div>
+
+          <div class="task done">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">芝コンディション確認 (グリーン #3, #7)</div>
+              <div class="task-meta">
+                <span>09:00</span>
+                <span class="dot"></span>
+                <span class="pill t-sky">支配人業務</span>
+              </div>
+            </div>
+            <div class="task-side"></div>
+          </div>
+
+          <div class="task">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">キャプテンカップ予選成績シートを最終確認</div>
+              <div class="task-meta">
+                <span>10:30</span>
+                <span class="dot"></span>
+                <span class="pill t-rose">キャプテンカップ</span>
+                <span class="dot"></span>
+                <span class="tag">#至急</span>
+              </div>
+            </div>
+            <div class="task-side">
+              <div class="priority-flag high"><svg width="14" height="14" viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="currentColor"><path d="M4 22V4M4 4h13l-2 4 2 4H4z"/></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-head">
+          <div class="group-name">午後</div>
+          <div class="group-meta">3 件</div>
+        </div>
+        <div class="task-list">
+          <div class="task">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">OTA戦略レビュー — 自社WEB誘導の数値確認</div>
+              <div class="task-meta">
+                <span>13:00</span>
+                <span class="dot"></span>
+                <span class="pill t-yellow">OTA戦略</span>
+              </div>
+            </div>
+            <div class="task-side">
+              <div class="priority-flag med"><svg width="14" height="14" viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="currentColor"><path d="M4 22V4M4 4h13l-2 4 2 4H4z"/></svg></div>
+            </div>
+          </div>
+
+          <div class="task">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">来月のシフト表を TickTick に登録</div>
+              <div class="task-meta">
+                <span>15:00</span>
+                <span class="dot"></span>
+                <span class="pill t-sky">支配人業務</span>
+              </div>
+            </div>
+            <div class="task-side"></div>
+          </div>
+
+          <div class="task">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">スタッフ面談 (山田さん)</div>
+              <div class="task-meta">
+                <span>16:00</span>
+                <span class="dot"></span>
+                <span class="pill t-lavender">個人</span>
+                <span class="dot"></span>
+                <span class="tag">#会議</span>
+              </div>
+            </div>
+            <div class="task-side"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-head">
+          <div class="group-name">夜まで</div>
+          <div class="group-meta">1 件</div>
+        </div>
+        <div class="task-list">
+          <div class="task">
+            <div class="check"></div>
+            <div class="task-body">
+              <div class="task-title">月次RM分析の前準備 — 売上CSVをダウンロード</div>
+              <div class="task-meta">
+                <span>期限なし</span>
+                <span class="dot"></span>
+                <span class="tag">#待ち</span>
+              </div>
+            </div>
+            <div class="task-side"></div>
+          </div>
+        </div>
+
+        <div class="quick-add">
+          <span style="font-size:18px">+</span>
+          クリックして新しいタスクを追加
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
