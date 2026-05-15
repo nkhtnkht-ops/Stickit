@@ -58,17 +58,6 @@ supabase db push
 
 または Supabase Dashboard → SQL Editor で `supabase/migrations/0005_schedule_send_reminders.sql` の中身を実行。
 
-### pg_cron が `app.settings.*` を読めるようにする
-
-`0005_*.sql` の冒頭コメントの通り、SQL Editor で次を 1 回実行:
-
-```sql
-alter database postgres set "app.settings.project_url"      = 'https://mhvweowjjocnbmpvpjwi.supabase.co';
-alter database postgres set "app.settings.service_role_key" = 'SERVICE_ROLE_KEY_HERE';
-```
-
-> ⚠️ Service Role Key は Dashboard → Project Settings → API → `service_role` の `secret`。
-
 ### スケジュール確認
 
 ```sql
