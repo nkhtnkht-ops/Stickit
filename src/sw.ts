@@ -30,7 +30,9 @@ self.addEventListener("push", (event) => {
     }
   }
   const title = payload.title ?? "Stickit";
-  const options: NotificationOptions = {
+  // `renotify` is valid at runtime but missing from TS lib types — use a loose
+  // type so we can still pass it through.
+  const options: NotificationOptions & { renotify?: boolean } = {
     body: payload.body ?? "",
     icon: "/Stickit/icons/icon-192.png",
     badge: "/Stickit/icons/icon-192.png",
