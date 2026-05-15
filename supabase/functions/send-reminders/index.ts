@@ -113,19 +113,32 @@ async function processBatch(): Promise<{ processed: number; sent: number; failed
 
     let anySuccess = false;
     for (const sub of userSubs) {
+      const endpointShort = sub.endpoint.slice(0, 60) + "...";
       try {
-        await webpush.sendNotification(
+        const result: any = await webpush.sendNotification(
           { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
           payload,
         );
+        console.log("push_send_success", {
+          reminder_id: r.id,
+          endpoint: endpointShort,
+          statusCode: result?.statusCode,
+          body: result?.body,
+        });
         anySuccess = true;
       } catch (e: any) {
-        // 404/410 = subscription is gone; remove it.
         const status = e?.statusCode ?? e?.status;
+        console.error("push_send_error", {
+          reminder_id: r.id,
+          endpoint: endpointShort,
+          name: e?.name,
+          message: e?.message,
+          statusCode: status,
+          body: e?.body,
+          stack: e?.stack?.split("\n").slice(0, 3).join("\n"),
+        });
         if (status === 404 || status === 410) {
           deadEndpoints.push(sub.endpoint);
-        } else {
-          console.error("push send failed", { endpoint: sub.endpoint, status, msg: e?.message });
         }
       }
     }

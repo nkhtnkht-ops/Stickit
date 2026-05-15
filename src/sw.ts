@@ -21,6 +21,10 @@ type PushPayload = {
 };
 
 self.addEventListener("push", (event) => {
+  console.log("[sw] push event fired", {
+    hasData: !!event.data,
+    text: event.data ? event.data.text() : null,
+  });
   let payload: PushPayload = {};
   if (event.data) {
     try {
@@ -30,8 +34,6 @@ self.addEventListener("push", (event) => {
     }
   }
   const title = payload.title ?? "Stickit";
-  // `renotify` is valid at runtime but missing from TS lib types — use a loose
-  // type so we can still pass it through.
   const options: NotificationOptions & { renotify?: boolean } = {
     body: payload.body ?? "",
     icon: "/Stickit/icons/icon-192.png",
@@ -40,7 +42,12 @@ self.addEventListener("push", (event) => {
     tag: payload.taskId ?? "stickit-reminder",
     renotify: true,
   };
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(
+    self.registration
+      .showNotification(title, options)
+      .then(() => console.log("[sw] showNotification resolved"))
+      .catch((e) => console.error("[sw] showNotification failed", e)),
+  );
 });
 
 self.addEventListener("notificationclick", (event) => {
