@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { ProjectList } from "@/components/projects/ProjectList";
 import { TagList } from "@/components/tags/TagList";
+import { usePush } from "@/hooks/usePush";
 
 export default function Settings() {
   const { session, signOut } = useAuth();
@@ -48,6 +49,11 @@ export default function Settings() {
             </div>
           </section>
 
+          {/* Notifications */}
+          <section className="glass-card rounded-lg shadow-glass p-6">
+            <NotificationsPanel />
+          </section>
+
           {/* Projects */}
           <section className="glass-card rounded-lg shadow-glass p-6">
             <ProjectList />
@@ -59,6 +65,68 @@ export default function Settings() {
           </section>
         </div>
       </div>
+    </div>
+  );
+}
+
+function NotificationsPanel() {
+  const { status, busy, error, subscribe, unsubscribe } = usePush();
+
+  const enabled = status === "subscribed";
+  const disabledByEnv =
+    status === "unsupported" || status === "missing-vapid" || status === "denied";
+
+  let hint: string;
+  switch (status) {
+    case "unsupported":
+      hint = "このブラウザは Web Push に対応していません。";
+      break;
+    case "missing-vapid":
+      hint = "VAPID 公開鍵が未設定です（VITE_VAPID_PUBLIC_KEY）。";
+      break;
+    case "denied":
+      hint = "ブラウザ設定で通知が拒否されています。サイト設定から許可に変更してください。";
+      break;
+    case "subscribed":
+      hint = "期限リマインダーを受け取れます。";
+      break;
+    default:
+      hint = "ブラウザ通知を有効にすると、期限の指定時間前にプッシュが届きます。";
+  }
+
+  const onToggle = () => {
+    if (busy) return;
+    if (enabled) void unsubscribe();
+    else void subscribe();
+  };
+
+  return (
+    <div>
+      <h2 className="font-display font-semibold text-[17px] text-ink mb-1">通知</h2>
+      <p className="text-[12.5px] text-ink-3 mb-4">期限リマインドとプッシュ通知の設定。</p>
+      <div className="flex items-center gap-4 py-2">
+        <div className="flex-1">
+          <div className="text-[14px] font-medium text-ink">ブラウザ通知</div>
+          <div className="text-[12px] text-ink-3 mt-0.5">{hint}</div>
+        </div>
+        <button
+          type="button"
+          onClick={onToggle}
+          disabled={busy || disabledByEnv}
+          aria-pressed={enabled}
+          className="relative w-11 h-[26px] rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+          style={{ background: enabled ? "#7B5BFF" : "rgba(0,0,0,.16)" }}
+        >
+          <span
+            className="absolute top-[3px] w-5 h-5 rounded-full bg-white transition-all"
+            style={{
+              left: enabled ? 21 : 3,
+              boxShadow: "0 2px 4px rgba(0,0,0,.18)",
+            }}
+          />
+        </button>
+      </div>
+      {error && <p className="text-crit text-[12.5px] mt-2">{error}</p>}
     </div>
   );
 }
