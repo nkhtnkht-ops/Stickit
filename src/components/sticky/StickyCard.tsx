@@ -20,9 +20,7 @@ export function StickyCard({ task, project, onClick, onToggle }: Props) {
       onClick={() => onClick?.(task)}
       className={`relative overflow-hidden cursor-pointer transition-all flex flex-col gap-1.5 ${done ? "opacity-55" : ""}`}
       style={{
-        background: "rgba(255,255,255,.65)",
-        backdropFilter: "blur(16px) saturate(180%)",
-        WebkitBackdropFilter: "blur(16px) saturate(180%)",
+        background: "rgba(255,255,255,.92)",
         border: "1px solid rgba(255,255,255,.55)",
         borderRadius: 10,
         padding: "12px 12px 10px",

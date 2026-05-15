@@ -31,9 +31,7 @@ export default function Login() {
         <div
           className="relative w-full max-w-[420px] text-center"
           style={{
-            background: "rgba(255,255,255,.72)",
-            backdropFilter: "blur(40px) saturate(200%)",
-            WebkitBackdropFilter: "blur(40px) saturate(200%)",
+            background: "rgba(255,255,255,.95)",
             border: "1px solid rgba(255,255,255,.55)",
             borderRadius: 22,
             padding: "36px 36px 28px",
@@ -141,9 +139,7 @@ function FloatChip({
     <div
       className={`absolute pointer-events-none ${className ?? ""}`}
       style={{
-        background: "rgba(255,255,255,.55)",
-        backdropFilter: "blur(20px) saturate(180%)",
-        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        background: "rgba(255,255,255,.85)",
         border: "1px solid rgba(255,255,255,.55)",
         borderRadius: 14,
         padding: "12px 14px",

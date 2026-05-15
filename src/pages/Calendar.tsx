@@ -41,9 +41,7 @@ export default function Calendar() {
         <div
           className="inline-flex ml-auto"
           style={{
-            background: "rgba(255,255,255,.55)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
+            background: "rgba(255,255,255,.78)",
             borderRadius: 9999,
             padding: 3,
             height: 32,

@@ -83,9 +83,7 @@ function Column({
       style={{
         width: 296,
         flexShrink: 0,
-        background: "rgba(255,255,255,.40)",
-        backdropFilter: "blur(20px) saturate(180%)",
-        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        background: "rgba(255,255,255,.72)",
         border: "1px solid rgba(255,255,255,.55)",
         maxHeight: "100%",
       }}

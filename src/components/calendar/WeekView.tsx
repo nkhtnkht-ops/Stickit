@@ -126,7 +126,7 @@ export function WeekView({ anchor }: Props) {
                 return (
                   <div
                     key={t.id}
-                    className="absolute left-1 right-1 rounded-md px-2 py-1.5 text-[12px] cursor-pointer overflow-hidden backdrop-blur-sm"
+                    className="absolute left-1 right-1 rounded-md px-2 py-1.5 text-[12px] cursor-pointer overflow-hidden"
                     style={{
                       top,
                       minHeight: 36,

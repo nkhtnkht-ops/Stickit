@@ -82,7 +82,7 @@ export function DayView({ anchor }: Props) {
               return (
                 <div
                   key={t.id}
-                  className="absolute left-2 right-4 rounded-md px-3 py-2 text-[14px] cursor-pointer backdrop-blur-sm"
+                  className="absolute left-2 right-4 rounded-md px-3 py-2 text-[14px] cursor-pointer"
                   style={{
                     top,
                     minHeight: 52,
