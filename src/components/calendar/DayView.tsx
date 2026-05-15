@@ -27,7 +27,10 @@ export function DayView({ anchor }: Props) {
   const projectMap = useMemo(() => Object.fromEntries(projects.map((p) => [p.id, p])), [projects]);
 
   const [now, setNow] = useState(new Date());
-  useEffect(() => { const id = setInterval(() => setNow(new Date()), 60000); return () => clearInterval(id); }, []);
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(id);
+  }, []);
   const { h: nh, m: nm } = jstHourMinutes(now);
   const nowOffset = (nh - 7) * HOUR_PX + (nm / 60) * HOUR_PX;
   const isToday = jstYmd(now) === ymd;
@@ -36,48 +39,96 @@ export function DayView({ anchor }: Props) {
   const done = tasks.filter((t) => t.status === "done").length;
   const high = tasks.filter((t) => (t.priority ?? 0) === 3).length;
 
+  const HAIR = "1px solid rgba(0,0,0,.06)";
+
   return (
-    <div className="grid grid-cols-[280px_1fr] h-full overflow-hidden">
-      <aside className="border-r border-border bg-surface-2 p-5 overflow-y-auto">
-        <div className="text-[26px] font-semibold tracking-[-0.02em]">{ymd}</div>
-        <div className="font-mono text-[12.5px] text-ink-3 mb-4">// day stats</div>
-        <div className="flex flex-col gap-1.5 text-[14px]">
-          <div className="bg-surface border border-border rounded px-3 py-2 flex items-center gap-2.5"><span className="font-mono font-semibold text-[17px] text-crit min-w-[28px]">{high}</span><span className="text-ink-3">優先度 高 (P0)</span></div>
-          <div className="bg-surface border border-border rounded px-3 py-2 flex items-center gap-2.5"><span className="font-mono font-semibold text-[17px] text-warn min-w-[28px]">{open}</span><span className="text-ink-3">未完了</span></div>
-          <div className="bg-surface border border-border rounded px-3 py-2 flex items-center gap-2.5"><span className="font-mono font-semibold text-[17px] text-accent-deep min-w-[28px]">{done}</span><span className="text-ink-3">完了</span></div>
+    <div className="grid h-full overflow-hidden" style={{ gridTemplateColumns: "300px 1fr" }}>
+      {/* Stats sidebar */}
+      <aside className="overflow-y-auto p-6" style={{ borderRight: HAIR }}>
+        <div className="font-display font-semibold text-[28px] tracking-display text-ink">{ymd}</div>
+        <div className="text-[12px] text-ink-3 mb-5">日次サマリー</div>
+        <div className="flex flex-col gap-2 text-[14px]">
+          <StatRow value={high} label="優先度 高" color="#B83232" />
+          <StatRow value={open} label="未完了" color="#D9802A" />
+          <StatRow value={done} label="完了" color="#1F5A3A" />
         </div>
       </aside>
-      <div className="grid grid-cols-[56px_1fr] overflow-y-auto relative">
-        <div className="border-r border-border bg-surface-2">
-          {HOURS.map((h) => (
-            <div key={h} className="border-b border-border-2 text-right pr-2 pt-1 font-mono text-[11.5px] text-ink-4 font-medium" style={{ height: HOUR_PX }}>{String(h).padStart(2, "0")}:00</div>
+
+      {/* Timeline */}
+      <div className="grid overflow-y-auto relative" style={{ gridTemplateColumns: "64px 1fr" }}>
+        <div style={{ borderRight: HAIR }}>
+          {HOURS.map((hh) => (
+            <div
+              key={hh}
+              className="text-right pr-2 pt-1 text-[11px] text-ink-4 font-medium tabular-nums"
+              style={{ height: HOUR_PX, borderBottom: "1px solid rgba(0,0,0,.04)" }}
+            >
+              {String(hh).padStart(2, "0")}:00
+            </div>
           ))}
         </div>
         <div className="relative">
-          {HOURS.map((h) => (<div key={h} className="border-b border-border-2" style={{ height: HOUR_PX }} />))}
-          {tasks.filter((t) => t.due_at).map((t) => {
-            const dt = new Date(t.due_at!);
-            const { h, m } = jstHourMinutes(dt);
-            const top = (h - 7) * HOUR_PX + (m / 60) * HOUR_PX;
-            const proj = t.project_id ? projectMap[t.project_id] : null;
-            const bg = proj ? `${proj.color}26` : "rgba(0,0,0,.06)";
-            const fg = proj ? proj.color! : "#404040";
-            return (
-              <div key={t.id} className="absolute left-2 right-4 rounded px-3 py-2 text-[14px] cursor-pointer shadow-sm" style={{ top, minHeight: 48, background: bg, borderLeft: `3px solid ${fg}` }}>
-                <div className="font-mono text-[11.5px] opacity-70" style={{ color: fg }}>{`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`}</div>
-                <div className="font-medium" style={{ color: "#0A0A0A" }}>{t.title}</div>
-              </div>
-            );
-          })}
+          {HOURS.map((hh) => (
+            <div key={hh} style={{ height: HOUR_PX, borderBottom: "1px solid rgba(0,0,0,.04)" }} />
+          ))}
+          {tasks
+            .filter((t) => t.due_at)
+            .map((t) => {
+              const dt = new Date(t.due_at!);
+              const { h, m } = jstHourMinutes(dt);
+              const top = (h - 7) * HOUR_PX + (m / 60) * HOUR_PX;
+              const proj = t.project_id ? projectMap[t.project_id] : null;
+              const color = proj?.color ?? "#7B5BFF";
+              return (
+                <div
+                  key={t.id}
+                  className="absolute left-2 right-4 rounded-md px-3 py-2 text-[14px] cursor-pointer backdrop-blur-sm"
+                  style={{
+                    top,
+                    minHeight: 52,
+                    background: `${color}33`,
+                    borderLeft: `3px solid ${color}`,
+                    boxShadow: "0 2px 8px rgba(70,40,140,.06)",
+                  }}
+                >
+                  <div className="text-[11.5px] tabular-nums opacity-80" style={{ color }}>
+                    {`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`}
+                  </div>
+                  <div className="font-medium text-ink">{t.title}</div>
+                </div>
+              );
+            })}
           {isToday && (
             <div className="absolute left-0 right-0 z-10 pointer-events-none" style={{ top: nowOffset }}>
-              <div className="border-t-[1.5px] border-accent" />
-              <div className="absolute -left-1.5 -top-1.5 w-2.5 h-2.5 rounded-full bg-accent" style={{ boxShadow: "0 0 0 3px rgba(0,200,83,.18)" }} />
-              <div className="absolute -left-12 -top-2 bg-accent text-white font-mono text-[11px] font-semibold px-1.5 py-px rounded">{`${String(nh).padStart(2, "0")}:${String(nm).padStart(2, "0")}`}</div>
+              <div style={{ borderTop: "1.5px solid #7B5BFF" }} />
+              <div
+                className="absolute -left-1.5 -top-1.5 w-2.5 h-2.5 rounded-full"
+                style={{ background: "#7B5BFF", boxShadow: "0 0 0 3px rgba(123,91,255,.18)" }}
+              />
+              <div
+                className="absolute -left-14 -top-2.5 text-white text-[11px] font-semibold px-2 py-px rounded-full tabular-nums"
+                style={{ background: "#7B5BFF" }}
+              >
+                {`${String(nh).padStart(2, "0")}:${String(nm).padStart(2, "0")}`}
+              </div>
             </div>
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function StatRow({ value, label, color }: { value: number; label: string; color: string }) {
+  return (
+    <div
+      className="glass-card rounded-md px-3.5 py-2.5 flex items-center gap-3"
+      style={{ borderRadius: 10 }}
+    >
+      <span className="font-display font-semibold text-[20px] tabular-nums min-w-[28px]" style={{ color }}>
+        {value}
+      </span>
+      <span className="text-ink-2">{label}</span>
     </div>
   );
 }

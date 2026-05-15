@@ -17,7 +17,6 @@ function jstYear(d: Date): number {
 }
 
 type Props = {
-  /** Anchor month to render around. */
   anchor: Date;
   onPeriodChange?: (label: string) => void;
 };
@@ -25,14 +24,12 @@ type Props = {
 export function MonthView({ anchor, onPeriodChange }: Props) {
   const scrollerRef = useRef<HTMLDivElement>(null);
 
-  // Build 3 months of slots (prev, current, next) for continuous scroll
   const slots = useMemo(() => {
     const prev = new Date(anchor.getTime() - 30 * 24 * 60 * 60 * 1000);
     const next = new Date(anchor.getTime() + 30 * 24 * 60 * 60 * 1000);
     return [...monthGridSlots(prev, 6), ...monthGridSlots(anchor, 6), ...monthGridSlots(next, 6)];
   }, [anchor]);
 
-  // Remove duplicate dates (overlapping weeks between months)
   const uniqueSlots = useMemo(() => {
     const seen = new Set<string>();
     return slots.filter((d) => {
@@ -70,18 +67,19 @@ export function MonthView({ anchor, onPeriodChange }: Props) {
       }
     };
     update();
+    // also report initial label
+    onPeriodChange?.(`${visibleYear}年 ${visibleMonth}月`);
     scroller.addEventListener("scroll", update, { passive: true });
     return () => scroller.removeEventListener("scroll", update);
-  }, [uniqueSlots, visibleMonth, visibleYear, onPeriodChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uniqueSlots]);
 
-  // Fetch tasks across the visible range
   const fromDate = uniqueSlots[0];
   const toDate = new Date(uniqueSlots[uniqueSlots.length - 1].getTime() + 24 * 60 * 60 * 1000);
   const { tasks } = useTasks({ from: fromDate, to: toDate, status: "all" });
   const { projects } = useProjects();
   const projectMap = useMemo(() => Object.fromEntries(projects.map((p) => [p.id, p])), [projects]);
 
-  // Index tasks by date
   const tasksByDate = useMemo(() => {
     const map: Record<string, Task[]> = {};
     for (const t of tasks) {
@@ -95,24 +93,28 @@ export function MonthView({ anchor, onPeriodChange }: Props) {
   return (
     <div className="flex flex-col h-full">
       {/* DOW header */}
-      <div className="grid grid-cols-7 border-b border-border bg-surface sticky top-0 z-10">
+      <div
+        className="grid grid-cols-7 sticky top-0 z-10"
+        style={{ borderBottom: "1px solid rgba(0,0,0,.06)" }}
+      >
         {DOW_LABELS.map((d, i) => (
-          <div key={d} className={`px-3.5 py-2.5 text-[13px] font-medium ${i === 0 ? "text-crit" : i === 6 ? "text-info" : "text-ink-3"}`}>
+          <div
+            key={d}
+            className={`px-3.5 py-2 text-[12px] font-semibold uppercase ${
+              i === 0 ? "text-rose-700/70" : i === 6 ? "text-sky-700/70" : "text-ink-3"
+            }`}
+            style={{ letterSpacing: "0.06em" }}
+          >
             {d}
           </div>
         ))}
       </div>
 
-      {/* Scroll area */}
       <div ref={scrollerRef} className="flex-1 overflow-y-auto" style={{ scrollBehavior: "smooth" }}>
-        <div
-          className="grid grid-cols-7"
-          style={{ gridAutoRows: "calc((100vh - 142px) / 6)" }}
-        >
+        <div className="grid grid-cols-7" style={{ gridAutoRows: "calc((100vh - 14px - 14px - 60px - 28px) / 6)" }}>
           {uniqueSlots.map((d, i) => {
             const ymd = jstYmd(d);
             const day = jstDate(d);
-            const isFirst = day === 1;
             const cellMonth = jstMonth(d);
             const cellYear = jstYear(d);
             const isOther = cellMonth !== visibleMonth || cellYear !== visibleYear;
@@ -124,35 +126,54 @@ export function MonthView({ anchor, onPeriodChange }: Props) {
               <div
                 key={ymd}
                 data-cell-ymd={ymd}
-                className={`border-r border-b border-border-2 px-2 py-1 flex flex-col gap-0.5 overflow-hidden cursor-pointer hover:bg-surface-2 ${isToday ? "bg-accent-soft/40" : ""}`}
+                className={`px-2 py-1.5 flex flex-col gap-1 overflow-hidden cursor-pointer transition-colors hover:bg-white/30 ${
+                  isOther ? "opacity-55" : ""
+                }`}
+                style={{
+                  borderRight: "1px solid rgba(0,0,0,.06)",
+                  borderBottom: "1px solid rgba(0,0,0,.06)",
+                }}
               >
-                <div className="flex items-baseline gap-1 min-h-[18px]">
-                  {isFirst ? (
-                    <span className={`text-[14px] font-semibold tracking-tightish ${isOther ? "text-ink-4 opacity-55" : "text-ink"}`}>
-                      {cellMonth}月{day}日
+                <div className="flex items-center min-h-[24px]">
+                  {isToday ? (
+                    <span
+                      className="w-6 h-6 rounded-full grid place-items-center text-white font-semibold text-[12.5px]"
+                      style={{
+                        background: "linear-gradient(135deg, #7B5BFF, #5A3FD9)",
+                        boxShadow: "0 2px 8px rgba(123,91,255,.35)",
+                      }}
+                    >
+                      {day}
                     </span>
                   ) : (
-                    <span className={`text-[14px] font-medium font-mono ${isOther ? "text-ink-4 opacity-55" : isSun ? "text-crit" : isSat ? "text-info" : "text-ink-2"} ${isToday ? "bg-accent-deep text-white w-5 h-5 rounded-full grid place-items-center text-[12.5px] font-bold" : ""}`}>
+                    <span
+                      className={`text-[13.5px] font-semibold tabular-nums ${
+                        isSun ? "text-rose-700/80" : isSat ? "text-sky-700/80" : "text-ink"
+                      }`}
+                    >
                       {day}
                     </span>
                   )}
                 </div>
                 {dayTasks.slice(0, 3).map((t) => {
                   const proj = t.project_id ? projectMap[t.project_id] : null;
-                  const bg = proj ? `${proj.color}1F` : "#F4F4F4";
-                  const fg = proj ? proj.color! : "#404040";
+                  const color = proj?.color ?? "#7B5BFF";
                   return (
                     <div
                       key={t.id}
-                      className={`text-[13px] px-2 py-px rounded font-medium overflow-hidden text-ellipsis whitespace-nowrap ${isOther ? "opacity-50" : ""}`}
-                      style={{ background: bg, color: fg }}
+                      className="text-[12px] px-2 py-px rounded-full font-medium overflow-hidden text-ellipsis whitespace-nowrap"
+                      style={{
+                        background: `${color}26`,
+                        color: color,
+                      }}
+                      title={t.title}
                     >
                       {t.title}
                     </div>
                   );
                 })}
                 {dayTasks.length > 3 && (
-                  <div className="text-[12px] text-ink-3 px-2 font-mono">+{dayTasks.length - 3}件</div>
+                  <div className="text-[11px] text-ink-3 px-1">+{dayTasks.length - 3}件</div>
                 )}
               </div>
             );
