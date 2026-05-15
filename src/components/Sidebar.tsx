@@ -1,73 +1,88 @@
 import { NavLink } from "react-router-dom";
+import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProjects } from "@/hooks/useProjects";
 import { useTags } from "@/hooks/useTags";
 import { useTasks } from "@/hooks/useTasks";
-import { todayRange, tomorrowRange, next7DaysRange } from "@/utils/dateRange";
-import { ReactNode } from "react";
+import { todayRange, next7DaysRange } from "@/utils/dateRange";
 
 type NavItemDef = { to: string; label: string; count?: number; icon: ReactNode };
 
 const Ic = ({ d }: { d: string }) => (
-  <svg className="w-3.5 h-3.5 stroke-current fill-none flex-shrink-0" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: d }} />
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    className="stroke-current fill-none flex-shrink-0"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    dangerouslySetInnerHTML={{ __html: d }}
+  />
+);
+
+const GoogleLogo = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 18 18" aria-label="Google">
+    <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.08-1.79 2.72v2.26h2.9c1.7-1.56 2.69-3.87 2.69-6.62z" />
+    <path fill="#34A853" d="M9 18c2.43 0 4.46-.81 5.95-2.18l-2.9-2.26c-.81.54-1.84.86-3.05.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33A9 9 0 0 0 9 18z" />
+    <path fill="#FBBC05" d="M3.97 10.71A5.41 5.41 0 0 1 3.68 9c0-.6.1-1.18.29-1.71V4.96H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.04l3.01-2.33z" />
+    <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z" />
+  </svg>
 );
 
 export function Sidebar() {
-  const { signOut } = useAuth();
+  const { session, signOut } = useAuth();
   const { projects } = useProjects();
   const { tags } = useTags();
   const todayCount = useTasks(todayRange()).tasks.length;
-  const tomorrowCount = useTasks(tomorrowRange()).tasks.length;
   const next7Count = useTasks(next7DaysRange()).tasks.length;
-  const allCount = useTasks({ status: "all" }).tasks.length;
+
+  const meta = session?.user?.user_metadata ?? {};
+  const displayName: string = meta.full_name || meta.name || session?.user?.email || "ゲスト";
+  const email: string = session?.user?.email ?? "";
 
   const mainNav: NavItemDef[] = [
-    { to: "/today",    label: "今日",      count: todayCount,    icon: <Ic d='<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' /> },
-    { to: "/tomorrow", label: "明日",      count: tomorrowCount, icon: <Ic d='<path d="M3 6h18M3 12h18M3 18h18"/>' /> },
-    { to: "/next7",    label: "今後7日間",  count: next7Count,    icon: <Ic d='<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>' /> },
+    { to: "/today",    label: "今日",        count: todayCount, icon: <Ic d='<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' /> },
+    { to: "/next7",    label: "次の7日間",    count: next7Count, icon: <Ic d='<path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 4v5h-5"/>' /> },
     { to: "/calendar", label: "カレンダー",                       icon: <Ic d='<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>' /> },
     { to: "/sticky",   label: "付箋ボード",                       icon: <Ic d='<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>' /> },
-    { to: "/all",      label: "すべて",     count: allCount,      icon: <Ic d='<path d="M5 6h14M5 12h14M5 18h14"/>' /> },
+    { to: "/all",      label: "すべて",                           icon: <Ic d='<path d="M5 6h14M5 12h14M5 18h14"/>' /> },
   ];
+
+  const navClass = (isActive: boolean) =>
+    `w-full text-left flex items-center gap-[11px] h-9 px-3 rounded-md text-[14px] transition-colors ${
+      isActive
+        ? "bg-white/85 text-primary-deep font-semibold shadow-soft"
+        : "text-ink-2 font-normal hover:bg-white/40 hover:text-ink"
+    }`;
+
   return (
-    <aside className="w-60 bg-surface border-r border-border p-2.5 pt-3.5 flex flex-col gap-4 overflow-y-auto">
-      {/* ブランド */}
-      <div className="flex items-center gap-2 px-2.5 pt-1">
-        <div className="w-[26px] h-[26px] rounded-md bg-ink text-accent grid place-items-center font-mono font-semibold text-[14.5px] relative">
+    <aside className="glass-sidebar rounded-xl shadow-glass flex flex-col gap-1 overflow-y-auto" style={{ padding: "18px 10px 14px" }}>
+      {/* Brand */}
+      <div className="flex items-center gap-2.5 px-3 pt-1 pb-5">
+        <div
+          className="w-7 h-7 rounded-lg grid place-items-center text-white font-bold text-[14px]"
+          style={{
+            background: "linear-gradient(135deg, #7B5BFF, #5A3FD9)",
+            boxShadow: "0 4px 12px rgba(123,91,255,.35)",
+            letterSpacing: "-0.02em",
+          }}
+        >
           S
-          <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-accent border-2 border-surface" />
         </div>
-        <span className="font-semibold text-[17px] tracking-tightish">Stickit</span>
-        <span className="ml-auto font-mono text-[11.5px] text-ink-4 bg-bg-2 px-1.5 py-px rounded">v0.1</span>
+        <span className="font-display font-semibold text-[17px] tracking-display text-ink">Stickit</span>
       </div>
 
-      {/* 検索 */}
-      <div className="mx-1 flex items-center gap-2 px-2.5 py-1.5 bg-bg-2 rounded text-ink-3 text-[14px] cursor-pointer hover:border hover:border-border">
-        <Ic d='<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>' />
-        <span>タスクを検索...</span>
-        <span className="ml-auto font-mono text-[12px] text-ink-4 bg-surface border border-border px-1.5 py-px rounded">⌘K</span>
-      </div>
-
-      {/* メインナビ */}
-      <nav className="px-1 flex flex-col gap-px">
+      {/* Main nav */}
+      <nav className="flex flex-col gap-px px-0.5">
         {mainNav.map((it) => (
-          <NavLink
-            key={it.to}
-            to={it.to}
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 px-2 py-1.5 rounded text-[14.5px] font-medium transition-colors ${
-                isActive ? "bg-ink text-white" : "text-ink-2 hover:bg-bg-2 hover:text-ink"
-              }`
-            }
-          >
+          <NavLink key={it.to} to={it.to} className={({ isActive }) => navClass(isActive)}>
             {({ isActive }) => (
               <>
-                {it.icon}
-                {it.label}
+                <span className={isActive ? "text-primary" : "text-ink-3"}>{it.icon}</span>
+                <span className="flex-1">{it.label}</span>
                 {it.count !== undefined && (
-                  <span className={`ml-auto font-mono text-[12.5px] ${isActive ? "text-white/55" : "text-ink-4"}`}>
-                    {it.count}
-                  </span>
+                  <span className="text-[12px] text-ink-3 tabular-nums">{it.count}</span>
                 )}
               </>
             )}
@@ -75,66 +90,65 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* プロジェクト */}
-      <div className="px-1">
-        <div className="font-mono text-[11.5px] uppercase tracking-wider text-ink-4 px-2 py-1.5">// プロジェクト</div>
-        {projects.length === 0 && (
-          <div className="px-2 py-1.5 text-[13px] text-ink-4 font-mono">// 未作成</div>
-        )}
-        {projects.map((p) => (
-          <button key={p.id} className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-[14.5px] font-medium text-ink-2 hover:bg-bg-2 hover:text-ink transition-colors text-left">
-            <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: p.color ?? "#94a3b8" }} />
-            {p.name}
-          </button>
-        ))}
-      </div>
-
-      {/* タグ */}
-      {tags.length > 0 && (
-        <div className="px-1">
-          <div className="font-mono text-[11.5px] uppercase tracking-wider text-ink-4 px-2 py-1.5">// タグ</div>
-          {tags.map((t) => (
-            <button key={t.id} className="w-full text-left flex items-center gap-2.5 px-2 py-1.5 rounded text-[14.5px] font-medium text-ink-2 hover:bg-bg-2 hover:text-ink transition-colors">
-              <span className="font-mono text-ink-4">#</span>{t.name}
+      {/* Projects */}
+      {projects.length > 0 && (
+        <div className="flex flex-col gap-px px-0.5">
+          <div className="text-[11px] font-semibold uppercase text-ink-3 px-3.5 pt-4 pb-2" style={{ letterSpacing: "0.04em" }}>
+            プロジェクト
+          </div>
+          {projects.map((p) => (
+            <button key={p.id} className={navClass(false)}>
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: p.color ?? "#94a3b8" }} />
+              <span className="flex-1">{p.name}</span>
             </button>
           ))}
         </div>
       )}
 
-      {/* ツール */}
-      <div className="px-1">
-        <div className="font-mono text-[11.5px] uppercase tracking-wider text-ink-4 px-2 py-1.5">// ツール</div>
-        {[
-          { label: "シフト取込", path: '<path d="M14 3v4a1 1 0 001 1h4M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/>' },
-          { label: "TickTick 移行", path: '<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>' },
-        ].map((it) => (
-          <button key={it.label} className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-[14.5px] font-medium text-ink-2 hover:bg-bg-2 hover:text-ink transition-colors text-left">
-            <Ic d={it.path} />
-            {it.label}
-          </button>
-        ))}
-        <NavLink
-          to="/settings"
-          className={({ isActive }) =>
-            `w-full flex items-center gap-2.5 px-2 py-1.5 rounded text-[14.5px] font-medium transition-colors text-left ${
-              isActive ? "bg-ink text-white" : "text-ink-2 hover:bg-bg-2 hover:text-ink"
-            }`
-          }
-        >
-          <Ic d='<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33"/>' />
-          設定
+      {/* Tags */}
+      {tags.length > 0 && (
+        <div className="flex flex-col gap-px px-0.5">
+          <div className="text-[11px] font-semibold uppercase text-ink-3 px-3.5 pt-4 pb-2" style={{ letterSpacing: "0.04em" }}>
+            タグ
+          </div>
+          {tags.map((t) => (
+            <button key={t.id} className={navClass(false)}>
+              <span className="text-ink-4">#</span>
+              <span className="flex-1">{t.name}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Settings */}
+      <div className="flex flex-col gap-px px-0.5 mt-2">
+        <NavLink to="/settings" className={({ isActive }) => navClass(isActive)}>
+          {({ isActive }) => (
+            <>
+              <span className={isActive ? "text-primary" : "text-ink-3"}>
+                <Ic d='<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>' />
+              </span>
+              <span className="flex-1">設定</span>
+            </>
+          )}
         </NavLink>
       </div>
 
-      {/* アバター */}
-      <div className="mt-auto pt-3 px-2 border-t border-border flex items-center gap-2.5">
-        <div className="w-[26px] h-[26px] rounded-full grid place-items-center text-white font-mono font-semibold text-[12.5px]"
-             style={{ background: "linear-gradient(135deg, #00C853, #00A152)" }}>
-          NK
+      {/* Google account foot */}
+      <div className="mt-auto pt-3 px-2 flex items-center gap-2.5">
+        <div
+          className="w-8 h-8 rounded-full bg-white grid place-items-center cursor-pointer transition-transform hover:scale-105"
+          style={{ boxShadow: "0 2px 8px rgba(0,0,0,.08)" }}
+          title={email}
+          onClick={signOut}
+        >
+          <GoogleLogo size={18} />
         </div>
-        <div className="flex flex-col leading-tight">
-          <span className="font-semibold text-[14px]">中畑 慶治</span>
-          <button onClick={signOut} className="font-mono text-[12px] text-ink-4 hover:text-ink text-left">支配人 · 退出</button>
+        <div className="flex flex-col leading-tight min-w-0">
+          <span className="font-semibold text-[12px] text-ink truncate">{displayName}</span>
+          <button onClick={signOut} className="text-[11px] text-ink-3 hover:text-ink truncate text-left">
+            {email || "サインアウト"}
+          </button>
         </div>
       </div>
     </aside>
